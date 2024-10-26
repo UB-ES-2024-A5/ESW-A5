@@ -12,6 +12,14 @@
             <input v-model="name" type="text" placeholder="Name" required />
           </div>
 
+          <!-- Campo de Apellido -->
+          <div class="input-group">
+            <span class="input-icon">
+              <img :src="accountIcon" alt="Account icon" />
+            </span>
+            <input v-model="surname" type="text" placeholder="Surname" required />
+          </div>
+
           <!-- Campo de Email -->
           <div class="input-group">
             <span class="input-icon">
@@ -68,6 +76,7 @@ export default {
   data () {
     return {
       name: '',
+      surname: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -85,7 +94,7 @@ export default {
   methods: {
     handleSignUp () {
       // Handle sign-up logic here
-      console.log(`Name: ${this.name}, Email: ${this.email}`)
+      console.log(`Name: ${this.name}, Surname: ${this.surname}, Email: ${this.email}`)
     },
     toggleShowPassword () {
       this.showPassword = !this.showPassword
@@ -112,10 +121,10 @@ export default {
   margin: 0;
 }
 
-/* Signup box style */
+/* Increased Signup box width */
 .signup-box {
   display: flex;
-  width: 900px;
+  width: 1000px; /* Adjusted width to fit all fields */
   padding: 30px;
   background: rgba(255, 255, 255, 0.6);
   border-radius: 10px;
