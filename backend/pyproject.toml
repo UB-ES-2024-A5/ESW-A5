@@ -1,8 +1,15 @@
 [tool.poetry]
 name = "app"
 version = "0.1.0"
-description = "UB Software Distribuit P2 2024"
-authors = ["Xavier Baró <xbaro@ub.edu>"]
+description = "UB Projecte ES-A5 2024"
+authors = [
+    "Damián Baldovino <abaldoal17@alumnes.ub.edu>",
+    "Daniel Ferrer <dferreri14@alumnes.ub.edu>",
+    "Pau Segura <psegurba7@alumnes.ub.edu>",
+    "Sergio Gil <sgilhern23@alumnes.ub.edu>",
+    "Raúl Gomez <rgomezca32@alumnes.ub.edu>",
+    "Marc Cabrera <mcabrema102@alumnes.ub.edu>"
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"

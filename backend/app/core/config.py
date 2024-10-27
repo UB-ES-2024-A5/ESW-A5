@@ -3,6 +3,7 @@ import os
 import secrets
 import warnings
 from typing import Annotated, Any, Literal
+from pydantic import EmailStr
 
 from pydantic import (
     AnyUrl,
@@ -79,7 +80,7 @@ class Settings(BaseSettings):
     DB_ENGINE: str = "sqlite"
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
-    DB_USER: str = "sd_db_user"
+    DB_USER: str = "es_db_user"
     DB_PASSWORD: str | None = None
     DB_NAME: str | None = None
 
@@ -90,7 +91,7 @@ class Settings(BaseSettings):
         # Check database engine
         if self.DB_ENGINE == 'postgres':
             if self.DB_NAME is None:
-                self.DB_NAME = 'sd_db'
+                self.DB_NAME = 'es_db'
             database_uri = MultiHostUrl.build(
                 scheme="postgresql+psycopg",
                 username=self.DB_USER,
@@ -101,7 +102,7 @@ class Settings(BaseSettings):
             )
         elif self.DB_ENGINE == 'sqlite':
             if self.DB_NAME is None:
-                self.DB_NAME = os.path.join(os.path.dirname(get_env_file()), 'sd_db.sqlite')
+                self.DB_NAME = os.path.join(os.path.dirname(get_env_file()), 'es_db.sqlite')
             database_uri = MultiHostUrl.build(
                 scheme="sqlite",
                 host='',
@@ -117,8 +118,7 @@ class Settings(BaseSettings):
     SMTP_HOST: str | None = None
     SMTP_USER: str | None = None
     SMTP_PASSWORD: str | None = None
-    # TODO: update type to EmailStr when sqlmodel supports it
-    EMAILS_FROM_EMAIL: str | None = None
+    EMAILS_FROM_EMAIL: Annotated[str, EmailStr] | None = None
     EMAILS_FROM_NAME: str | None = None
 
     @model_validator(mode="after")
@@ -134,10 +134,8 @@ class Settings(BaseSettings):
     def emails_enabled(self) -> bool:
         return bool(self.SMTP_HOST and self.EMAILS_FROM_EMAIL)
 
-    # TODO: update type to EmailStr when sqlmodel supports it
-    EMAIL_TEST_USER: str = "test@example.com"
-    # TODO: update type to EmailStr when sqlmodel supports it
-    FIRST_SUPERUSER: str
+    EMAIL_TEST_USER: Annotated[str, EmailStr] = "test@example.com"
+    FIRST_SUPERUSER: Annotated[str, EmailStr]
     FIRST_SUPERUSER_PASSWORD: str
     USERS_OPEN_REGISTRATION: bool = False
 

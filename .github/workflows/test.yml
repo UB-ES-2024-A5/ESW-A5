@@ -15,10 +15,10 @@ env:
   DB_USER: db_user
   DB_HOST: localhost
   DB_PASSWORD: db_user_pass
-  DB_NAME: ub_sd_p2
-  ADMIN_USER: admin
+  DB_NAME: ub_es_a5
+  ADMIN_USER: admin@example.com
   ADMIN_PASSWORD: admin_pass
-  APPLICATION_NAME: ub_sd_p2
+  APPLICATION_NAME: ub_es_a5
 jobs:
 
   test:
@@ -30,7 +30,7 @@ jobs:
         env:
           POSTGRES_PASSWORD: db_user_pass
           POSTGRES_USER: db_user
-          POSTGRES_DB: ub_sd_p2
+          POSTGRES_DB: ub_es_a5
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -72,9 +72,9 @@ jobs:
           path: '.github/badges/pylint.svg'
       - name: Run tests
         env:
-          PROJECT_NAME: env.APPLICATION_NAME
-          FIRST_SUPERUSER: env.ADMIN_USER
-          FIRST_SUPERUSER_PASSWORD: env.ADMIN_PASSWORD
+          PROJECT_NAME: ${{ env.APPLICATION_NAME }}
+          FIRST_SUPERUSER: ${{ env.ADMIN_USER }}
+          FIRST_SUPERUSER_PASSWORD: ${{ env.ADMIN_PASSWORD }}
         run: |
           cd backend
           poetry run alembic upgrade head
