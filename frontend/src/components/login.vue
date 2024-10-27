@@ -10,7 +10,7 @@
           <div class="input-group">
             <input v-model="password" type="password" placeholder="Password" required />
           </div>
-          <button type="submit" class="login-button">Login</button>
+          <button type="submit" @click="login_user" class="login-button">sign in</button>
         </form>
         <!-- Sign Up link under the form -->
         <p class="signup-link">
@@ -26,20 +26,44 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   data () {
     return {
-      email: '',
-      password: '',
+      email: null,
+      password: null,
+      token: null,
+      is_authenticated: false,
       // Set your images here
       boxImage: require('@/assets/foto_box.png'),
       backgroundImage: require('@/assets/foto_fondo_login.png')
     }
   },
   methods: {
-    handleLogin () {
-      // Handle login logic here
-      console.log(`Email: ${this.email}, Password: ${this.password}`)
+    login_user (event) {
+      const data = 'username=' + this.email + '&password=' + this.password
+      const path = process.env.API_URL + '/api/v1/login/access-token'
+      axios.post(path, data, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      })
+        .then((res) => {
+          console.log(res) // Verifica la respuesta
+          this.logged = true
+          this.token = res.data.access_token
+          this.$router.push({ path: '/', query: { email: this.email, logged: this.logged, token: this.token } })
+        })
+        .catch((error) => {
+          console.error(error)
+          alert('Email or Password incorrect')
+        })
+    },
+    register_user () {
+      this.$router.push('/create-account')
+    },
+    back_matches (event) {
+      this.$router.push('/')
     }
   }
 }
