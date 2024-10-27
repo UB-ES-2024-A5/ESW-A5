@@ -79,7 +79,7 @@ class Settings(BaseSettings):
     DB_ENGINE: str = "sqlite"
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
-    DB_USER: str = "sd_db_user"
+    DB_USER: str = "es_db_user"
     DB_PASSWORD: str | None = None
     DB_NAME: str | None = None
 
@@ -90,7 +90,7 @@ class Settings(BaseSettings):
         # Check database engine
         if self.DB_ENGINE == 'postgres':
             if self.DB_NAME is None:
-                self.DB_NAME = 'sd_db'
+                self.DB_NAME = 'es_db'
             database_uri = MultiHostUrl.build(
                 scheme="postgresql+psycopg",
                 username=self.DB_USER,
@@ -101,7 +101,7 @@ class Settings(BaseSettings):
             )
         elif self.DB_ENGINE == 'sqlite':
             if self.DB_NAME is None:
-                self.DB_NAME = os.path.join(os.path.dirname(get_env_file()), 'sd_db.sqlite')
+                self.DB_NAME = os.path.join(os.path.dirname(get_env_file()), 'es_db.sqlite')
             database_uri = MultiHostUrl.build(
                 scheme="sqlite",
                 host='',
