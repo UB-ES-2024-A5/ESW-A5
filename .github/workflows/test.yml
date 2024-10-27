@@ -72,9 +72,9 @@ jobs:
           path: '.github/badges/pylint.svg'
       - name: Run tests
         env:
-          PROJECT_NAME: env.APPLICATION_NAME
-          FIRST_SUPERUSER: env.ADMIN_USER
-          FIRST_SUPERUSER_PASSWORD: env.ADMIN_PASSWORD
+          PROJECT_NAME: ${{ env.APPLICATION_NAME }}
+          FIRST_SUPERUSER: ${{ env.ADMIN_USER }}
+          FIRST_SUPERUSER_PASSWORD: ${{ env.ADMIN_PASSWORD }}
         run: |
           cd backend
           poetry run alembic upgrade head
