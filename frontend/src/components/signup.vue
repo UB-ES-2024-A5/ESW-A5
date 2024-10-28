@@ -9,7 +9,20 @@
             <span class="input-icon">
               <img :src="accountIcon" alt="Account icon" />
             </span>
-            <input v-model="name" type="text" placeholder="Name" required />
+            <input
+              v-model="name"
+              type="text"
+              placeholder="Name"
+              required
+              @input="validateName"
+            />
+            <span v-if="nameValid !== null" class="validation-icon">
+              <img
+                :src="nameValid ? checkIcon : errorIcon"
+                :alt="nameValid ? 'Valid' : 'Invalid'"
+                :title="nameValid ? '' : nameErrorMessage"
+              />
+            </span>
           </div>
 
           <!-- Campo de Apellido -->
@@ -17,7 +30,20 @@
             <span class="input-icon">
               <img :src="accountIcon" alt="Account icon" />
             </span>
-            <input v-model="surname" type="text" placeholder="Surname" required />
+            <input
+              v-model="surname"
+              type="text"
+              placeholder="Surname"
+              required
+              @input="validateSurname"
+            />
+            <span v-if="surnameValid !== null" class="validation-icon">
+              <img
+                :src="surnameValid ? checkIcon : errorIcon"
+                :alt="surnameValid ? 'Valid' : 'Invalid'"
+                :title="surnameValid ? '' : surnameErrorMessage"
+              />
+            </span>
           </div>
 
           <!-- Campo de Email -->
@@ -25,7 +51,20 @@
             <span class="input-icon">
               <img :src="mailIcon" alt="Mail icon" />
             </span>
-            <input v-model="email" type="email" placeholder="Email" required />
+            <input
+              v-model="email"
+              type="email"
+              placeholder="Email"
+              required
+              @input="validateEmail"
+            />
+            <span v-if="emailValid !== null" class="validation-icon">
+              <img
+                :src="emailValid ? checkIcon : errorIcon"
+                :alt="emailValid ? 'Valid' : 'Invalid'"
+                :title="emailValid ? '' : emailErrorMessage"
+              />
+            </span>
           </div>
 
           <!-- Campo de Contraseña -->
@@ -33,9 +72,22 @@
             <span class="input-icon">
               <img :src="lockIcon" alt="Lock icon" />
             </span>
-            <input :type="showPassword ? 'text' : 'password'" v-model="password" placeholder="Password" required />
+            <input
+              :type="showPassword ? 'text' : 'password'"
+              v-model="password"
+              placeholder="Password"
+              required
+              @input="validatePassword"
+            />
             <span class="toggle-password" @click="toggleShowPassword">
-              <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i> <!-- Asegúrate de que esto esté correcto -->
+              <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </span>
+            <span v-if="passwordValid !== null" class="validation-icon">
+              <img
+                :src="passwordValid ? checkIcon : errorIcon"
+                :alt="passwordValid ? 'Valid' : 'Invalid'"
+                :title="passwordValid ? '' : passwordErrorMessage"
+              />
             </span>
           </div>
 
@@ -44,18 +96,30 @@
             <span class="input-icon">
               <img :src="keyIcon" alt="Key icon" />
             </span>
-            <input :type="showConfirmPassword ? 'text' : 'password'" v-model="confirmPassword" placeholder="Confirm Password" required />
+            <input
+              :type="showConfirmPassword ? 'text' : 'password'"
+              v-model="confirmPassword"
+              placeholder="Confirm Password"
+              required
+              @input="validateConfirmPassword"
+            />
             <span class="toggle-password" @click="toggleShowConfirmPassword">
               <i :class="showConfirmPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
             </span>
+            <span v-if="confirmPasswordValid !== null" class="validation-icon">
+              <img
+                :src="confirmPasswordValid ? checkIcon : errorIcon"
+                :alt="confirmPasswordValid ? 'Valid' : 'Invalid'"
+                :title="confirmPasswordValid ? '' : confirmPasswordErrorMessage"
+              />
+            </span>
           </div>
-
           <!-- Términos y Condiciones -->
           <div class="terms-conditions">
             <input type="checkbox" v-model="agreedToTerms" required />
             <label>I agree to all statements in <span class="terms-link">terms and conditions</span></label>
           </div>
-          <button type="submit" @click="register_user" class="signup-button">sign in</button>
+          <button type="submit" @click="register_user" class="signup-button">register</button>
         </form>
 
         <!-- Enlace para Iniciar Sesión -->
@@ -76,59 +140,86 @@ import UserService from '../services/UserServices'
 export default {
   data () {
     return {
-      username: null,
-      password: null,
-      token: null,
-      is_authenticated: false,
-      name: null,
-      surname: null,
-      email: null,
-      confirmPassword: null,
+      name: '',
+      surname: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      nameValid: null,
+      surnameValid: null,
+      emailValid: null,
+      passwordValid: null,
+      confirmPasswordValid: null,
       agreedToTerms: false,
+      nameErrorMessage: 'Only letters are allowed.',
+      surnameErrorMessage: 'Only letters are allowed.',
+      emailErrorMessage: 'Please enter a valid email address -> example@gmail.com',
+      passwordErrorMessage: 'Password must be at least 8 characters, contain a symbol and an uppercase letter.',
+      confirmPasswordErrorMessage: 'Passwords do not match.',
       showPassword: false,
       showConfirmPassword: false,
       accountIcon: require('@/assets/account_icon.png'),
       mailIcon: require('@/assets/mail_icon.png'),
       lockIcon: require('@/assets/lock_icon.png'),
       keyIcon: require('@/assets/key_icon.png'),
-      boxImage: require('@/assets/foto_signup.png'), // Replace with your signup illustration path
-      backgroundImage: require('@/assets/foto_fondo_login.png') // Replace with your signup background path
+      checkIcon: require('@/assets/check_icon.png'),
+      errorIcon: require('@/assets/error_icon.png'),
+      boxImage: require('@/assets/foto_signup.png'),
+      backgroundImage: require('@/assets/foto_fondo_login.png')
+    }
+  },
+  computed: {
+    canRegister () {
+      return (
+        this.nameValid &&
+        this.surnameValid &&
+        this.emailValid &&
+        this.passwordValid &&
+        this.confirmPasswordValid &&
+        this.agreedToTerms
+      )
     }
   },
   methods: {
-    validateFields () {
-      if (!this.name || !this.surname || !this.email || !this.password || !this.confirmPassword) {
-        alert('Please fill in all fields.')
-        return false
-      }
-
-      if (!this.email.includes('@')) {
-        alert('Please enter a valid email address.')
-        return false
-      }
-
-      if (this.password !== this.confirmPassword) {
-        alert('Passwords do not match.')
-        return false
-      }
-
-      if (!this.agreedToTerms) {
-        alert('You must agree to the terms and conditions.')
-        return false
-      }
-
-      return true
+    validateName () {
+      const nameRegex = /^[a-zA-ZÀ-ÿ\s]+$/ // only letters
+      this.nameValid = nameRegex.test(this.name)
     },
+    validateSurname () {
+      const surnameRegex = /^[a-zA-ZÀ-ÿ\s]+$/ // only letters
+      this.surnameValid = surnameRegex.test(this.surname)
+    },
+    validateEmail () {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      this.emailValid = emailRegex.test(this.email)
+    },
+    validatePassword () {
+      const minLength = /.{8,}/
+      const hasUppercase = /[A-Z]/
+      const hasSymbol = /[\W_]/
 
+      const isValidLength = minLength.test(this.password)
+      const containsUppercase = hasUppercase.test(this.password)
+      const containsSymbol = hasSymbol.test(this.password)
+      this.passwordValid = isValidLength && containsUppercase && containsSymbol
+    },
+    validateConfirmPassword () {
+      this.confirmPasswordValid = this.password === this.confirmPassword
+    },
+    toggleShowPassword () {
+      this.showPassword = !this.showPassword
+    },
+    toggleShowConfirmPassword () {
+      this.showConfirmPassword = !this.showConfirmPassword
+    },
     register_user () {
-      if (this.validateFields()) {
+      if (this.canRegister) {
         const data = {
           name: this.name,
           surname: this.surname,
           email: this.email,
           password: this.password
         }
-
         UserService.create(data)
           .then(() => {
             alert('La cuenta se ha creado correctamente. Por favor inicie sesión.')
@@ -138,19 +229,49 @@ export default {
             console.error(error)
             alert('Hubo un error al crear la cuenta.')
           })
+      } else {
+        alert('Please correct the errors in the form.')
       }
-    },
-    toggleShowPassword () {
-      this.showPassword = !this.showPassword
-    },
-    toggleShowConfirmPassword () {
-      this.showConfirmPassword = !this.showConfirmPassword
     }
   }
 }
 </script>
 
 <style scoped>
+.input-group {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.validation-icon {
+  position: absolute;
+  right: -30px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.validation-icon img {
+  width: 20px;
+  height: 20px;
+}
+
+.validation-icon img[title] {
+  position: relative;
+}
+
+.validation-icon img[title]:hover:after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  background-color: #f44336;
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 /* Fullscreen container with background */
 .signup-container {
   display: flex;
@@ -205,7 +326,7 @@ h1 {
 
 .input-group input {
   width: 100%;
-  padding: 12px 40px 12px 40px; /* Padding for the icon */
+  padding: 12px 40px 12px 40px;
   border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 16px;
@@ -227,11 +348,10 @@ h1 {
 
 .toggle-password {
   position: absolute;
-  right: 10px; /* Ajusta el valor según sea necesario */
+  right: 10px;
   cursor: pointer;
   font-size: 18px;
-  color: #000; /* Puedes cambiar el color si es necesario */
-  z-index: 1; /* Asegúrate de que el icono esté por encima del campo */
+  color: #000;
 }
 
 /* Terms and Conditions */
