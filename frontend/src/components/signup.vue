@@ -35,7 +35,7 @@
             </span>
             <input :type="showPassword ? 'text' : 'password'" v-model="password" placeholder="Password" required />
             <span class="toggle-password" @click="toggleShowPassword">
-              <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+              <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i> <!-- Asegúrate de que esto esté correcto -->
             </span>
           </div>
 
@@ -55,7 +55,7 @@
             <input type="checkbox" v-model="agreedToTerms" required />
             <label>I agree to all statements in <span class="terms-link">terms and conditions</span></label>
           </div>
-          <button type="submit" class="signup-button">Register</button>
+          <button type="submit" @click="register_user" class="signup-button">sign in</button>
         </form>
 
         <!-- Enlace para Iniciar Sesión -->
@@ -72,14 +72,18 @@
 </template>
 
 <script>
+import UserService from '../services/UserServices'
 export default {
   data () {
     return {
-      name: '',
-      surname: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
+      username: null,
+      password: null,
+      token: null,
+      is_authenticated: false,
+      name: null,
+      surname: null,
+      email: null,
+      confirmPassword: null,
       agreedToTerms: false,
       showPassword: false,
       showConfirmPassword: false,
@@ -92,9 +96,49 @@ export default {
     }
   },
   methods: {
-    handleSignUp () {
-      // Handle sign-up logic here
-      console.log(`Name: ${this.name}, Surname: ${this.surname}, Email: ${this.email}`)
+    validateFields () {
+      if (!this.name || !this.surname || !this.email || !this.password || !this.confirmPassword) {
+        alert('Please fill in all fields.')
+        return false
+      }
+
+      if (!this.email.includes('@')) {
+        alert('Please enter a valid email address.')
+        return false
+      }
+
+      if (this.password !== this.confirmPassword) {
+        alert('Passwords do not match.')
+        return false
+      }
+
+      if (!this.agreedToTerms) {
+        alert('You must agree to the terms and conditions.')
+        return false
+      }
+
+      return true
+    },
+
+    register_user () {
+      if (this.validateFields()) {
+        const data = {
+          name: this.name,
+          surname: this.surname,
+          email: this.email,
+          password: this.password
+        }
+
+        UserService.create(data)
+          .then(() => {
+            alert('La cuenta se ha creado correctamente. Por favor inicie sesión.')
+            this.$router.push({ path: '/login' })
+          })
+          .catch((error) => {
+            console.error(error)
+            alert('Hubo un error al crear la cuenta.')
+          })
+      }
     },
     toggleShowPassword () {
       this.showPassword = !this.showPassword
@@ -181,13 +225,13 @@ h1 {
   height: 24px;
 }
 
-/* Toggle password visibility icon */
 .toggle-password {
   position: absolute;
-  right: 10px;
+  right: 10px; /* Ajusta el valor según sea necesario */
   cursor: pointer;
   font-size: 18px;
-  color: #777;
+  color: #000; /* Puedes cambiar el color si es necesario */
+  z-index: 1; /* Asegúrate de que el icono esté por encima del campo */
 }
 
 /* Terms and Conditions */
