@@ -75,7 +75,7 @@ class Settings(BaseSettings):
         list[AnyUrl] | str, BeforeValidator(parse_cors)
     ] = []
 
-    PROJECT_NAME: str
+    PROJECT_NAME: str = "BOOK-NET"
     SENTRY_DSN: HttpUrl | None = None
     DB_ENGINE: str = "sqlite"
     DB_HOST: str = "localhost"
@@ -112,14 +112,14 @@ class Settings(BaseSettings):
             raise ValueError(f'Invalid database engine {self.DB_ENGINE}. Valid options are [sqlite, postgres]')
         return database_uri
 
-    SMTP_TLS: bool = True
+    SMTP_TLS: bool = False
     SMTP_SSL: bool = False
-    SMTP_PORT: int = 587
-    SMTP_HOST: str | None = None
+    SMTP_PORT: int = 1025
+    SMTP_HOST: str | None = "localhost"
     SMTP_USER: str | None = None
     SMTP_PASSWORD: str | None = None
-    EMAILS_FROM_EMAIL: Annotated[str, EmailStr] | None = None
-    EMAILS_FROM_NAME: str | None = None
+    EMAILS_FROM_EMAIL: Annotated[str, EmailStr] | None = "bookNet@gmail.com"
+    EMAILS_FROM_NAME: str | None = "BOOK-NET"
 
     @model_validator(mode="after")
     def _set_default_emails_from(self) -> Self:
