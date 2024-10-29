@@ -30,7 +30,6 @@ router = APIRouter()
 
 @router.get(
     "/",
-    #dependencies=[Depends(get_current_active_superuser)],
     response_model=UsersPublic
 )
 def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
@@ -49,7 +48,6 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
 
 @router.post(
     "/",
-    #dependencies=[Depends(get_current_active_superuser)],
     response_model=UserPublic
 )
 def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
@@ -141,8 +139,23 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     user = crud.user.create_user(session=session, user_create=user_create)
     return user
 
+@router.get(
+    "/{email}",
+    response_model=UserPublic)
+def read_user_by_email(
+    email: str, session: SessionDep, current_user: CurrentUser
+) -> Any:
+    """
+    Get a specific user by email (mes endavant per buscar usuaris).
+    """
+    user = crud.user.get_user_by_email(session=session, email=email)
+    if user == current_user:
+        return user
 
-@router.get("/{user_id}", response_model=UserPublic)
+    return user
+@router.get("/{user_id}",
+            response_model=UserPublic, responses={404: {"description": "Not found"}},
+            dependencies=[Depends(get_current_active_superuser)],)
 def read_user_by_id(
     user_id: int, session: SessionDep, current_user: CurrentUser
 ) -> Any:
@@ -192,7 +205,9 @@ def update_user(
     return db_user
 
 
-@router.delete("/{user_id}")
+@router.delete(
+    "/{user_id}",
+    dependencies=[Depends(get_current_active_superuser)],)
 def delete_user(
     session: SessionDep, current_user: CurrentUser, user_id: int
 ) -> Message:
