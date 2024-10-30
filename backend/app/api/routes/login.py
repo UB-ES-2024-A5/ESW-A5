@@ -1,5 +1,6 @@
 """ Login related routes """
 from datetime import timedelta
+import random
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -11,7 +12,7 @@ from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
 from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash
-from app.models import Message, NewPassword, Token, UserOut
+from app.models import Message, NewPassword, Token, UserPublic
 from app.utils import (
     generate_password_reset_token,
     generate_reset_password_email,
@@ -24,7 +25,7 @@ router = APIRouter()
 
 @router.post("/login/access-token")
 def login_access_token(
-    session: SessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+        session: SessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ) -> Token:
     """
     OAuth2 compatible token login, get an access token for future requests
@@ -44,7 +45,25 @@ def login_access_token(
     )
 
 
-@router.post("/login/test-token", response_model=UserOut)
+@router.post("/login/guest-access-token")
+def guest_access_token() -> Token:
+    """
+    Login para acceso como invitado con token.
+    """
+    num_id = random.randint(1, 1000000)
+    guest_user_id = "guest" + str(num_id)  # Podrías usar un ID ficticio o manejarlo de forma específica en tu app
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    # Crear un token para el usuario invitado
+    return Token(
+        access_token=security.create_access_token(
+            guest_user_id, expires_delta=access_token_expires
+        )
+    )
+
+
+@router.post("/login/test-token",
+             response_model=UserPublic)
 def test_token(current_user: CurrentUser) -> Any:
     """
     Test access token

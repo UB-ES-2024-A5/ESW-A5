@@ -1,54 +1,64 @@
 """ User models """
+import uuid
+
 from sqlmodel import Field
 from .base import SQLModel
+from pydantic import EmailStr
+from typing import Annotated
 
 # Shared properties
 class UserBase(SQLModel):
-    email: str = Field(unique=True, index=True)
+    email: Annotated[str, EmailStr] = Field(unique=True, index=True, max_length=255)
     is_active: bool = True
     is_superuser: bool = False
-    full_name: str | None = None
+    name: str | None = Field(default=None, max_length=255)
+    surname: str | None = Field(default=None, max_length=255)
 
-
-# Database model, database table inferred from class name
-class User(UserBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    hashed_password: str
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
-    password: str
+    password: str = Field(min_length=8, max_length=40)
 
 
-# TODO replace email str with EmailStr when sqlmodel supports it
-class UserCreateOpen(SQLModel):
-    email: str
-    password: str
-    full_name: str | None = None
+class UserRegister(SQLModel):
+    email: Annotated[str, EmailStr] = Field(max_length=255)
+    password: str = Field(min_length=8, max_length=40)
+    name: str | None = Field(default=None, max_length=255)
+    surname: str | None = Field(default=None, max_length=255)
 
 
 # Properties to receive via API on update, all are optional
 class UserUpdate(UserBase):
-    email: str | None = None  # type: ignore
-    password: str | None = None
+    email: Annotated[str, EmailStr] | None = Field(default=None, max_length=255)  # type: ignore
+    password: str | None = Field(default=None, min_length=8, max_length=40)
 
 
-# TODO replace email str with EmailStr when sqlmodel supports it
 class UserUpdateMe(SQLModel):
-    full_name: str | None = None
-    email: str | None = None
+    name: str | None = Field(default=None, max_length=255)
+    surname: str | None = Field(default=None, max_length=255)
+    email: Annotated[str, EmailStr] | None = Field(default=None, max_length=255)
+
 
 class UpdatePassword(SQLModel):
-    current_password: str
-    new_password: str
+    current_password: str = Field(min_length=8, max_length=40)
+    new_password: str = Field(min_length=8, max_length=40)
+
+
+# Database model, database table inferred from class name
+class User(UserBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    hashed_password: str
+
 
 # Properties to return via API, id is always required
-class UserOut(UserBase):
-    id: int
+class UserPublic(UserBase):
+    id: uuid.UUID
 
-class UsersOut(SQLModel):
-    data: list[UserOut]
+
+class UsersPublic(SQLModel):
+    data: list[UserPublic]
     count: int
+
 
 # Generic message
 class Message(SQLModel):
@@ -68,4 +78,4 @@ class TokenPayload(SQLModel):
 
 class NewPassword(SQLModel):
     token: str
-    new_password: str
+    new_password: str = Field(min_length=8, max_length=40)
