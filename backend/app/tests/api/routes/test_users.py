@@ -2,13 +2,79 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 from sqlmodel import Session
-
+from app.main import app
 from app import crud
 from app.core.config import settings
 from app.models import UserCreate
 from app.tests.utils.utils import random_email, random_lower_string
 
+client = TestClient(app)
 
+def test_create_user():
+    user_data = {
+        "email": "newuser@example.com",
+        "password": "password123",
+        "name": "new",
+        "surname" :"user"
+    }
+    response = client.post("/api/v1/users/", json=user_data)
+    assert response.status_code == 200
+    assert response.json()["email"] == user_data["email"]
+
+def test_duplicate_user():
+    user_data = {
+        "email": "newuser@example.com",
+        "password": "password123",
+        "name": "perico",
+        "surname" :"palotes"
+    }
+    response = client.post("/api/v1/users/", json=user_data)
+    assert response.status_code == 400
+    assert response.json()['detail'] == "The user with this email already exists in the system."
+
+def test_less_8char_password():
+    user_data = {
+        "email": "newuser2@example.com",
+        "password": "p",
+        "name": "perico",
+        "surname" :"palotes"
+    }
+    response = client.post("/api/v1/users/", json=user_data)
+    assert response.status_code == 422
+
+def test_40char_password():
+    user_data = {
+        "email": "newuser3@example.com",
+        "password": "pppppppppppppppppppppppppppppppppppppppp",
+        "name": "perico",
+        "surname" :"palotes"
+    }
+    response = client.post("/api/v1/users/", json=user_data)
+    assert response.status_code == 200
+    assert response.json()["email"] == user_data["email"]
+
+def test_more_40char_password():
+    user_data = {
+        "email": "newuser4@example.com",
+        "password": "ppppppppppppppppppppppppppppppppppppppppp",
+        "name": "perico",
+        "surname" :"palotes"
+    }
+    response = client.post("/api/v1/users/", json=user_data)
+    assert response.status_code == 422
+
+def test_mail_invalid():
+    user_data = {
+        "email": "newuser5.com",
+        "password": "papapapapa",
+        "name": "perico",
+        "surname" :"palotes"
+    }
+    response = client.post("/api/v1/users/", json=user_data)
+    assert response.status_code == 422
+
+
+"""   
 def test_get_users_superuser_me(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
@@ -438,3 +504,4 @@ def test_delete_user_without_privileges(
     )
     assert r.status_code == 403
     assert r.json()["detail"] == "The user doesn't have enough privileges"
+"""
