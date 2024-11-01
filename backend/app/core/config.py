@@ -103,13 +103,17 @@ class Settings(BaseSettings):
         elif self.DB_ENGINE == 'sqlite':
             if self.DB_NAME is None:
                 self.DB_NAME = os.path.join(os.path.dirname(get_env_file()), 'es_db.sqlite')
+            sqlite_path = self.DB_NAME.replace(os.sep, '/')
+    
             database_uri = MultiHostUrl.build(
                 scheme="sqlite",
                 host='',
                 path=self.DB_NAME,
             )
+            database_uri = f"sqlite:///{sqlite_path}"
         else:
             raise ValueError(f'Invalid database engine {self.DB_ENGINE}. Valid options are [sqlite, postgres]')
+        
         return database_uri
 
     SMTP_TLS: bool = False
