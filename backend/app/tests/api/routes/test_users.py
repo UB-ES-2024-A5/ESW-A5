@@ -63,6 +63,16 @@ def test_more_40char_password():
     response = client.post("/api/v1/users/", json=user_data)
     assert response.status_code == 422
 
+def test_mail_invalid():
+    user_data = {
+        "email": "newuser5.com",
+        "password": "papapapapa",
+        "name": "perico",
+        "surname" :"palotes"
+    }
+    response = client.post("/api/v1/users/", json=user_data)
+    assert response.status_code == 422
+
 
 """   
 def test_get_users_superuser_me(
