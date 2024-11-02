@@ -7,7 +7,8 @@ module.exports = {
   transformIgnorePatterns: [
     "/node_modules/(?!jest-runtime)"
   ],
-  collectCoverage: true,
-  coverageDirectory: "coverage",
-  coverageProvider: "v8"
+  moduleNameMapper: {
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+    '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/__mocks__/fileMock.js'
+  },
 };
