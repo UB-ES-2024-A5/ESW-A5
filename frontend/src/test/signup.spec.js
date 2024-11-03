@@ -414,6 +414,8 @@ describe('signup.vue', () => {
     wrapper.vm.validateConfirmPassword();
     await wrapper.vm.$nextTick();
     wrapper.setData({password:'Testing1#'});
+    wrapper.vm.validateConfirmPassword();
+    await wrapper.vm.$nextTick();
     expect(wrapper.vm.confirmPasswordValid).toBe(false);
   });
 
@@ -425,6 +427,8 @@ describe('signup.vue', () => {
     wrapper.vm.validateConfirmPassword();
     await wrapper.vm.$nextTick();
     wrapper.setData({password:'Testing1#'});
+    wrapper.vm.validateConfirmPassword();
+    await wrapper.vm.$nextTick();
     const errorIcon = wrapper.find('img[title="Passwords do not match."]');
     expect(errorIcon.exists()).toBe(true);
   });
