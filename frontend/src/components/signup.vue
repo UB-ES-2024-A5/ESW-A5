@@ -103,7 +103,7 @@
               required
               @input="validateConfirmPassword"
             />
-            <span class="toggle-password" @click="toggleShowConfirmPassword">
+            <span class="toggle-confirm-password" @click="toggleShowConfirmPassword">
               <i :class="showConfirmPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
             </span>
             <span v-if="confirmPasswordValid !== null" class="validation-icon">
@@ -354,6 +354,14 @@ h1 {
 }
 
 .toggle-password {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #000;
+}
+
+.toggle-confirm-password {
   position: absolute;
   right: 10px;
   cursor: pointer;
