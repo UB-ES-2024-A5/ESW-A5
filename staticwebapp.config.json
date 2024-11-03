@@ -1,9 +1,0 @@
-{
-  "routes": [
-    {
-      "route": "/api/*",
-      "allowedRoles": ["anonymous"],
-      "rewrite": "https://esa05-cyc9agehcmd3gudg.francecentral-01.azurewebsites.net/api/*"
-    }
-  ]
-}
