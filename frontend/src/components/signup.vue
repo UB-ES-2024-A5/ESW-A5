@@ -202,6 +202,7 @@ export default {
       const containsUppercase = hasUppercase.test(this.password)
       const containsSymbol = hasSymbol.test(this.password)
       this.passwordValid = isValidLength && containsUppercase && containsSymbol
+      this.validateConfirmPassword();
     },
     validateConfirmPassword () {
       this.confirmPasswordValid = this.password === this.confirmPassword
