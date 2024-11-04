@@ -103,7 +103,7 @@
               required
               @input="validateConfirmPassword"
             />
-            <span class="toggle-password" @click="toggleShowConfirmPassword">
+            <span class="toggle-confirm-password" @click="toggleShowConfirmPassword">
               <i :class="showConfirmPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
             </span>
             <span v-if="confirmPasswordValid !== null" class="validation-icon">
@@ -141,31 +141,38 @@ export default {
   data () {
     return {
       name: '',
-      surname: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
       nameValid: null,
-      surnameValid: null,
-      emailValid: null,
-      passwordValid: null,
-      confirmPasswordValid: null,
-      agreedToTerms: false,
       nameErrorMessage: 'Only letters are allowed.',
-      surnameErrorMessage: 'Only letters are allowed.',
-      emailErrorMessage: 'Please enter a valid email address -> example@gmail.com',
-      passwordErrorMessage: 'Password must be at least 8 characters, contain a symbol and an uppercase letter.',
-      confirmPasswordErrorMessage: 'Passwords do not match.',
-      showPassword: false,
-      showConfirmPassword: false,
+      backgroundImage: require('@/assets/foto_fondo_login.png'),
       accountIcon: require('@/assets/account_icon.png'),
+
+      surname: '',
+      surnameValid: null,
+      surnameErrorMessage: 'Only letters are allowed.',
+
+      email: '',
+      emailValid: null,
+      emailErrorMessage: 'Please enter a valid email address -> example@gmail.com',
       mailIcon: require('@/assets/mail_icon.png'),
+
+      password: '',
+      passwordValid: null,
+      showPassword: false,
+      passwordErrorMessage: 'Password must be at least 8 characters, contain a symbol and an uppercase letter.',
       lockIcon: require('@/assets/lock_icon.png'),
+
+      confirmPassword: '',
+      confirmPasswordValid: null,
+      confirmPasswordErrorMessage: 'Passwords do not match.',
       keyIcon: require('@/assets/key_icon.png'),
+      showConfirmPassword: false,
+
+      agreedToTerms: false,
+      
       checkIcon: require('@/assets/check_icon.png'),
       errorIcon: require('@/assets/error_icon.png'),
       boxImage: require('@/assets/foto_signup.png'),
-      backgroundImage: require('@/assets/foto_fondo_login.png')
+      
     }
   },
   computed: {
@@ -348,6 +355,14 @@ h1 {
 }
 
 .toggle-password {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #000;
+}
+
+.toggle-confirm-password {
   position: absolute;
   right: 10px;
   cursor: pointer;

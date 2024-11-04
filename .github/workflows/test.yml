@@ -84,6 +84,16 @@ jobs:
         with:
           name: coverage-html
           path: backend/htmlcov
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+          
+      - name: Run Jest tests
+        run: |
+          cd frontend
+          npm test
   # https://github.com/marketplace/actions/alls-green#why
   alls-green:  # This job does nothing and is only used for the branch protection
     if: always()
