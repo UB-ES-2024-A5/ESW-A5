@@ -15,6 +15,7 @@ async function clearUserDatabase() {
 
 test.describe('Signup Page Tests', () => {
   test('should successfully create a new user account', async ({ page }) => {
+
     await clearUserDatabase();
     await page.goto('http://localhost:8080/#/');
     await page.click('text=Sign up as user');
@@ -25,11 +26,18 @@ test.describe('Signup Page Tests', () => {
     await page.fill('input[placeholder="Confirm Password"]', 'Password!123');
     await page.check('input[type="checkbox"]');    
     await page.click('button.signup-button');
-    page.on('dialog', async dialog => {
+    const dialogPromise = new Promise(resolve => {
+      page.on('dialog', async dialog => {
+        console.log('Diálogo detectado con mensaje:', dialog.message()); // Log para ver el mensaje
         expect(dialog.message()).toBe('La cuenta se ha creado correctamente. Por favor inicie sesión.');
         await dialog.accept();
+        resolve(); // Resuelve la promesa una vez aceptado el diálogo
       });
+    });
+    await dialogPromise;
+
     await expect(page).toHaveURL('http://localhost:8080/#/login');
+    
   });
 
   test('should show error for missing terms acceptance', async ({ page }) => {
