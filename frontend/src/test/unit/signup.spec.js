@@ -1,9 +1,9 @@
 import { mount } from '@vue/test-utils';
-import Signup from '../components/signup.vue';
-import UserService from '../services/UserServices';
+import Signup from '../../components/signup.vue';
+import UserService from '../../services/UserServices';
 
 // Mockear UserService
-jest.mock('../services/UserServices', () => ({
+jest.mock('../../services/UserServices', () => ({
   create: jest.fn(() => Promise.resolve()),
 }));
 
