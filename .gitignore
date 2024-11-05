@@ -247,3 +247,4 @@ docs/book
 !frontend/build/
 
 frontend/coverage
+frontend/test-results
