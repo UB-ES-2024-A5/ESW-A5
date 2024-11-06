@@ -168,11 +168,9 @@ export default {
       showConfirmPassword: false,
 
       agreedToTerms: false,
-      
       checkIcon: require('@/assets/check_icon.png'),
       errorIcon: require('@/assets/error_icon.png'),
-      boxImage: require('@/assets/foto_signup.png'),
-      
+      boxImage: require('@/assets/foto_signup.png')
     }
   },
   computed: {
@@ -209,7 +207,7 @@ export default {
       const containsUppercase = hasUppercase.test(this.password)
       const containsSymbol = hasSymbol.test(this.password)
       this.passwordValid = isValidLength && containsUppercase && containsSymbol
-      this.validateConfirmPassword();
+      this.validateConfirmPassword()
     },
     validateConfirmPassword () {
       this.confirmPasswordValid = this.password === this.confirmPassword

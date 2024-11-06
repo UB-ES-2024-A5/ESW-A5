@@ -13,4 +13,7 @@ yarn-error.log*
 *.njsproj
 *.sln
 .idea/jsLibraryMappings.xml
-
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
