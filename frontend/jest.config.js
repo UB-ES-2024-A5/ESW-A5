@@ -11,4 +11,8 @@ module.exports = {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/__mocks__/fileMock.js'
   },
+  testMatch: [
+    "<rootDir>/src/test/unit/**/*.(spec|test).js"
+  ],
+
 };
