@@ -16,7 +16,7 @@ def test_create_user():
         "password": "password123",
         "name": "new",
         "surname" :"user",
-        "is_editorial": False
+        "is_editor": False
     }
     response = client.post("/api/v1/users/", json=user_data)
     assert response.status_code == 200
@@ -27,13 +27,13 @@ def test_create_editorial():
         "email" : "editorial@example.com",
         "password" : "password",
         "name" : "Vaixell de Vapor",
-        "nif" : "G66458933",
-        "is_editorial" : True
+        "cif" : "G66458933",
+        "is_editor" : True
     }
     response = client.post("api/v1/users/", json=editorial_data)
     assert response.status_code == 200
     assert response.json()["email"] == editorial_data["email"]
-    assert response.json()["nif"] == editorial_data["nif"]
+    assert response.json()["cif"] == editorial_data["cif"]
 
 def test_duplicate_user():
     user_data = {
@@ -41,7 +41,7 @@ def test_duplicate_user():
         "password": "password123",
         "name": "perico",
         "surname" :"palotes",
-        "is_editorial": False
+        "is_editor": False
     }
     response = client.post("/api/v1/users/", json=user_data)
     assert response.status_code == 400
@@ -52,24 +52,24 @@ def test_duplicate_editorial_email():
         "email" : "editorial@example.com",
         "password" : "password",
         "name" : "Vaixell de Vapor",
-        "nif" : "G66458932",
-        "is_editorial" : True
+        "cif" : "G66458932",
+        "is_editor" : True
     }
     response = client.post("/api/v1/users/", json=editorial_data)
     assert response.status_code == 400
     assert response.json()['detail'] == "The user with this email already exists in the system."
 
-def test_duplicate_editorial_nif():
+def test_duplicate_editorial_cif():
     editorial_data = {
         "email" : "editorial2@example.com",
         "password" : "password",
         "name" : "Vaixell de Vapor",
-        "nif" : "G66458933",
-        "is_editorial" : True
+        "cif" : "G66458933",
+        "is_editor" : True
     }
     response = client.post("/api/v1/users/", json=editorial_data)
     assert response.status_code == 400
-    assert response.json()['detail'] == "The editorial with this NIF already exists in the system."
+    assert response.json()['detail'] == "The editorial with this CIF already exists in the system."
 
 def test_less_8char_password():
     user_data = {
@@ -77,7 +77,7 @@ def test_less_8char_password():
         "password": "p",
         "name": "perico",
         "surname" :"palotes",
-        "is_editorial": False
+        "is_editor": False
     }
     response = client.post("/api/v1/users/", json=user_data)
     assert response.status_code == 422
@@ -88,7 +88,7 @@ def test_40char_password():
         "password": "pppppppppppppppppppppppppppppppppppppppp",
         "name": "perico",
         "surname" :"palotes",
-        "is_editorial": False
+        "is_editor": False
     }
     response = client.post("/api/v1/users/", json=user_data)
     assert response.status_code == 200
@@ -100,7 +100,7 @@ def test_more_40char_password():
         "password": "ppppppppppppppppppppppppppppppppppppppppp",
         "name": "perico",
         "surname" :"palotes",
-        "is_editorial": False
+        "is_editor": False
     }
     response = client.post("/api/v1/users/", json=user_data)
     assert response.status_code == 422
@@ -111,7 +111,7 @@ def test_mail_invalid():
         "password": "papapapapa",
         "name": "perico",
         "surname" :"palotes",
-        "is_editorial": False
+        "is_editor": False
     }
     response = client.post("/api/v1/users/", json=user_data)
     assert response.status_code == 422
