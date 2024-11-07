@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Login from '../components/login.vue'
 import signup from '../components/signup.vue'
 import guessaccess from '../components/guestaccess.vue'
+import signupEdit from '../components/signupEdit.vue'
 
 Vue.use(Router)
 export default new Router({
@@ -21,6 +22,11 @@ export default new Router({
       path: '/signup',
       name: 'signup',
       component: signup
+    },
+    {
+      path: '/signupEdit',
+      name: 'signupEdit',
+      component: signupEdit
     }
   ]
 })
