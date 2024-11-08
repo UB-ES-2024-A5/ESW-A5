@@ -52,7 +52,7 @@ export default {
           console.log(res) // Verifica la respuesta
           this.logged = true
           this.token = res.data.access_token
-          this.$router.push({ path: '/', query: { email: this.email, logged: this.logged, token: this.token } })
+          this.$router.push({ path: '/mainpage_user', query: { email: this.email, logged: this.logged, token: this.token } })
         })
         .catch((error) => {
           console.error(error)

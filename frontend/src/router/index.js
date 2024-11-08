@@ -5,6 +5,8 @@ import signup from '../components/signup.vue'
 import guessaccess from '../components/welcomePage.vue'
 import signupEdit from '../components/signupEdit.vue'
 import mainpageGuest from '../components/mainPageGuest.vue'
+import mainpageUser from '../components/mainPageUser.vue'
+import mainpagePublisher from '../components/mainPagePublisher.vue'
 
 Vue.use(Router)
 export default new Router({
@@ -33,6 +35,16 @@ export default new Router({
       path: '/mainPage_guest',
       name: 'mainPage_guest',
       component: mainpageGuest
+    },
+    {
+      path: '/mainPage_user',
+      name: 'mainPage_user',
+      component: mainpageUser
+    },
+    {
+      path: '/mainPage_publisher',
+      name: 'mainPage_publisher',
+      component: mainpagePublisher
     }
   ]
 })
