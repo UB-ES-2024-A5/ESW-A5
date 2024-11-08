@@ -3,7 +3,12 @@
     <!-- Header con campo de búsqueda y botón de inicio de sesión -->
     <header class="header">
       <input type="text" placeholder="Search for a publication" class="search-bar" />
-      <router-link to="/login" class="sign-in-btn">Sign in</router-link>
+      <router-link to="/" class="sign-in-btn">Log out</router-link>
+
+      <!-- Enlace al perfil de usuario con icono de imagen -->
+      <router-link to="/user_profile" class="profile-link">
+        <img src="@/assets/user_icon.png" alt="User Profile" class="user-icon" />
+      </router-link>
     </header>
 
     <!-- Título principal -->
