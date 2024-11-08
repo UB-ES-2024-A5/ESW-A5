@@ -3,7 +3,12 @@
     <!-- Header con campo de búsqueda y botón de inicio de sesión -->
     <header class="header">
       <input type="text" placeholder="Search for a publication" class="search-bar" />
-      <router-link to="/login" class="sign-in-btn">Sign in</router-link>
+      <router-link to="/" class="sign-in-btn">Log out</router-link>
+
+      <!-- Enlace al perfil de usuario con icono de imagen -->
+      <router-link to="/publisher_profile" class="profile-link">
+        <img src="@/assets/user_icon.png" alt="User Profile" class="user-icon" />
+      </router-link>
     </header>
 
     <!-- Título principal -->
@@ -12,6 +17,9 @@
 
       <!-- Carrusel de imágenes -->
       <div class="carousel-container">
+        <!-- Botón de agregar publicación -->
+        <router-link to="/publish_content" class="add-button">+</router-link>
+
         <button class="carousel-btn left-btn" @click="previousSlide">‹</button>
         <div class="carousel">
           <div class="carousel-track" :style="{ transform: `translateX(-${currentIndex * 100}%)` }">
@@ -71,13 +79,14 @@ export default {
   justify-content: flex-start;
   height: 100vh;
   background: url('../assets/fondo_carrousel2.png') no-repeat center center fixed;
-  background-size: cover;  /* Ensures the image fits within the container */
+  background-size: cover; /* Ensures the image fits within the container */
   font-family: 'Georgia', serif;
-    background-position: center bottom; /* Align the image to the top, showing more of the top part */
+  background-position: center bottom; /* Align the image to the top, showing more of the top part */
   color: #333;
   position: relative;
   padding-top: 20px;
 }
+
 /* Header */
 .header {
   position: absolute;
@@ -114,6 +123,10 @@ export default {
   background-color: rgba(0, 0, 0, 0.1);
 }
 
+.profile-link:hover {
+  transform: scale(1.1); /* Efecto de zoom al pasar el ratón */
+}
+
 /* Contenido principal */
 .content {
   text-align: center;
@@ -128,6 +141,7 @@ export default {
   margin-bottom: 10px;
 }
 
+/* Contenedor del carrusel */
 .carousel-container {
   margin-top: 100px;
   display: flex;
@@ -136,11 +150,34 @@ export default {
   width: 100%;
   max-width: 1200px;
   overflow: hidden;
-  /* Fondo de color claro */
   padding: 20px; /* Espacio interno */
   border-radius: 15px; /* Bordes redondeados */
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Sombra para darle profundidad */
-  border: 5px solid ; /* Borde sutil */
+  position: relative; /* Para posicionar el botón flotante */
+}
+
+/* Botón de agregar publicación en el carrusel */
+.add-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #333;
+  color: #fff;
+  font-size: 1.5em;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.add-button:hover {
+  background-color: #555;
 }
 
 .carousel {
