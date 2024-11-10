@@ -33,7 +33,7 @@ export default {
 .app-logo {
   position: absolute;
   top: 20px; /* Ajusta para posicionarlo correctamente en la página */
-  left: 70px; /* Ajusta para tu diseño */
+  left: 20px; /* Ajusta para tu diseño */
   height: 150px; /* Tamaño del logo */
   cursor: pointer;
   z-index: 1000; /* Asegura que esté sobre otros elementos */
