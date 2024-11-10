@@ -13,7 +13,7 @@ class UserBase(SQLModel):
     is_superuser: bool = False
     name: str | None = Field(default=None, max_length=255)
     surname: str | None = Field(default=None, max_length=255)
-    cif: str | None = Field(default=None, max_length=255)
+    cif: str | None = Field(default=None, unique=True, index=True, max_length=255)
     is_editor: bool = False
 
 
