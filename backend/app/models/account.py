@@ -13,8 +13,13 @@ class AccountBase(SQLModel):
 class Account(AccountBase, table=True):
     user: "User" = Relationship(back_populates="account")
 
-class AccountUpdate(AccountBase):
-    pass
+class AccountUpdate(SQLModel):
+    photo: str | None = None
+    bio: str | None = Field(default=None, max_length=200)
+
+class AccountUpdateMe(SQLModel):
+    photo: str | None = None
+    bio: str | None = Field(default=None, max_length=200)
 
 class AccountCreate(AccountBase):
     pass
