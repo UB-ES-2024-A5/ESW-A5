@@ -84,6 +84,26 @@ def test_create_book_isbn_already_in_db(db:Session,create_account):
     with pytest.raises(IntegrityError):
         book = crud.book.create_book(session=db,book_create=book_in)
 
+def test_get_book_by_id(db:Session, create_account):
+    account_id = create_account.id
+
+    title = "Book5"
+    author = "Pau"
+    genre1 = "Fantasía"
+    synopsis = "lorem ipsum"
+    isbn = "7675453127941"
+    account_id_in = account_id
+    price = 56.3
+    publication_year = 2023
+
+    book_in = BookCreate(title=title,author=author,genre1=genre1,synopsis=synopsis,isbn=isbn,account_id=account_id_in,price=price,publication_year=publication_year)
+    book = crud.book.create_book(session=db,book_create=book_in)
+
+    book_out = crud.book.get_book_by_id(session=db, id=book.id)
+    assert book_out.title == book.title
+    assert book_out.isbn == book.isbn
+
+
 
     
 
