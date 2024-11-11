@@ -1,13 +1,9 @@
 """ User accounts model class """
 import uuid
 
-from . import User
 from .base import SQLModel
 from sqlmodel import Field, Relationship
 from typing import List
-
-from .book import Book
-
 
 class AccountBase(SQLModel):
     photo: str | None = None
