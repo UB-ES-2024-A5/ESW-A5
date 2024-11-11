@@ -9,13 +9,13 @@ from .base import SQLModel
 
 # Shared properties
 class BookBase(SQLModel):
-    title: str = Field(max_length=255)
-    author: str = Field(max_length=255)
+    title: str = Field(index=True, max_length=255)
+    author: str = Field(index=True, max_length=255)
     gender_main: str  # Es obligatori un genere pero no dos
     gender_secondary: str | None = None
     synopsis: float | None = None
     publication_year: int | None = None
-    isbn: int | None = Field(unique=True, min_length=10, max_length=13)  #El ISBN es compon de 13 numeros, pero existeixen de 10
+    isbn: int | None = Field(unique=True, index=True, min_length=10, max_length=13)  #El ISBN es compon de 13 numeros, pero existeixen de 10
     price: int | None = None
     img: str | None = None
 
