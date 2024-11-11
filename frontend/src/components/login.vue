@@ -3,7 +3,7 @@
     <div class="login-box">
       <div class="login-form">
         <h1>SIGN IN</h1>
-        <form @submit.prevent="handleLogin">
+        <form @submit.prevent="login_user">
           <div class="input-group">
             <input v-model="email" type="email" placeholder="Email" required />
           </div>
