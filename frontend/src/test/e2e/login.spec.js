@@ -54,4 +54,32 @@ test.describe('Setup - Create User for Login Tests', () => {
 
     });
 
-});
+    test('should display an error message for invalid credentials', async ({ page }) => {
+  
+      await page.goto('http://localhost:8080/#/login');
+  
+      await page.fill('input[placeholder="Email"]', 'wrong.email@example.com');
+      await page.fill('input[placeholder="Password"]', 'wrongPassword!');
+      await page.click('button.login-button');
+  
+      const dialogPromise = new Promise(resolve => {
+        page.on('dialog', async dialog => {
+          console.log('Diálogo detectado con mensaje:', dialog.message()); // Log para ver el mensaje
+          expect(dialog.message()).toBe('Email or Password incorrect');
+          
+          await dialog.accept();
+          resolve();
+        });
+      });
+      await dialogPromise;
+      await expect(page).toHaveURL('http://localhost:8080/#/login');
+    });
+    test('should navigate to the signup page when "Sign Up" link is clicked', async ({ page }) => {
+
+      await page.goto('http://localhost:8080/#/login');
+  
+      await page.click('text=Sign Up');      
+  
+      await expect(page).toHaveURL('http://localhost:8080/#/signup');
+    });
+  });
