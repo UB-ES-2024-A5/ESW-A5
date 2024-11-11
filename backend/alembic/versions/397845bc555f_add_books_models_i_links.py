@@ -24,13 +24,14 @@ def upgrade():
     sa.Column('author', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('gender_main', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('gender_secondary', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
-    sa.Column('synopsis', sa.Float(), nullable=True),
+    sa.Column('synopsis', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('publication_year', sa.Integer(), nullable=True),
     sa.Column('isbn', sa.Integer(), nullable=True),
-    sa.Column('price', sa.Integer(), nullable=True),
+    sa.Column('price', sa.Float(), nullable=True),
     sa.Column('img', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('id', sqlmodel.sql.sqltypes.GUID(), nullable=False),
     sa.Column('account_id', sa.Integer(), nullable=False),
+    sa.Column('rating', sa.Float(), nullable=True),
     sa.ForeignKeyConstraint(['account_id'], ['account.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
