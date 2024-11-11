@@ -23,13 +23,13 @@ class BookBase(SQLModel):
 class Book(BookBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     rating: float = 0.0
-    account_id: int = Field(foreign_key="account.id")
+    account_id: uuid.UUID = Field(foreign_key="account.id")
     account: "Account" = Relationship(back_populates="book")
     links: List["Link"] = Relationship(back_populates="book")
 
 
 class BookOut(BookBase):
-    id: int
+    id: uuid.UUID
 
 class BooksOut(SQLModel):
     data: list[BookOut]
