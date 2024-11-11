@@ -31,12 +31,4 @@ def test_create_account_correctly(db: Session,create_user):
     assert account.id == user.id
 
 
-def test_create_account_with_invalid_user_id(db: Session):
-    invalid_user_id = uuid4()
-
-    account_in = Account(id=invalid_user_id)
-
-    with pytest.raises(IntegrityError):
-        account = crud.account.create_account(session=db, account=account_in)
-
 

@@ -39,7 +39,7 @@ def test_create_account(create_user):
 def test_create_account_with_invalid_user_id():
     account_id= uuid4()
     account_data = {
-        "id": account_id
+        "id": str(account_id)
     }
     response = client.post("api/v1/accounts/", json=account_data)
     assert response.status_code == 400
