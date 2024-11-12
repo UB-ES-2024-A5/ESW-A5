@@ -13,7 +13,13 @@ async function clearUserDatabase() {
     db.close();
 }
 
+
+test.beforeEach(async ({ page }) => {
+  await clearUserDatabase();  
+});
+
 test.describe('Signup Page Tests', () => {
+  
   test('should successfully create a new user account', async ({ page }) => {
 
     await clearUserDatabase();

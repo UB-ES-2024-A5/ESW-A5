@@ -61,6 +61,15 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
             detail="The user with this email already exists in the system.",
         )
 
+    if user_in.is_editor:
+        user = crud.user.get_user_by_cif(session=session, cif=user_in.cif)
+
+        if user:
+            raise HTTPException(
+                status_code=400,
+                detail="The editorial with this CIF already exists in the system.",
+            )
+
     user = crud.user.create_user(session=session, user_create=user_in)
     if settings.emails_enabled and user_in.email:
         email_data = generate_new_account_email(

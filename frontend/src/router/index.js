@@ -7,6 +7,8 @@ import signupEdit from '../components/signupEdit.vue'
 import mainpageGuest from '../components/mainPageGuest.vue'
 import mainpageUser from '../components/mainPageUser.vue'
 import mainpagePublisher from '../components/mainPagePublisher.vue'
+import userProfile from '../components/userProfile.vue'
+import publisherProfile from '../components/publisherProfile.vue'
 
 Vue.use(Router)
 export default new Router({
@@ -45,6 +47,16 @@ export default new Router({
       path: '/mainPage_publisher',
       name: 'mainPage_publisher',
       component: mainpagePublisher
+    },
+    {
+      path: '/user_profile',
+      name: 'user_profile',
+      component: userProfile
+    },
+    {
+      path: '/publisher_profile',
+      name: 'publisher_profile',
+      component: publisherProfile
     }
   ]
 })

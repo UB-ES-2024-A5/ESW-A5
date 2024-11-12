@@ -3,7 +3,7 @@
     <div class="signup-box">
       <div class="signup-form">
         <h1>PUBLISHER SIGN UP</h1>
-        <form @submit.prevent="handleSignUp">
+        <form @submit.prevent="register_user">
           <!-- Campo de CIF -->
           <div class="input-group">
             <span class="input-icon">
