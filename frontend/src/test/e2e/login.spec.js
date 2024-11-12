@@ -12,12 +12,18 @@ async function clearUserDatabase() {
     db.close();
 }
 
-test.describe('Setup - Create User for Login Tests', () => {
-    test('should create a user before login tests', async ({ page }) => {
-      await clearUserDatabase();
+test.afterEach(async ({page}) => {
+  await clearUserDatabase();
+});
+
   
+  
+  test.describe('Login Page Tests', () => {
+    test('should successfully log in with the created user', async ({ page }) => {
+
 
       await page.goto('http://localhost:8080/#/');
+
       await page.click('text=Sign up as user');
       await page.fill('input[placeholder="Name"]', 'John');
       await page.fill('input[placeholder="Surname"]', 'Doe');
@@ -26,7 +32,8 @@ test.describe('Setup - Create User for Login Tests', () => {
       await page.fill('input[placeholder="Confirm Password"]', 'Password!123');
       await page.check('input[type="checkbox"]');
       await page.click('button.signup-button');
-  
+
+      // Esperar al diálogo que confirma que la cuenta se ha creado
       const dialogPromise = new Promise((resolve) => {
         page.on('dialog', async (dialog) => {
           console.log('Diálogo detectado con mensaje:', dialog.message());
@@ -36,13 +43,10 @@ test.describe('Setup - Create User for Login Tests', () => {
         });
       });
       await dialogPromise;
-  
+
+      // Asegurarse de que redirige a la página de login
       await expect(page).toHaveURL('http://localhost:8080/#/login');
-    });
-  });
-  
-  test.describe('Login Page Tests', () => {
-    test('should successfully log in with the created user', async ({ page }) => {
+      
 
       await page.goto('http://localhost:8080/#/login');  
       await page.fill('input[placeholder="Email"]', 'john.doe2@example.com');
@@ -64,7 +68,7 @@ test.describe('Setup - Create User for Login Tests', () => {
   
       const dialogPromise = new Promise(resolve => {
         page.on('dialog', async dialog => {
-          console.log('Diálogo detectado con mensaje:', dialog.message()); // Log para ver el mensaje
+          console.log('Diálogo detectado con mensaje:', dialog.message());
           expect(dialog.message()).toBe('Email or Password incorrect');
           
           await dialog.accept();
