@@ -24,7 +24,7 @@ class Book(BookBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     rating: float = 0.0
     account_id: uuid.UUID = Field(foreign_key="account.id")
-    account: "Account" = Relationship(back_populates="book")
+    account: "Account" = Relationship(back_populates="books")
     links: List["Link"] = Relationship(back_populates="book")
 
 
