@@ -13,6 +13,7 @@ class Account(AccountBase, table=True):
     id: uuid.UUID = Field(default=None, primary_key=True, foreign_key="user.id")
 
     user: "User" = Relationship(back_populates="account")
+    books: List["Book"] = Relationship(back_populates="account")
 
 class AccountOut(AccountBase):
     id: uuid.UUID
