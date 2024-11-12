@@ -3,8 +3,8 @@ import uuid
 from typing import List
 
 from sqlmodel import Field, Relationship
-from .base import SQLModel
 
+from .base import SQLModel
 
 # Shared properties
 class BookBase(SQLModel):
@@ -14,12 +14,12 @@ class BookBase(SQLModel):
     gender_secondary: str | None = None
     synopsis: str | None = None
     publication_year: int | None = None
-    isbn: int | None = Field(unique=True, index=True, min_length=10, max_length=13)  #El ISBN es compon de 13 numeros, pero existeixen de 10
+    isbn: str | None = Field(unique=True, index=True, min_length=10, max_length=13)  #El ISBN es compon de 13 numeros, pero existeixen de 10
     price: float | None = None
     img: str | None = None
 
 
-# Database model, database table inferred from class name
+
 class Book(BookBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     rating: float = 0.0
@@ -30,6 +30,8 @@ class Book(BookBase, table=True):
 
 class BookOut(BookBase):
     id: uuid.UUID
+    list_links: List['str']
+
 
 class BooksOut(SQLModel):
     data: list[BookOut]
@@ -40,8 +42,20 @@ class BookUpdate(SQLModel):
     synopsis: str | None = None
     price: float | None = None
     img: str | None = None
-    links: List["Link"]
+    links: List[str]
+
+class BookUpdateSuper(SQLModel):
+    title: str
+    author: str
+    gender_main: str  # Es obligatori un genere pero no dos
+    gender_secondary: str | None = None
+    synopsis: str | None = None
+    publication_year: int
+    price: float | None = None
+    img: str | None = None
+    links: List[str]
+
 
 # Modelo para la creación de un libro, donde incluimos la lista de enlaces
 class BookCreate(BookBase):
-    links: List["Link"]  # Lista de enlaces para el libro
+    links: List[str]  # Lista de enlaces para el libro
