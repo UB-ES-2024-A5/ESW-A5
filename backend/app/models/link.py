@@ -12,3 +12,13 @@ class Link(LinkBase, table=True):
     book_id: uuid.UUID = Field(foreign_key="book.id")
     book: "Book" = Relationship(back_populates="links")
 
+class LinkOut(LinkBase):
+    id: uuid.UUID
+
+class LinksOut(SQLModel):
+    data: list[LinkOut]
+    count: int
+
+class LinkUpdate(SQLModel):
+    url: str
+
