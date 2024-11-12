@@ -164,7 +164,7 @@ def update_book(*, session: SessionDep, book_id: uuid.UUID, current_user: Curren
     book_out = crud.book.convert_book_bookOut(book=db_book)
     return book_out
 @router.delete("/{book_id}")
-def delete_account(session: SessionDep, current_user: CurrentUser, book_id: uuid.UUID) -> Message:
+def delete_book(session: SessionDep, current_user: CurrentUser, book_id: uuid.UUID) -> Message:
    
     book = session.get(Book, book_id)
     if not book:
