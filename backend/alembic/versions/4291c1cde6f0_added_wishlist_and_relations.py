@@ -12,7 +12,7 @@ import sqlmodel.sql.sqltypes
 
 # revision identifiers, used by Alembic.
 revision = '4291c1cde6f0'
-down_revision = '89d74c385cf4'
+down_revision = '029bc6b8efb7'
 branch_labels = None
 depends_on = None
 
@@ -38,7 +38,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['wishlist_id'], ['wishlist.id'], ),
     sa.PrimaryKeyConstraint('wishlist_id', 'book_id')
     )
-    op.create_index(op.f('ix_user_cif'), 'user', ['cif'], unique=True)
     # ### end Alembic commands ###
 
 
