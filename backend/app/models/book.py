@@ -4,6 +4,7 @@ from typing import List
 
 from sqlmodel import Field, Relationship
 from .base import SQLModel
+from .wishlist_book_link import WishlistBookLink
 
 
 # Shared properties
@@ -26,6 +27,8 @@ class Book(BookBase, table=True):
     account_id: uuid.UUID = Field(foreign_key="account.id")
     account: "Account" = Relationship(back_populates="book")
     links: List["Link"] = Relationship(back_populates="book")
+
+    wishlists: List["WishList"] = Relationship(back_populates="books", link_model=WishlistBookLink)
 
 
 class BookOut(BookBase):
