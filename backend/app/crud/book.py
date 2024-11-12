@@ -6,9 +6,8 @@ from sqlmodel import Session, select
 from fastapi import HTTPException
 from app.core.security import get_password_hash, verify_password
 from app.models import User, UserCreate, UserUpdate, Link, Book, BookCreate, BookUpdate, BookUpdateSuper, BookOut
-from app.api.deps import CurrentUser
 
-def create_book(session: Session, book: BookCreate, current_user: CurrentUser) -> Book:
+def create_book(session: Session, book: BookCreate, current_user: User) -> Book:
     db_obj = Book(
         title=book.title,
         author=book.author,
