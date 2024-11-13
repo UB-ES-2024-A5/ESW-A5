@@ -8,7 +8,7 @@ from sqlmodel import Session, delete
 from app.core.config import settings
 from app.core.db import engine, init_db
 from app.main import app
-from app.models import User, Account, Link, Book
+from app.models import User, Account, Link, Book, WishList, WishlistBookLink
 from app.tests.utils.user import authentication_token_from_email
 from app.tests.utils.utils import get_superuser_token_headers
 
@@ -20,9 +20,9 @@ def db() -> Generator[Session, None, None]:
             init_db(session)
             yield session
         finally:
-            # Hacer rollback si hay transacciones pendientes
             session.rollback()
-            # Eliminar todos los datos de las tablas
+            session.exec(delete(WishlistBookLink))
+            session.exec(delete(WishList))
             session.exec(delete(Link))
             session.exec(delete(Book))
             session.exec(delete(Account))
