@@ -30,7 +30,7 @@ class Book(BookBase, table=True):
 
 class BookOut(BookBase):
     id: uuid.UUID
-    list_links: List['str']
+    list_links: List[str]
 
 
 class BooksOut(SQLModel):

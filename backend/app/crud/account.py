@@ -6,6 +6,7 @@ from sqlmodel import Session, select
 from fastapi import HTTPException
 
 from app.models import Account, AccountCreate, AccountUpdate
+import uuid
 
 def create_account(session: Session, account: AccountCreate) -> Account:
     db_obj = Account(
@@ -25,3 +26,8 @@ def update_account(*, session: Session, db_account: Account, account_in: Account
     session.commit()
     session.refresh(db_account)
     return db_account
+
+def get_account_by_id(*, session: Session, id: uuid.UUID) -> Account | None:
+    statement = select(Account).where(Account.id == id)
+    session_account = session.exec(statement).first()
+    return session_account

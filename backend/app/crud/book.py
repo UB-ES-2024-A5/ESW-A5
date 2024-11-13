@@ -6,6 +6,7 @@ from sqlmodel import Session, select
 from fastapi import HTTPException
 from app.core.security import get_password_hash, verify_password
 from app.models import User, UserCreate, UserUpdate, Link, Book, BookCreate, BookUpdate, BookUpdateSuper, BookOut
+import uuid
 
 def create_book(session: Session, book: BookCreate, current_user: User) -> Book:
     db_obj = Book(
@@ -87,9 +88,13 @@ def convert_book_bookOut(book: Book):
         gender_secondary=book.gender_secondary,
         synopsis=book.synopsis,
         publication_year=book.publication_year,
-        isbn=book.isbn,
+        isbn=str(book.isbn),
         price=book.price,
         img=book.img,
         list_links=[link.url for link in book.links]  # Mapear los links como strings
     )
     return bookOut
+
+def read_book_by_id(session:Session, id: uuid.UUID) -> Book:
+    statement = select(Book).where(Book.id == id)
+    return session.exec(statement).first()
