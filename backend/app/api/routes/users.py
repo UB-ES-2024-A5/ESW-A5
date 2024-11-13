@@ -147,6 +147,10 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     user_create = UserCreate.from_orm(user_in)
     user = crud.user.create_user(session=session, user_create=user_create)
     return user
+@router.get("/user/{email}", response_model=UserPublic)
+def read_user_by_email_master(email:str, session:SessionDep) -> Any:
+    user = crud.user.get_user_by_email(session=session, email=email)
+    return user
 
 @router.get(
     "/{email}",
