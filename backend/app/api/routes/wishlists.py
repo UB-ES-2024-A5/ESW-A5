@@ -228,12 +228,6 @@ def delete_wishlist(
             detail="The wishlist does not belong to the current user",
         )
 
-    # Eliminar todos los enlaces de libros asociados a la wishlist
-    statement = select(WishlistBookLink).where(WishlistBookLink.wishlist_id == wishlist_id)
-    links = session.exec(statement).all()
-    for link in links:
-        session.delete(link)
-
     session.delete(db_wishlist)
     session.commit()
     return Message(message="Wishlist deleted successfully")
