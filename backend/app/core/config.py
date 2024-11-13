@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     DOMAIN: str = "localhost"
-    ENVIRONMENT: Literal["local", "staging", "production"] = "local"
+    ENVIRONMENT: Literal["local", "staging", "production", "testing"] = "local"
 
     @computed_field  # type: ignore[misc]
     @property
@@ -84,10 +84,15 @@ class Settings(BaseSettings):
     DB_PASSWORD: str | None = None
     DB_NAME: str | None = None
 
+    TEST_DB_ENGINE: str = "sqlite"
+    TEST_DB_NAME: str = os.path.join(os.path.dirname(get_env_file()), 'test_db.sqlite')
+
     @computed_field  # type: ignore[misc]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn | SQLiteDsn:
         database_uri = None
+        if self.ENVIRONMENT == "testing":
+            return f"sqlite:///{self.TEST_DB_NAME}"
         # Check database engine
         if self.DB_ENGINE == 'postgres':
             if self.DB_NAME is None:

@@ -3,7 +3,7 @@ const sqlite3 = require('sqlite3').verbose();
 
 async function clearUserDatabase() {
     const path = require('path');
-    const dbPath = path.resolve(__dirname, '../../../../es_db.sqlite');
+    const dbPath = path.resolve(__dirname, '../../../../test_db.sqlite');
     const db = new sqlite3.Database(dbPath);
     await db.serialize(() => {
         db.run('DELETE FROM user'); 

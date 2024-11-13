@@ -1,4 +1,9 @@
 """ Tests configuration module """
+
+import os
+os.environ["ENVIRONMENT"] = "testing"
+
+
 from collections.abc import Generator
 
 import pytest
@@ -11,6 +16,8 @@ from app.main import app
 from app.models import User, Account, Link, Book, WishList, WishlistBookLink
 from app.tests.utils.user import authentication_token_from_email
 from app.tests.utils.utils import get_superuser_token_headers
+
+
 
 
 @pytest.fixture(scope="session", autouse=True)

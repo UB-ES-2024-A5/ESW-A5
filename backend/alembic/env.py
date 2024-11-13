@@ -3,7 +3,9 @@ import sys
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
+import os
 
+ENVIRONMENT = os.getenv("ENVIRONMENT", "production") 
 # Ensure Alembic can find application packages
 sys.path = ['', '..'] + sys.path[1:]
 
@@ -37,6 +39,8 @@ def get_url():
         :rtype: str
         :return: Connection url
     """
+
+    
     url_str = settings.SQLALCHEMY_DATABASE_URI.__str__()
 
     return url_str
