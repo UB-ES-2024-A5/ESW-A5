@@ -3,8 +3,9 @@ import uuid
 from typing import List
 
 from sqlmodel import Field, Relationship
-
 from .base import SQLModel
+from .wishlist_book_link import WishlistBookLink
+
 
 # Shared properties
 class BookBase(SQLModel):
@@ -19,13 +20,15 @@ class BookBase(SQLModel):
     img: str | None = None
 
 
-
+# Database model, database table inferred from class name
 class Book(BookBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     rating: float = 0.0
     account_id: uuid.UUID = Field(foreign_key="account.id")
     account: "Account" = Relationship(back_populates="books")
     links: List["Link"] = Relationship(back_populates="book")
+
+    wishlists: List["WishList"] = Relationship(back_populates="books", link_model=WishlistBookLink)
 
 
 class BookOut(BookBase):

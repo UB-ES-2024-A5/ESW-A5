@@ -3,4 +3,5 @@
 from . import user
 from . import account
 from . import book
+from . import wishlist
 
