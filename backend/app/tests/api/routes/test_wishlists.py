@@ -152,10 +152,26 @@ def test_add_book_to_wishlist(create_book,authenticate):
     wishlist_id = response.json()["data"][0]['id']
     book_id = create_book.json()['id']
 
-    response = client.patch(f"/api/v1/wishlists/{wishlist_id}/{book_id}")
+    response = client.patch(f"/api/v1/wishlists/{wishlist_id}/{book_id}", headers=headers)
     assert response.status_code == 200
     print(response.json())
     assert response.json()["message"] == "Book added correctly"
+
+def test_add_book_to_non_own_wishlist(authenticate, authenticate_2):
+    headers1 = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+    headers2 = {
+        "Authorization": f"Bearer {authenticate_2}"
+    }
+
+    response = client.get("/api/v1/wishlists/me", headers=headers1)
+    wishlist_id = response.json()["data"][0]['id']
+    books = client.get("/api/v1/books/my_books", headers=headers1)
+    book_id = books.json()["data"][0]['id']
+    response = client.patch(f"/api/v1/wishlists/{wishlist_id}/{book_id}", headers=headers2)
+    assert response.status_code == 422
+
 
 def test_add_repeated_book_to_wishlist(authenticate):
     headers = {
@@ -165,7 +181,7 @@ def test_add_repeated_book_to_wishlist(authenticate):
     response = client.get("/api/v1/wishlists/me", headers=headers)
     wishlist_id = response.json()["data"][0]['id']
     book_id = books.json()['data'][0]['id']
-    update = client.patch(f"/api/v1/wishlists/{wishlist_id}/{book_id}")
+    update = client.patch(f"/api/v1/wishlists/{wishlist_id}/{book_id}", headers=headers)
     assert update.status_code == 400
 
 def test_add_book_to_not_existent_wishlist(authenticate):
@@ -177,7 +193,7 @@ def test_add_book_to_not_existent_wishlist(authenticate):
     wishlist_id = uuid4()
 
     book_id = books.json()['data'][0]['id']
-    update = client.patch(f"/api/v1/wishlists/{wishlist_id}/{book_id}")
+    update = client.patch(f"/api/v1/wishlists/{wishlist_id}/{book_id}", headers=headers)
     assert update.status_code == 404
 
 def test_add_not_existent_book_to_wishlist(authenticate):
@@ -189,7 +205,7 @@ def test_add_not_existent_book_to_wishlist(authenticate):
     response = client.get("/api/v1/wishlists/me", headers=headers)
     wishlist_id = response.json()["data"][0]['id']
 
-    update = client.patch(f"/api/v1/wishlists/{wishlist_id}/{book_id}")
+    update = client.patch(f"/api/v1/wishlists/{wishlist_id}/{book_id}",headers=headers)
     assert update.status_code == 404
 
 
