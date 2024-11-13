@@ -190,3 +190,86 @@ def add_book_to_wishlist(
     return Message(message="Book added correctly")
 
 
+@router.delete(
+    "/{wishlist_id}",)
+def delete_wishlist(
+        session: SessionDep, current_user: CurrentUser, wishlist_id: uuid.UUID
+) -> Message:
+    """
+    Delete a wishlist.
+    """
+    account = session.get(Account, current_user.account.id)
+
+    if not account:
+        raise HTTPException(status_code=404, detail="Account not found")
+
+    db_wishlist = session.get(WishList, wishlist_id)
+
+    if not db_wishlist:
+        raise HTTPException(
+            status_code=404,
+            detail="The wishlist with this id does not exist in the system",
+        )
+
+    # Verificar si la wishlist pertenece al usuario actual
+    if db_wishlist.account_id != account.id:
+        raise HTTPException(
+            status_code=422,
+            detail="The wishlist does not belong to the current user",
+        )
+
+    session.delete(db_wishlist)
+    session.commit()
+    return Message(message="Wishlist deleted successfully")
+
+
+@router.delete(
+    "/{wishlist_id}/{book_id}",)
+def delete_book_from_wishlist(
+        session: SessionDep, current_user: CurrentUser, wishlist_id: uuid.UUID, book_id: uuid.UUID
+) -> Message:
+    """
+    Delete a book from a wishlist.
+    """
+
+    # Verificar que la cuenta del usuario existe
+    account = session.get(Account, current_user.account.id)
+
+    if not account:
+        raise HTTPException(status_code=404, detail="Account not found")
+
+    # Verificar que la wishlist existe
+    db_wishlist = session.get(WishList, wishlist_id)
+    if not db_wishlist:
+        raise HTTPException(
+            status_code=404,
+            detail="The wishlist with this id does not exist in the system",
+        )
+
+    # Verificar que la wishlist pertenece a la cuenta del usuario actual
+    if db_wishlist.account_id != account.id:
+        raise HTTPException(
+            status_code=422,
+            detail="The wishlist does not belong to the current user",
+        )
+
+    # Verificar que el libro existe
+    db_book = session.get(Book, book_id)
+    if not db_book:
+        raise HTTPException(
+            status_code=404,
+            detail="The book with this id does not exist in the system",
+        )
+
+    # Verificar que el libro está en la wishlist
+    wishlist_book_link = session.get(WishlistBookLink, (wishlist_id, book_id))
+    if not wishlist_book_link:
+        raise HTTPException(
+            status_code=422,
+            detail="The book is not in the specified wishlist",
+        )
+
+    # Eliminar el enlace entre la wishlist y el libro
+    session.delete(wishlist_book_link)
+    session.commit()
+    return Message(message="Book removed from wishlist successfully")
