@@ -147,10 +147,13 @@ def add_book_to_wishlist(
         session: SessionDep,
         wishlist_id: uuid.UUID,
         book_id: uuid.UUID,
+        current_user: CurrentUser,
 ) -> Any:
     """
     Add a specific book to specific wishlist.
     """
+
+    account = session.get(Account, current_user.account.id)
 
     db_wishlist = session.get(WishList, wishlist_id)
     if not db_wishlist:
@@ -164,6 +167,13 @@ def add_book_to_wishlist(
         raise HTTPException(
             status_code=404,
             detail="The book with this id does not exist in the system",
+        )
+
+    # Verificar si la wishlist pertenece al usuario actual
+    if db_wishlist.account_id != account.id:
+        raise HTTPException(
+            status_code=422,
+            detail="The wishlist does not belong to the current user",
         )
 
     # Verificar si el libro ya está en la wishlist
@@ -217,6 +227,12 @@ def delete_wishlist(
             status_code=422,
             detail="The wishlist does not belong to the current user",
         )
+
+    # Eliminar todos los enlaces de libros asociados a la wishlist
+    statement = select(WishlistBookLink).where(WishlistBookLink.wishlist_id == wishlist_id)
+    links = session.exec(statement).all()
+    for link in links:
+        session.delete(link)
 
     session.delete(db_wishlist)
     session.commit()
