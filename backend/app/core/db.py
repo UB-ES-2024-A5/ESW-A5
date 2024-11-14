@@ -6,10 +6,8 @@ from app import crud
 from app.core.config import settings
 from app.models import User, UserCreate
 
-if settings.ENVIRONMENT == "testing":
-    engine = create_engine(settings.SQLALCHEMY_DATABASE_URI)
-else:
-    engine = create_engine(settings.SQLALCHEMY_DATABASE_URI)
+
+engine = create_engine(settings.SQLALCHEMY_DATABASE_URI)
 
 
 SessionLocal = Session(engine)
