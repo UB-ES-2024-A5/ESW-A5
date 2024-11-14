@@ -52,14 +52,6 @@ jobs:
       - uses: Gr1N/setup-poetry@v8
       - run: poetry --version
 
-      - name: Add GStreamer PPA
-        run: |
-          sudo add-apt-repository -y ppa:savoury1/gstreamer
-          sudo apt-get update
-          sudo apt-get install -y gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
-          gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav libwoff1 \
-          libvpx7 libevent-2.1-7 libopus0 libharfbuzz-icu0 libhyphen0 libflite1
-
       - name: Install System dependencies
         run: |
           sudo apt-get update
@@ -110,6 +102,10 @@ jobs:
         run: |
           cd frontend
           npm test
+
+      - name: Install Playwright dependencies
+        run: sudo npx playwright install-deps
+
       - name: Run Playwright tests
         env:
             ENVIRONMENT: "staging"
