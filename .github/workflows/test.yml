@@ -112,11 +112,6 @@ jobs:
           # Esperar a que el frontend inicie
           sleep 5
           npx playwright install
-          sudo apt-get update
-          sudo apt-get install -y libwoff2-1 libvpx7 libevent-2.1-7 libopus0 \
-              libgstreamer1.0-0 libgstreamer-plugins-base1.0-0 \
-              libgstreamer-plugins-good1.0-0 libgstreamer-gl1.0-0 \
-              libharfbuzz-icu0 libhyphen0 libgles2 libx264-160
           # Ejecutar las pruebas de Playwright
           npx playwright test --project=chromium
 
