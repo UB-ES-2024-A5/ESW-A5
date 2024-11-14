@@ -187,11 +187,11 @@ export default {
   },
   methods: {
     validateName () {
-      const nameRegex = /^[a-zA-ZÀ-ÿ]+(?:\s[a-zA-ZÀ-ÿ]+)*$/; // only letters
+      const nameRegex = /^[a-zA-ZÀ-ÿ]+(?:\s[a-zA-ZÀ-ÿ]+)*$/ // only letters
       this.nameValid = nameRegex.test(this.name)
     },
     validateSurname () {
-      const surnameRegex = /^[a-zA-ZÀ-ÿ]+(?:\s[a-zA-ZÀ-ÿ]+)*$/; // only letters
+      const surnameRegex = /^[a-zA-ZÀ-ÿ]+(?:\s[a-zA-ZÀ-ÿ]+)*$/ // only letters
       this.surnameValid = surnameRegex.test(this.surname)
     },
     validateEmail () {
@@ -199,7 +199,7 @@ export default {
       this.emailValid = emailRegex.test(this.email)
     },
     validatePassword () {
-      const length = /^.{8,40}$/;
+      const length = /^.{8,40}$/
       const hasUppercase = /[A-Z]/
       const hasSymbol = /[\W_]/
       const isValidLength = length.test(this.password)

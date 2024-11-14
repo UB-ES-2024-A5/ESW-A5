@@ -111,6 +111,7 @@ jobs:
           nohup npm run dev &
           # Esperar a que el frontend inicie
           sleep 5
+          npx playwright install
           # Ejecutar las pruebas de Playwright
           npx playwright test --project=chromium
 
