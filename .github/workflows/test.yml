@@ -95,6 +95,11 @@ jobs:
           cd frontend
           npm test
       - name: Run Playwright tests
+        env:
+            ENVIRONMENT: "staging"
+            PROJECT_NAME: ${{ env.APPLICATION_NAME }}
+            FIRST_SUPERUSER: ${{ env.ADMIN_USER }}
+            FIRST_SUPERUSER_PASSWORD: ${{ env.ADMIN_PASSWORD }}
         run: |
           # Iniciar el backend
           cd ../backend
