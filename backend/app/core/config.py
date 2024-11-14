@@ -119,7 +119,7 @@ class Settings(BaseSettings):
         else:
             raise ValueError(f'Invalid database engine {self.DB_ENGINE}. Valid options are [sqlite, postgres]')
         
-        return database_uri
+        return str(database_uri)
 
     SMTP_TLS: bool = False
     SMTP_SSL: bool = False
