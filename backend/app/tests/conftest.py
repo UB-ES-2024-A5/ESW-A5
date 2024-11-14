@@ -1,7 +1,8 @@
 """ Tests configuration module """
 
 import os
-os.environ["ENVIRONMENT"] = "testing"
+if "GITHUB_ACTIONS" not in os.environ:
+    os.environ["ENVIRONMENT"] = "testing"
 
 
 from collections.abc import Generator
