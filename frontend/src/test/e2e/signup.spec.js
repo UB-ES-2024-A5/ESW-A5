@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const sqlite3 = require('sqlite3').verbose();
+const { Client } = require('pg');
 
 
 async function clearUserDatabase() {
