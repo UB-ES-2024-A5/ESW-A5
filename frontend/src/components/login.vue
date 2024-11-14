@@ -27,6 +27,8 @@
 
 <script>
 import axios from 'axios'
+import userServices from '../services/UserServices.js'
+
 export default {
   data () {
     return {
@@ -34,35 +36,50 @@ export default {
       password: null,
       token: null,
       is_authenticated: false,
-      // Set your images here
-      boxImage: require('@/assets/foto_box.png'),
-      backgroundImage: require('@/assets/foto_fondo_login.png')
+      boxImage: require('../assets/foto_box.png'),
+      backgroundImage: require('../assets/foto_fondo_login.png')
     }
   },
   methods: {
-    login_user (event) {
-      const data = 'username=' + this.email + '&password=' + this.password
+    async login_user (event) {
+      const data = `username=${this.email}&password=${this.password}`
       const path = process.env.API_URL + '/api/v1/login/access-token'
-      axios.post(path, data, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+
+      try {
+        const res = await axios.post(path, data, {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        })
+
+        console.log(res)
+        this.is_authenticated = true
+        this.token = res.data.access_token
+
+        // Guardamos el token en localStorage
+        localStorage.setItem('token', this.token)
+
+        // Configuramos Axios para que use el token automáticamente en futuras solicitudes
+        axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
+
+        // Llamamos a getActualUser y esperamos la respuesta
+        const userInfo = await userServices.getActualUser()
+
+        // Verificamos si el usuario es editor y redirige en consecuencia
+        if (userInfo.is_editor) {
+          this.$router.push({ path: '/mainPage_publisher', query: { email: this.email, token: this.token } })
+        } else {
+          this.$router.push({ path: '/mainPage_user', query: { email: this.email, token: this.token } })
         }
-      })
-        .then((res) => {
-          console.log(res) // Verifica la respuesta
-          this.logged = true
-          this.token = res.data.access_token
-          this.$router.push({ path: '/mainpage_user', query: { email: this.email, logged: this.logged, token: this.token } })
-        })
-        .catch((error) => {
-          console.error(error)
-          alert('Email or Password incorrect')
-        })
+      } catch (error) {
+        console.error(error)
+        alert('Email or Password incorrect')
+      }
     },
     register_user () {
       this.$router.push('/create-account')
     },
-    back_matches (event) {
+    back_matches () {
       this.$router.push('/')
     }
   }
