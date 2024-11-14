@@ -20,7 +20,7 @@ async function clearUserDatabase() {
     } catch (err) {
       console.error('Error al conectar o limpiar la base de datos PostgreSQL', err.stack);
     } finally {
-      await client.end();  // Cerrar la conexión
+      await client.end();
     }
   } else {
     const path = require('path');
@@ -31,6 +31,7 @@ async function clearUserDatabase() {
     });
 
     db.close();
+  }
 }
 
 test.afterEach(async ({page}) => {

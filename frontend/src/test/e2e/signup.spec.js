@@ -32,8 +32,8 @@ async function clearUserDatabase() {
     });
 
     db.close();
+  }
 }
-
 
 test.beforeEach(async ({ page }) => {
   await clearUserDatabase();  
