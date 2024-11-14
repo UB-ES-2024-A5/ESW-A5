@@ -102,7 +102,7 @@ jobs:
             FIRST_SUPERUSER_PASSWORD: ${{ env.ADMIN_PASSWORD }}
         run: |
           # Iniciar el backend
-          cd ../backend
+          cd backend
           nohup poetry run uvicorn app.main:app --reload &
           # Esperar a que el backend inicie
           sleep 5
