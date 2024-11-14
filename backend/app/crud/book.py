@@ -78,6 +78,13 @@ def update_book(session: Session, db_book: Book, book_in: BookUpdateSuper) -> Bo
     session.refresh(db_book)
     return db_book
 
+def update_link(session: Session, db_link: Link, new_url: str) -> Link:
+    db_link.url = new_url  # Actualizem la URL
+    session.add(db_link)
+    session.commit()
+    session.refresh(db_link)
+    return db_link
+
 
 def convert_book_bookOut(book: Book):
     bookOut = BookOut(

@@ -13,7 +13,7 @@ from app.api.deps import (
 )
 
 from app.models import (
-    Book, BookCreate, BookUpdate, BookOut, BooksOut, BookUpdateSuper, User, Message, Account, Link, LinksOut
+    Book, BookCreate, BookUpdate, BookOut, BooksOut, BookUpdateSuper, User, Message, Account, Link, LinkOut, LinksOut, LinkUpdate
 )
 
 router = APIRouter()
@@ -163,6 +163,30 @@ def update_book(*, session: SessionDep, book_id: uuid.UUID, current_user: Curren
     db_book = crud.book.update_book(session=session, db_book=db_book, book_in=book_in)
     book_out = crud.book.convert_book_bookOut(book=db_book)
     return book_out
+
+
+@router.patch("/link/{link_id}", response_model=LinkOut)
+def update_link(*, session: SessionDep, link_id: uuid.UUID, new_url: LinkUpdate, current_user: CurrentUser) -> Any:
+    db_link = session.get(Link, link_id)
+    if not db_link:
+        raise HTTPException(
+            status_code=404,
+            detail="The Link with this id does not exist in the system",
+        )
+    if not current_user.is_editor:
+        raise HTTPException(
+            status_code=400,
+            detail="User must be an editorial user.",
+        )
+    if not (db_link.book.account_id == current_user.account.id):
+        raise HTTPException(
+            status_code=400,
+            detail="This link does not belong to your user's book.",
+        )
+
+    db_link = crud.book.update_link(session=session, db_link=db_link, new_url=new_url)
+    return db_link
+
 @router.delete("/{book_id}")
 def delete_book(session: SessionDep, current_user: CurrentUser, book_id: uuid.UUID) -> Message:
    

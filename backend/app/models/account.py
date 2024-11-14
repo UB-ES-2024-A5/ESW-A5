@@ -14,6 +14,7 @@ class Account(AccountBase, table=True):
     user: "User" = Relationship(back_populates="account")
     books: List["Book"] = Relationship(back_populates="account")
     wishlists: List["WishList"] = Relationship(back_populates="account")
+    reviews: List["Review"] = Relationship(back_populates="account")
 
 class AccountUpdate(SQLModel):
     photo: str | None = None
