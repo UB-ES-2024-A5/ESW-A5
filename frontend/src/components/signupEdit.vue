@@ -16,7 +16,7 @@
               required
               @input="validateCIF"
             />
-            <span v-if="cifValid !== null" class="validation-icon">
+            <span v-if="cif && cifValid !== null" class="validation-icon">
               <img
                 :src="cifValid ? checkIcon : errorIcon"
                 :alt="cifValid ? 'Valid' : 'Invalid'"
@@ -37,7 +37,7 @@
               required
               @input="validateName"
             />
-            <span v-if="nameValid !== null" class="validation-icon">
+            <span v-if="name && nameValid !== null" class="validation-icon">
               <img
                 :src="nameValid ? checkIcon : errorIcon"
                 :alt="nameValid ? 'Valid' : 'Invalid'"
@@ -58,7 +58,7 @@
               required
               @input="validateEmail"
             />
-            <span v-if="emailValid !== null" class="validation-icon">
+            <span v-if="email && emailValid !== null" class="validation-icon">
               <img
                 :src="emailValid ? checkIcon : errorIcon"
                 :alt="emailValid ? 'Valid' : 'Invalid'"
@@ -82,7 +82,7 @@
             <span class="toggle-password" @click="toggleShowPassword">
               <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
             </span>
-            <span v-if="passwordValid !== null" class="validation-icon">
+            <span v-if="password && passwordValid !== null" class="validation-icon">
               <img
                 :src="passwordValid ? checkIcon : errorIcon"
                 :alt="passwordValid ? 'Valid' : 'Invalid'"
@@ -106,7 +106,7 @@
             <span class="toggle-password" @click="toggleShowConfirmPassword">
               <i :class="showConfirmPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
             </span>
-            <span v-if="confirmPasswordValid !== null" class="validation-icon">
+            <span v-if="confirmPassword && confirmPasswordValid !== null" class="validation-icon">
               <img
                 :src="confirmPasswordValid ? checkIcon : errorIcon"
                 :alt="confirmPasswordValid ? 'Valid' : 'Invalid'"
@@ -120,7 +120,7 @@
             <input type="checkbox" v-model="agreedToTerms" required />
             <label>I agree to all statements in <span class="terms-link">terms and conditions</span></label>
           </div>
-          <button type="submit" @click="register_user" class="signup-button">register</button>
+          <button type="submit" class="signup-button">Register</button>
         </form>
 
         <!-- Enlace para Iniciar Sesión -->
@@ -143,11 +143,11 @@ export default {
     return {
       name: '',
       cif: '',
-      surname: '',
       email: '',
       password: '',
       confirmPassword: '',
       nameValid: null,
+      cifValid: null,
       surnameValid: null,
       emailValid: null,
       passwordValid: null,
@@ -176,18 +176,18 @@ export default {
     canRegister () {
       return (
         this.nameValid &&
-        this.surnameValid &&
         this.emailValid &&
         this.passwordValid &&
         this.confirmPasswordValid &&
-        this.agreedToTerms
+        this.agreedToTerms &&
+        this.cifValid
       )
     }
   },
   methods: {
     validateName () {
-      const nameRegex = /^[a-zA-ZÀ-ÿ\s]+$/ // only letters
-      this.nameValid = nameRegex.test(this.name)
+      const nameRegex = /^[a-zA-ZÀ-ÿ\s]+$/ // solo letras y espacios permitidos
+      this.nameValid = nameRegex.test(this.name) && this.name.trim().length > 0
     },
     validateCIF () {
       const cifRegex = /^[A-Za-z]\d{8}$/ // CIF format: starts with a letter followed by 8 digits
@@ -220,9 +220,10 @@ export default {
       if (this.canRegister) {
         const data = {
           name: this.name,
-          surname: this.surname,
           email: this.email,
-          password: this.password
+          password: this.password,
+          is_editor: true,
+          cif: this.cif
         }
         UserService.create(data)
           .then(() => {
