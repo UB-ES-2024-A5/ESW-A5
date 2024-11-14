@@ -36,10 +36,6 @@ async function clearUserDatabase() {
   }
 }
 
-test.beforeEach(async ({ page }) => {
-  await clearUserDatabase();  
-});
-
 test.describe('Signup Page Tests', () => {
   
   test('should successfully create a new user account', async ({ page }) => {

@@ -35,16 +35,14 @@ async function clearUserDatabase() {
   }
 }
 
-test.afterEach(async ({page}) => {
-  await clearUserDatabase();
-});
+
 
   
   
   test.describe('Login Page Tests', () => {
     test('should successfully log in with the created user', async ({ page }) => {
 
-
+      await clearUserDatabase();
       await page.goto('http://localhost:8080/#/');
 
       await page.click('text=Sign up as user');
