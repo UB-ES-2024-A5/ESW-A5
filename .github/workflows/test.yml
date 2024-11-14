@@ -116,7 +116,6 @@ jobs:
           npx playwright test --project=chromium
         continue-on-error: true
       - name: Upload Playwright traces
-        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-traces
