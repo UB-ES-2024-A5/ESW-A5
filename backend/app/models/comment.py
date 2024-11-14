@@ -5,7 +5,7 @@ from sqlmodel import Field, Relationship
 from .base import SQLModel
 
 class CommentBase(SQLModel):
-    c: str = Field(unique=True, max_length=255)
+    text: str = Field(max_length=255)
 
 class Comment(CommentBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -20,5 +20,5 @@ class CommentsOut(SQLModel):
     count: int
 
 class CommentUpdate(SQLModel):
-    c: str
+    text: str
 
