@@ -20,7 +20,7 @@ class ReviewCreatePointBook(SQLModel):
     point_book: int
 
 class ReviewCreateComment(SQLModel):
-    c: str
+    text: str
 
 #Per modificar si canvia el point, i per afegir un altre comment
 # Els comments no es poden editar nomes

@@ -29,12 +29,11 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('comment',
-    sa.Column('c', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('text', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('id', sqlmodel.sql.sqltypes.GUID(), nullable=False),
     sa.Column('review_id', sqlmodel.sql.sqltypes.GUID(), nullable=False),
     sa.ForeignKeyConstraint(['review_id'], ['review.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('c')
     )
     op.add_column('book', sa.Column('num_reviews', sa.Integer(), nullable=False, server_default="0"))
     # ### end Alembic commands ###
