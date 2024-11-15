@@ -137,6 +137,7 @@
 
 <script>
 import UserService from '../services/UserServices'
+import AccountService from '../services/AccountServices'
 export default {
   data () {
     return {
@@ -187,11 +188,11 @@ export default {
   },
   methods: {
     validateName () {
-      const nameRegex = /^[a-zA-ZÀ-ÿ\s]+$/ // only letters
+      const nameRegex = /^[a-zA-ZÀ-ÿ]+(?:\s[a-zA-ZÀ-ÿ]+)*$/; // only letters
       this.nameValid = nameRegex.test(this.name)
     },
     validateSurname () {
-      const surnameRegex = /^[a-zA-ZÀ-ÿ\s]+$/ // only letters
+      const surnameRegex = /^[a-zA-ZÀ-ÿ]+(?:\s[a-zA-ZÀ-ÿ]+)*$/; // only letters
       this.surnameValid = surnameRegex.test(this.surname)
     },
     validateEmail () {
@@ -199,11 +200,12 @@ export default {
       this.emailValid = emailRegex.test(this.email)
     },
     validatePassword () {
-      const minLength = /.{8,}/
+      const length = /^.{8,40}$/;
       const hasUppercase = /[A-Z]/
       const hasSymbol = /[\W_]/
+      
 
-      const isValidLength = minLength.test(this.password)
+      const isValidLength = length.test(this.password)
       const containsUppercase = hasUppercase.test(this.password)
       const containsSymbol = hasSymbol.test(this.password)
       this.passwordValid = isValidLength && containsUppercase && containsSymbol
@@ -227,8 +229,13 @@ export default {
           password: this.password
         }
         UserService.create(data)
-          .then(() => {
+          .then((res) => {
+            const userId = res.id
+            console.log(typeof userId)
             alert('La cuenta se ha creado correctamente. Por favor inicie sesión.')
+            AccountService.create(userId)
+              .then(() => {
+              })
             this.$router.push({ path: '/login' })
           })
           .catch((error) => {
