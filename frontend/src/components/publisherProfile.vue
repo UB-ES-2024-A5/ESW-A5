@@ -59,7 +59,7 @@ export default {
         this.user.name = userData.name
         this.user.email = userData.email
         this.user.cif = userData.cif
-        this.user.publications = bookServices.getBooksByEditorial()
+        this.user.publications = await bookServices.getBooksByEditorial()
       } catch (error) {
         console.error('Error al obtener los datos del usuario:', error)
       }
