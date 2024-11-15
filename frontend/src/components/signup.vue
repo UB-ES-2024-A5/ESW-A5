@@ -137,6 +137,7 @@
 
 <script>
 import UserService from '../services/UserServices'
+import AccountService from '../services/AccountServices'
 export default {
   data () {
     return {
@@ -227,8 +228,13 @@ export default {
           password: this.password
         }
         UserService.create(data)
-          .then(() => {
+          .then((res) => {
+            const userId = res.id
+            console.log(typeof userId)
             alert('La cuenta se ha creado correctamente. Por favor inicie sesión.')
+            AccountService.create(userId)
+              .then(() => {
+              })
             this.$router.push({ path: '/login' })
           })
           .catch((error) => {
