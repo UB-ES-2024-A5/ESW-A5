@@ -98,7 +98,8 @@ def convert_book_bookOut(book: Book):
         isbn=str(book.isbn),
         price=book.price,
         img=book.img,
-        list_links=[link.url for link in book.links]  # Mapear los links como strings
+        list_links=[link.url for link in book.links],  # Mapear los links como strings
+        account_id=book.account_id
     )
     return bookOut
 

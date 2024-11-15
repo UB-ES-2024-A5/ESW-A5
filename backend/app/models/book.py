@@ -34,6 +34,7 @@ class Book(BookBase, table=True):
 
 class BookOut(BookBase):
     id: uuid.UUID
+    account_id: uuid.UUID
     list_links: List[str]
 
 
