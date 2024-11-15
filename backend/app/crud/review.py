@@ -5,7 +5,6 @@ from typing import Any, List
 from sqlmodel import Session, select
 from fastapi import HTTPException
 
-from app.api.deps import CurrentUser
 from app.core.security import get_password_hash, verify_password
 from app.models import (
     User, UserCreate, UserUpdate, Review, ReviewCreatePointBook, ReviewCreateComment,
@@ -172,7 +171,7 @@ def is_point_book(review: Review):
 
 
 # Aquesta part de codi surt 9 vegades, per reduir linies de codi
-def is_editor_and_review(session: Session, current_user: CurrentUser, book_id: uuid.UUID):
+def is_editor_and_review(session: Session, current_user: User, book_id: uuid.UUID):
     if current_user.is_editor:
         raise HTTPException(
             status_code=400, detail="The user cannot be an editorial user."
