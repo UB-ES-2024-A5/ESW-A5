@@ -1,3 +1,4 @@
+
 <template>
   <div class="profile-container" :style="{ backgroundImage: 'url(' + backgroundImage + ')' }">
     <div class="profile-box">
@@ -8,10 +9,10 @@
         </div>
         <div class="profile-details">
           <p><strong>Name:</strong> {{ user.name }}</p>
-          <p><strong>Surname:</strong> {{ user.surname }}</p>
           <p><strong>Email:</strong> {{ user.email }}</p>
+          <p><strong>CIF:</strong> {{ user.cif }}</p>
+          <p><strong>Publications:</strong> {{ user.publications }}</p>
         </div>
-        <button @click="showWishlist" class="wishlist-button">View Wishlist</button>
       </div>
 
       <div v-if="wishlistVisible" class="wishlist-popup">
@@ -26,22 +27,19 @@
     </div>
   </div>
 </template>
-
 <script>
+import userServices from '../services/UserServices.js'
+import bookServices from '../services/BookServices.js'
 export default {
   data () {
     return {
       backgroundImage: require('@/assets/foto_fondo_login.png'),
       userProfileImage: require('@/assets/user_icon.png'), // Default image
       user: {
-        name: 'John',
-        surname: 'Doe',
-        email: 'john.doe@example.com',
-        wishlist: [
-          { id: 1, title: 'The Catcher in the Rye' },
-          { id: 2, title: 'To Kill a Mockingbird' },
-          { id: 3, title: '1984' }
-        ]
+        name: '',
+        email: '',
+        cif: '',
+        publications: null
       },
       wishlistVisible: false
     }
@@ -52,7 +50,24 @@ export default {
     },
     closeWishlist () {
       this.wishlistVisible = false
+    },
+    async fetchUserProfile () {
+      console.log('Fetching user profile...')
+      try {
+        const userData = await userServices.getActualUser()
+        console.log('User data:', userData)
+        this.user.name = userData.name
+        this.user.email = userData.email
+        this.user.cif = userData.cif
+        this.user.publications = await bookServices.getBooksByEditorial()
+      } catch (error) {
+        console.error('Error al obtener los datos del usuario:', error)
+      }
     }
+  },
+  mounted () {
+    console.log('Componente montado')
+    this.fetchUserProfile()
   }
 }
 </script>
