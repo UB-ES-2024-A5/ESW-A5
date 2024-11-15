@@ -19,6 +19,7 @@ def convert_review_reviewOut(review: Review):
         id=review.id,
         account_id=review.account_id,
         book_id=review.book_id,
+        point_book=review.point_book,
         list_comments=[comment.text for comment in review.comments]  # Mapear los comments como strings
     )
     return reviewOut
@@ -39,7 +40,7 @@ def create_review_pb(session: Session, review: ReviewCreatePointBook, book: Book
     return db_obj
 
 def update_point_book(session: Session, review_in: ReviewUpdatePointBook, db_review: Review):
-    db_review.point_book = review_in.pointbook  # Actualizem la URL
+    db_review.point_book = review_in.point_book  # Actualizem la URL
     session.add(db_review)
     session.commit()
     session.refresh(db_review)
@@ -51,6 +52,12 @@ def delete_point_book(session: Session, db_review: Review):
     session.commit()
     session.refresh(db_review)
     return db_review
+
+
+def is_delete_point_book(session: Session, db_review: Review):
+    if db_review.point_book is None:
+        return True
+    return False
 
 
 def create_review_empty(session: Session, book: Book, current_user: User):
@@ -131,6 +138,9 @@ def delete_review(session: Session, db_review: Review):
 # Actualizar el ranking del libro con la nueva review de point book
 def update_rating(session: Session, book: Book, new_num_review: int):
     book.num_reviews += new_num_review
+    if book.num_reviews < 0:
+        book.num_reviews = 0
+
     total_points = sum(review.point_book for review in book.reviews if review.point_book is not None)
 
     if book.num_reviews > 0:
