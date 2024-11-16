@@ -10,7 +10,7 @@
           <div class="input-group">
             <input v-model="password" type="password" placeholder="Password" required />
           </div>
-          <button type="submit" @click="login_user" class="login-button">sign in</button>
+          <button type="submit" class="login-button">sign in</button>
         </form>
         <!-- Sign Up link under the form -->
         <p class="signup-link">
@@ -28,6 +28,7 @@
 <script>
 import axios from 'axios'
 import userServices from '../services/UserServices.js'
+import WishlistServices from '../services/WishlistServices.js'
 
 export default {
   data () {
@@ -69,6 +70,7 @@ export default {
         if (userInfo.is_editor) {
           this.$router.push({ path: '/mainPage_publisher', query: { email: this.email, token: this.token } })
         } else {
+          await this.createWishlist()
           this.$router.push({ path: '/mainPage_user', query: { email: this.email, token: this.token } })
         }
       } catch (error) {
@@ -81,6 +83,9 @@ export default {
     },
     back_matches () {
       this.$router.push('/')
+    },
+    async createWishlist () {
+      await WishlistServices.createWishlistOnLogin()
     }
   }
 }
