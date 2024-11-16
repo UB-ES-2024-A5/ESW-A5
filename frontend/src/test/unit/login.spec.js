@@ -1,9 +1,13 @@
 import { mount } from '@vue/test-utils';
 import Login from '../../components/login.vue';
 import LoginService from '../../services/LoginServices';
+
 import axios from 'axios';
 
-jest.mock('axios');
+jest.mock('axios', () => ({
+  post: jest.fn(),
+  create : jest.fn()
+}));
   
   describe('login.vue', () => {
     let wrapper;

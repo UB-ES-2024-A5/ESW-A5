@@ -1,10 +1,15 @@
 import { mount } from '@vue/test-utils';
 import Signup from '../../components/signup.vue';
 import UserService from '../../services/UserServices';
+import AccountServices from '../../services/AccountServices';
 
 // Mockear UserService
 jest.mock('../../services/UserServices', () => ({
   create: jest.fn(() => Promise.resolve()),
+}));
+
+jest.mock('../../services/AccountServices', () => ({
+  create: jest.fn(() => Promise.resolve())
 }));
 
 describe('signup.vue', () => {
@@ -314,6 +319,8 @@ it('sets incorrect confirm password when they were the same but password is chan
       confirmPasswordValid: true,
       agreedToTerms: true
     });
+    UserService.create.mockResolvedValue({ id: 123 });
+    AccountServices.create.mockResolvedValue({});;
     window.alert = jest.fn();
     await wrapper.find('.signup-button').trigger('click');
     expect(UserService.create).toHaveBeenCalledWith({
@@ -322,6 +329,7 @@ it('sets incorrect confirm password when they were the same but password is chan
       email: 'john.doe@example.com',
       password: 'Password@123'
     });
+    expect(AccountServices.create).toHaveBeenCalledWith(123);
     expect(window.alert).toHaveBeenCalledWith('La cuenta se ha creado correctamente. Por favor inicie sesión.');
     expect(wrapper.vm.$router.push).toHaveBeenCalledWith({ path: '/login' });
   });

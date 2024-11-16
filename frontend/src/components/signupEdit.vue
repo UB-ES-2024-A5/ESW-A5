@@ -229,7 +229,6 @@ export default {
         UserService.create(data)
           .then((res) => {
             const userId = res.id
-            console.log(typeof userId)
             alert('La cuenta se ha creado correctamente. Por favor inicie sesión.')
             AccountService.create(userId)
               .then(() => {
