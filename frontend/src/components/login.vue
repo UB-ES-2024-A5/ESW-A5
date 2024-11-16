@@ -28,6 +28,7 @@
 <script>
 import axios from 'axios'
 import userServices from '../services/UserServices.js'
+import wishlistServices from '../services/WishlistServices.js'
 
 export default {
   data () {
@@ -81,6 +82,9 @@ export default {
     },
     back_matches () {
       this.$router.push('/')
+    },
+    async createWishlist (id) {
+
     }
   }
 }
