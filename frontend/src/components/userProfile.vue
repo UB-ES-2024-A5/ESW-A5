@@ -30,7 +30,12 @@
         <div class="wishlist-content">
           <h2>Your Wishlist</h2>
           <ul>
-            <li v-for="book in user.wishlist" :key="book.id">{{ book.title }}</li>
+            <li v-for="book in user.wishlist" :key="book.id">
+              <router-link :to="{ path: '/book', query: { bookId: book.id } }">
+                <strong>{{ book.title }}</strong>
+              </router-link>
+              - {{ book.author }}
+            </li>
           </ul>
           <button @click="closeWishlist" class="close-button">Close</button>
         </div>
@@ -41,22 +46,20 @@
     </div>
   </div>
 </template>
-
 <script>
+import userServices from '../services/UserServices.js'
+import wishlistServices from '../services/WishlistServices.js'
 export default {
   data () {
     return {
       backgroundImage: require('@/assets/fondo_profile.png'),
       userProfileImage: require('@/assets/placeholder_image.png'), // Default placeholder image
       user: {
-        name: 'John',
-        surname: 'Doe',
-        email: 'john.doe@example.com',
-        wishlist: [
-          {id: 1, title: 'The Catcher in the Rye'},
-          {id: 2, title: 'To Kill a Mockingbird'},
-          {id: 3, title: '1984'}
-        ]
+        name: '',
+        surname: '',
+        email: '',
+        wishlist: [],
+        wishlistId: ''
       },
       wishlistVisible: false
     }
@@ -64,6 +67,7 @@ export default {
   methods: {
     showWishlist () {
       this.wishlistVisible = true
+      this.fetchWishlistsInformation()
     },
     closeWishlist () {
       this.wishlistVisible = false
@@ -81,7 +85,34 @@ export default {
         }
         reader.readAsDataURL(file)
       }
+    },
+    async fetchUserProfile () {
+      console.log('Fetching user profile...')
+      try {
+        const userData = await userServices.getActualUser()
+        console.log('User data:', userData)
+        this.user.name = userData.name
+        this.user.surname = userData.surname
+        this.user.email = userData.email
+      } catch (error) {
+        console.error('Error al obtener los datos del usuario:', error)
+      }
+    },
+    async fetchWishlistsInformation () {
+      const res = await wishlistServices.getMyWishlists()
+      this.wishlistId = res.data.data[0].id
+      this.fetchBooksInWishlist(this.wishlistId)
+    },
+    async fetchBooksInWishlist (id) {
+      const res = await wishlistServices.readBooksOfWishlist(id)
+      console.log(res)
+      this.user.wishlist = res.data.data
+      console.log(this.user.wishlist)
     }
+  },
+  mounted () {
+    console.log('Componente montado')
+    this.fetchUserProfile()
   }
 }
 </script>
