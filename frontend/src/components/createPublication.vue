@@ -1,501 +1,531 @@
 <template>
-  <div class="publication-form">
-    <div class="form-container">
-      <h1>Create a Publication</h1>
-      <form @submit.prevent="submitForm">
-        <!-- Title Field -->
-        <div class="form-group">
-          <input type="text" v-model="form.title" placeholder="Title" required @input="validateTitle"/>
-          <span v-if="formErrors.title" class="error-icon" @mouseover="showTooltip('title')" @mouseleave="hideTooltip">
-            <img src="../assets/error_icon.png" alt="Error" />
-            <div v-if="tooltipVisible && currentTooltip === 'title'" class="tooltip">{{ formErrors.title }}</div>
-          </span>
-          <span v-else-if="formValidations.title" class="success-icon">
-            <img src="../assets/check_icon.png" alt="Success" />
-          </span>
-        </div>
-
-        <!-- Author Field -->
-        <div class="form-group">
-          <input type="text" v-model="form.author" placeholder="Author" required @input="validateAuthor"/>
-          <span v-if="formErrors.author" class="error-icon" @mouseover="showTooltip('author')" @mouseleave="hideTooltip">
-            <img src="../assets/error_icon.png" alt="Error" />
-            <div v-if="tooltipVisible && currentTooltip === 'author'" class="tooltip">{{ formErrors.author }}</div>
-          </span>
-          <span v-else-if="formValidations.author" class="success-icon">
-            <img src="../assets/check_icon.png" alt="Success" />
-          </span>
-        </div>
-
-        <!-- Editorial Field -->
-        <div class="form-group">
-          <input type="text" v-model="form.editorial" placeholder="Editorial" required @input="validateEditorial"/>
-          <span v-if="formErrors.editorial" class="error-icon" @mouseover="showTooltip('editorial')" @mouseleave="hideTooltip">
-            <img src="../assets/error_icon.png" alt="Error" />
-            <div v-if="tooltipVisible && currentTooltip === 'editorial'" class="tooltip">{{ formErrors.editorial }}</div>
-          </span>
-          <span v-else-if="formValidations.editorial" class="success-icon">
-            <img src="../assets/check_icon.png" alt="Success" />
-          </span>
-        </div>
-
-        <!-- Genre Field -->
-        <div class="form-group genre-group">
-          <div class="genre-selection">
-            <p class="genre-title">Genres</p>
-            <div v-for="genre in genres" :key="genre" class="genre-item">
-              <label>{{ genre }}</label>
-              <input type="checkbox" :value="genre" v-model="form.genre" @change="validateGenreSelection" />
+  <div class="publication-container" :style="{ backgroundImage: 'url(' + backgroundImage + ')' }">
+    <div class="publication-box">
+      <div class="fields-container">
+        <div class="publication-form">
+          <h1>Create a Publication</h1>
+          <form @submit.prevent="submitPublication">
+            <!-- Campo de Título -->
+            <div class="input-group">
+              <input
+                v-model="title"
+                type="text"
+                placeholder="Title"
+                required
+                @input="validateTitle"
+              />
+              <!-- Icono de validación fuera del campo -->
+              <span v-if="title && titleValid !== null" class="validation-icon">
+                <img
+                  :src="titleValid ? checkIcon : errorIcon"
+                  :alt="titleValid ? 'Valid' : 'Invalid'"
+                  :title="titleValid ? '' : titleErrorMessage"
+                />
+              </span>
             </div>
-          </div>
-          <small v-if="errorGenre" class="error-message">{{ errorGenre }}</small>
+
+            <!-- Campo de Autor -->
+            <div class="input-group">
+              <input
+                v-model="author"
+                type="text"
+                placeholder="Author"
+                required
+                @input="validateAuthor"
+              />
+              <span v-if="author && authorValid !== null" class="validation-icon">
+                <img
+                  :src="authorValid ? checkIcon : errorIcon"
+                  :alt="authorValid ? 'Valid' : 'Invalid'"
+                  :title="authorValid ? '' : authorErrorMessage"
+                />
+              </span>
+            </div>
+
+            <!-- Campo de Editorial -->
+            <div class="input-group">
+              <input
+                v-model="editorial"
+                type="text"
+                placeholder="Editorial"
+                required
+                @input="validateEditorial"
+              />
+              <span v-if="editorial && editorialValid !== null" class="validation-icon">
+                <img
+                  :src="editorialValid ? checkIcon : errorIcon"
+                  :alt="editorialValid ? 'Valid' : 'Invalid'"
+                  :title="editorialValid ? '' : editorialErrorMessage"
+                />
+              </span>
+            </div>
+
+            <!-- Campo de Géneros -->
+            <div class="input-group">
+              <p class="genre-title">Genres</p>
+              <div class="genre-selection">
+                <div class="genre-box">
+                  <div v-for="genre in genres" :key="genre" class="genre-item">
+                    <label>{{ genre }}</label>
+                    <input
+                      type="checkbox"
+                      :value="genre"
+                      v-model="selectedGenres"
+                      @change="validateGenreSelection"
+                    />
+                  </div>
+                </div>
+                <span v-if="errorGenre" class="error-message">{{ errorGenre }}</span>
+              </div>
+            </div>
+
+            <!-- Campo de Año de Publicación -->
+            <div class="input-group">
+              <input
+                v-model="year"
+                type="number"
+                placeholder="Year of Publication"
+                min="0"
+                required
+                @input="validateYear"
+              />
+              <span v-if="year && yearValid !== null" class="validation-icon">
+                <img
+                  :src="yearValid ? checkIcon : errorIcon"
+                  :alt="yearValid ? 'Valid' : 'Invalid'"
+                  :title="yearValid ? '' : yearErrorMessage"
+                />
+              </span>
+            </div>
+
+            <!-- Campo de ISBN -->
+            <div class="input-group">
+              <input
+                v-model="isbn"
+                type="text"
+                placeholder="ISBN"
+                required
+                @input="validateISBN"
+                maxlength="13"
+              />
+              <span v-if="isbn && isbnValid !== null" class="validation-icon">
+                <img
+                  :src="isbnValid ? checkIcon : errorIcon"
+                  :alt="isbnValid ? 'Valid' : 'Invalid'"
+                  :title="isbnValid ? '' : isbnErrorMessage"
+                />
+              </span>
+            </div>
+
+            <!-- Campo de Precio -->
+            <div class="input-group">
+              <input
+                v-model="price"
+                type="number"
+                placeholder="Price"
+                min="0"
+                step="0.01"
+                required
+                @input="validatePrice"
+              />
+              <span v-if="price && priceValid !== null" class="validation-icon">
+                <img
+                  :src="priceValid ? checkIcon : errorIcon"
+                  :alt="priceValid ? 'Valid' : 'Invalid'"
+                  :title="priceValid ? '' : priceErrorMessage"
+                />
+              </span>
+            </div>
+
+            <!-- Campo de Sinopsis -->
+            <div class="input-group">
+              <textarea
+                v-model="synopsis"
+                placeholder="Synopsis"
+                class="synopsis-textarea"
+                required
+                @input="validateSynopsis"
+                maxlength="200"
+              ></textarea>
+              <span v-if="synopsis && synopsisValid !== null" class="validation-icon">
+                <img
+                  :src="synopsisValid ? checkIcon : errorIcon"
+                  :alt="synopsisValid ? 'Valid' : 'Invalid'"
+                  :title="synopsisValid ? '' : synopsisErrorMessage"
+                />
+              </span>
+            </div>
+
+            <!-- Campo de Enlaces de Compra -->
+            <div class="input-group">
+              <p class="genre-title">Purchase Links</p>
+              <div class="link-selection">
+                <div v-for="(link, index) in publisherLinks" :key="index" class="link-item">
+                  <input
+                    v-model="publisherLinks[index]"
+                    type="url"
+                    placeholder="Enter purchase link"
+                    :required="index < 3"
+                  />
+                  <!-- Mostrar botón de eliminar solo si hay más de un enlace -->
+                  <button
+                    v-if="publisherLinks.length >= 1"
+                    type="button"
+                    @click="removeLink(index)"
+                    class="remove-link-btn"
+                  >
+                    -
+                  </button>
+                </div>
+                <!-- Botón para agregar enlaces, visible solo si hay menos de 3 enlaces -->
+                <button
+                  v-if="publisherLinks.length < 3"
+                  type="button"
+                  @click="addLink"
+                  class="add-link-btn"
+                >
+                  +
+                </button>
+              </div>
+              <!-- Mensaje cuando no hay enlaces -->
+              <span v-if="publisherLinks.length === 0" class="error-message">You can add up to 3 links.</span>
+            </div>
+            <!-- Campo de Imagen -->
+            <div class="input-group">
+              <input
+                type="file"
+                accept="image/jpeg"
+                @change="handleImageUpload"
+              />
+              <span v-if="image && imagePreview" class="image-preview">
+                <img :src="imagePreview" alt="Image Preview" />
+              </span>
+              <span v-if="image && imageError" class="error-message">{{ imageError }}</span>
+            </div>
+
+            <!-- Botón para Enviar -->
+            <button type="submit" class="publication-button">Create Publication</button>
+          </form>
         </div>
-
-        <!-- Year Field -->
-        <div class="form-group">
-          <input type="number" v-model="form.year" placeholder="Year of Publication" min="0" required @input="validateYear"/>
-          <span v-if="formErrors.year" class="error-icon" @mouseover="showTooltip('year')" @mouseleave="hideTooltip">
-            <img src="../assets/error_icon.png" alt="Error" />
-            <div v-if="tooltipVisible && currentTooltip === 'year'" class="tooltip">{{ formErrors.year }}</div>
-          </span>
-          <span v-else-if="formValidations.year" class="success-icon">
-            <img src="../assets/check_icon.png" alt="Success" />
-          </span>
-        </div>
-
-        <!-- ISBN Field -->
-        <div class="form-group">
-          <input type="text" v-model="form.isbn" placeholder="ISBN" required @input="validateISBN"/>
-          <span v-if="formErrors.isbn" class="error-icon" @mouseover="showTooltip('isbn')" @mouseleave="hideTooltip">
-            <img src="../assets/error_icon.png" alt="Error" />
-            <div v-if="tooltipVisible && currentTooltip === 'isbn'" class="tooltip">{{ formErrors.isbn }}</div>
-          </span>
-          <span v-else-if="formValidations.isbn" class="success-icon">
-            <img src="../assets/check_icon.png" alt="Success" />
-          </span>
-        </div>
-
-        <!-- Price Field -->
-        <div class="form-group">
-          <input type="number" v-model="form.price" placeholder="Minimum Price" min="0" step="0.01" required @input="validatePrice"/>
-          <span v-if="formErrors.price" class="error-icon" @mouseover="showTooltip('price')" @mouseleave="hideTooltip">
-            <img src="../assets/error_icon.png" alt="Error" />
-            <div v-if="tooltipVisible && currentTooltip === 'price'" class="tooltip">{{ formErrors.price }}</div>
-          </span>
-          <span v-else-if="formValidations.price" class="success-icon">
-            <img src="../assets/check_icon.png" alt="Success" />
-          </span>
-        </div>
-
-        <!-- Synopsis Field -->
-        <div class="form-group">
-          <textarea v-model="form.synopsis" placeholder="Synopsis" class="synopsis-textarea" required @input="validateSynopsis"></textarea>
-          <span v-if="formErrors.synopsis" class="error-icon" @mouseover="showTooltip('synopsis')" @mouseleave="hideTooltip">
-            <img src="../assets/error_icon.png" alt="Error" />
-            <div v-if="tooltipVisible && currentTooltip === 'synopsis'" class="tooltip">{{ formErrors.synopsis }}</div>
-          </span>
-          <span v-else-if="formValidations.synopsis" class="success-icon">
-            <img src="../assets/check_icon.png" alt="Success" />
-          </span>
-        </div>
-
-        <!-- Add Purchase Link Section -->
-        <div class="form-group">
-          <p>Add Purchase Link</p>
-          <div v-for="(link, index) in form.purchaseLinks" :key="index" class="link-group">
-            <input type="url" v-model="form.purchaseLinks[index]" placeholder="Purchase link" />
-            <button type="button" @click="removePurchaseLink(index)">-</button>
-          </div>
-          <button type="button" @click="addPurchaseLink" v-if="form.purchaseLinks.length < 3">+</button>
-        </div>
-
-        <button type="submit">Submit</button>
-      </form>
-    </div>
-
-    <!-- Image Upload Section -->
-    <div class="image-container">
-      <div v-if="previewImage" class="image-preview">
-        <img :src="previewImage" alt="Book cover preview" />
-      </div>
-      <div v-else class="image-placeholder">
-        Book cover image preview
-      </div>
-
-      <div class="image-upload">
-        <label class="image-label" @click="triggerImageInput">Choose Image</label>
-        <input type="file" ref="imageInput" class="image-input" @change="handleImageUpload" />
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import BookServices from '../services/BookServices.js'
 export default {
   data () {
     return {
-      form: {
-        title: '',
-        author: '',
-        editorial: '',
-        genre: [],
-        year: '',
-        isbn: '',
-        price: '',
-        synopsis: '',
-        image: null,
-        purchaseLinks: []
-      },
-      previewImage: null,
+      title: '',
+      author: '',
+      editorial: '',
+      year: '',
+      isbn: '',
+      price: '',
+      synopsis: '',
+      selectedGenres: [],
+      image: null,
+      imagePreview: null,
+      imageError: '',
+      titleValid: null,
+      authorValid: null,
+      editorialValid: null,
+      yearValid: null,
+      isbnValid: null,
+      priceValid: null,
+      synopsisValid: null,
       errorGenre: '',
-      formErrors: {
-        title: '',
-        author: '',
-        editorial: '',
-        year: '',
-        isbn: '',
-        price: '',
-        synopsis: ''
-      },
-      formValidations: {
-        title: false,
-        author: false,
-        editorial: false,
-        year: false,
-        isbn: false,
-        price: false,
-        synopsis: false
-      },
-      existingISBNs: ['9781234567890', '9781234567891'],
-      genres: ['Action', 'Love', 'Drama', 'Terror', 'Fantasy', 'Sci-Fi', 'Mystery', 'Adventure', 'Historical', 'Romance', 'Thriller', 'Biography', 'Poetry'],
-      tooltipVisible: false,
-      currentTooltip: '' // Para saber qué tooltip mostrar
+      genres: ['Fiction', 'Non-Fiction', 'Fantasy', 'Science Fiction', 'Romance'],
+      publisherLinks: [ ],
+      titleErrorMessage: 'Title is required.',
+      authorErrorMessage: 'Author is required.',
+      editorialErrorMessage: 'Editorial is required.',
+      yearErrorMessage: 'Enter a valid year.',
+      isbnErrorMessage: 'Enter a valid ISBN.',
+      priceErrorMessage: 'Enter a valid price.',
+      synopsisErrorMessage: 'Synopsis is required.',
+      checkIcon: require('../assets/check_icon.png'),
+      errorIcon: require('../assets/error_icon.png'),
+      backgroundImage: require('../assets/fondo_carrousel2.png')
+    }
+  },
+  computed: {
+    canSubmit () {
+      return (
+        this.titleValid &&
+        this.authorValid &&
+        this.editorialValid &&
+        this.yearValid &&
+        this.isbnValid &&
+        this.priceValid &&
+        this.synopsisValid &&
+        this.selectedGenres.length >= 1 &&
+        this.selectedGenres.length <= 2 &&
+        !this.imageError &&
+        this.publisherLinks.every(link => link.trim() === '' || /^(ftp|http|https):\/\/[^ "]+$/.test(link))
+      )
     }
   },
   methods: {
-    // Método para mostrar el tooltip
-    showTooltip (field) {
-      this.tooltipVisible = true
-      this.currentTooltip = field // Asigna el campo para mostrar el mensaje
-    },
-    // Método para ocultar el tooltip
-    hideTooltip () {
-      this.tooltipVisible = false
-      this.currentTooltip = '' // Resetea el campo
-    },
-    validateTitle () {
-      const regex = /^[a-zA-Z0-9\s\W]+$/
-      this.formValidations.title = regex.test(this.form.title)
-      this.formErrors.title = this.formValidations.title ? '' : 'Title can only contain letters, numbers, and symbols.'
-    },
-    validateAuthor () {
-      const regex = /^[a-zA-Z\s]+$/
-      this.formValidations.author = regex.test(this.form.author)
-      this.formErrors.author = this.formValidations.author ? '' : 'Author name must only contain letters.'
-    },
-    validateEditorial () {
-      const regex = /^[a-zA-Z0-9\s]+$/
-      this.formValidations.editorial = regex.test(this.form.editorial)
-      this.formErrors.editorial = this.formValidations.editorial ? '' : 'Editorial can only contain letters and numbers.'
-    },
-    validateYear () {
-      const regex = /^(19|20)\d{2}$/
-      this.formValidations.year = regex.test(this.form.year)
-      this.formErrors.year = this.formValidations.year ? '' : 'Please enter a valid year.'
-    },
-    validateISBN () {
-      this.formValidations.isbn = !this.existingISBNs.includes(this.form.isbn)
-      this.formErrors.isbn = this.formValidations.isbn ? '' : 'ISBN already exists.'
-    },
-    validatePrice () {
-      this.formValidations.price = this.form.price > 0
-      this.formErrors.price = this.formValidations.price ? '' : 'Price must be greater than zero.'
-    },
-    validateSynopsis () {
-      this.formValidations.synopsis = this.form.synopsis.length > 10
-      this.formErrors.synopsis = this.formValidations.synopsis ? '' : 'Synopsis must be at least 10 characters.'
-    },
-    validateGenreSelection () {
-      this.errorGenre = this.form.genre.length === 0 ? 'At least one genre must be selected.' : ''
-    },
-    addPurchaseLink () {
-      this.form.purchaseLinks.push('')
-    },
-    removePurchaseLink (index) {
-      this.form.purchaseLinks.splice(index, 1)
-    },
-    submitForm () {
-      // Lógica para enviar el formulario
-    },
-    triggerImageInput () {
-      this.$refs.imageInput.click()
-    },
     handleImageUpload (event) {
       const file = event.target.files[0]
-      if (file) {
-        this.previewImage = URL.createObjectURL(file)
-        this.form.image = file
+      if (file && file.type === 'image/jpeg') {
+        this.imageError = ''
+        this.image = file
+        this.imagePreview = URL.createObjectURL(file)
+      } else {
+        this.imageError = 'Only JPEG images are allowed.'
+        this.imagePreview = null
       }
+    },
+    validateTitle () {
+      this.titleValid = this.title.trim().length > 0
+    },
+    validateAuthor () {
+      const regex = /^[A-Za-z\s]+$/
+      this.authorValid = regex.test(this.author)
+    },
+    validateEditorial () {
+      const regex = /^[A-Za-z\s]+$/
+      this.editorialValid = regex.test(this.editorial)
+    },
+    validateYear () {
+      const currentYear = new Date().getFullYear()
+      this.yearValid = this.year >= 1000 && this.year <= currentYear
+    },
+    validateISBN () {
+      // Validar que el ISBN tenga entre 10 y 13 dígitos numéricos
+      const regex = /^\d{10,13}$/
+      this.isbnValid = regex.test(this.isbn)
+    },
+    validatePrice () {
+      this.priceValid = this.price >= 0 && !isNaN(this.price)
+    },
+    validateGenreSelection () {
+      // Verificar que haya entre 1 y 2 géneros seleccionados
+      if (this.selectedGenres.length === 0) {
+        this.errorGenre = 'Please select at least one genre.'
+      } else if (this.selectedGenres.length > 2) {
+        this.errorGenre = 'You can select up to two genres.'
+      } else {
+        this.errorGenre = ''
+      }
+    },
+    validateSynopsis () {
+      this.synopsisValid = this.synopsis.trim().length > 0
+    },
+    addLink () {
+      if (this.publisherLinks.length < 3) {
+        this.publisherLinks.push('')
+      }
+    },
+    removeLink (index) {
+      // Eliminar el enlace solo si hay más de un enlace
+      if (this.publisherLinks.length > 1) {
+        this.publisherLinks.splice(index, 1)
+      } else {
+        // Si es el único enlace, lo eliminamos completamente
+        this.publisherLinks = []
+      }
+    },
+    async submitPublication () {
+      if (this.canSubmit) {
+        try {
+          // Convertir la imagen a Base64 de forma asíncrona
+          const imageBase64 = await this.convertImageToBase64(this.image)
+
+          // Preparar los datos con las correcciones necesarias
+          const data = {
+            title: this.title,
+            author: this.author,
+            gender_main: this.selectedGenres[0] || '',
+            gender_secondary: this.selectedGenres[1] || null,
+            synopsis: this.synopsis,
+            publication_year: parseInt(this.year, 10), // Cambiar a 'publication_year'
+            isbn: this.isbn,
+            price: parseFloat(this.price) || null,
+            img: imageBase64, // Asegurarse de que es una cadena Base64 válida
+            links: this.publisherLinks.filter(link => link.trim() !== '')
+          }
+
+          console.log('Data sent to server:', data)
+
+          // Enviar los datos al backend
+          await BookServices.createBook(data)
+          alert('Publication created successfully!')
+        } catch (error) {
+          console.error('Error while creating book:', error)
+          alert('Failed to create publication. Please try again.')
+        }
+      } else {
+        alert('Please correct the errors in the form.')
+      }
+    },
+    convertImageToBase64 (image) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onloadend = () => resolve(reader.result)
+        reader.onerror = reject
+        reader.readAsDataURL(image)
+      })
     }
   }
 }
 </script>
 
 <style scoped>
-.publication-form {
+/* Contenedor general más ancho */
+.publication-container {
   display: flex;
-  justify-content: space-between;
-  padding: 20px;
-  background-color: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-/* Estilos para las imágenes */
-.success-icon img, .error-icon img {
-  width: 20px;
-  height: 20px;
-}
-
-.error-icon img:hover {
-  cursor: pointer;
-}
-
-.form-container {
-  width: 50%;
-  margin: auto;
-}
-
-h1 {
-  font-size: 1.5em;
-  color: #333;
-  margin-bottom: 20px;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-  position: relative;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  outline: none;
-  font-size: 0.9em;
-}
-
-.form-group select {
-  height: 40px;
-}
-
-.form-group input::placeholder,
-.form-group select::placeholder,
-.form-group textarea::placeholder {
-  color: #999;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  border-color: #4CAF50;
-}
-
-.genre-group {
-  position: relative;
-}
-
-.genre-selection {
-  max-height: 100px; /* Nuevo alto más pequeño */
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 30px 8px 8px;
-  margin-top: 10px;
-  width: 100%;
-}
-
-.genre-title {
-  position: absolute;
-  top: 0px;
-  left: 4px;
-  font-size: 0.9em;
-  color: #999;
-  background-color: #fff;
-  padding: 0 5px;
-}
-
-.genre-item {
-  display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 5px 0;
+  height: 100vh;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
-.genre-item label {
-  flex-grow: 1;
-}
-
-.genre-item input {
-  margin-left: auto;
-  transform: translateX(100%); /* Mueve el checkbox a la derecha */
-}
-
-.image-label {
-  display: inline-block;
-  padding: 8px 12px;
-  background-color: #4CAF50;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 10px; /* Espacio entre el botón y el recuadro */
-}
-
-.image-input {
-  display: none;
-}
-
-.image-container {
-  width: 30%;
+/* Caja del formulario más ancha y menos alta */
+.publication-box {
+  width: 80%; /* Aumentamos el ancho del contenedor */
+  max-width: 900px; /* Limitar el ancho máximo */
+  max-height: 80vh; /* Reducimos la altura máxima al 80% de la ventana */
+  background-color: white;
+  padding: 20px; /* Reducimos el padding para hacer el recuadro más compacto */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  overflow-y: auto; /* Habilitar el desplazamiento vertical */
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
 }
 
-.image-placeholder {
+/* Opcional: Ajustar los márgenes para un espaciado más compacto */
+.input-group {
+  position: relative;
+  margin-bottom: 15px; /* Reducimos el margen entre los campos */
+}
+
+/* Contenedor de los campos de entrada */
+.fields-container {
+  flex: 1; /* Esto permite que el formulario ocupe el espacio disponible */
+  overflow-y: auto; /* Habilitar el desplazamiento en caso de que los campos sobrepasen */
+}
+
+.input-group input[type="file"] {
+  display: block;
+  margin: 10px 0;
+}
+
+/* Campos de entrada */
+.input-group input,
+.input-group textarea {
+  width: 100%;              /* Ocupa todo el ancho disponible */
+  max-width: 100%;          /* Asegura que no se agrande más allá del 100% */
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  resize: none;             /* Impide que los campos se agranden manualmente */
+}
+
+/* Ajustes específicos para los textarea */
+.input-group textarea {
+  min-height: 120px;        /* Establece una altura mínima */
+  resize: vertical;         /* Permite solo el ajuste vertical, no horizontal */
+}
+
+.input-group textarea {
+  min-height: 120px;
+}
+
+/* Estilo de los iconos de validación */
+.validation-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+}
+
+.validation-icon img {
   width: 100%;
-  height: 200px;
-  background-color: #000;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.9em;
-  text-align: center;
-  border-radius: 8px;
+  height: auto;
+  cursor: pointer;
+}
+
+/* Ajustes de mensaje de error */
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+/* Botón de envío */
+.publication-button {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.publication-button:hover {
+  background-color: #0056b3;
+}
+
+/* Títulos */
+.genre-title {
+  font-weight: bold;
+}
+.input-group input[type="file"] {
+  display: block;
+  margin: 10px 0;
 }
 
 .image-preview img {
   max-width: 100%;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  max-height: 200px;
+  margin-top: 10px;
 }
 
-.synopsis-textarea {
-  min-height: 150px;
-  resize: none;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  outline: none;
-  font-size: 0.9em;
+/* Estilo para el campo de los enlaces de compra */
+.link-selection {
+  display: flex;
+  flex-direction: column;
 }
 
-.synopsis-textarea::placeholder {
-  color: #999;
-}
-
-.synopsis-textarea:focus {
-  border-color: #4CAF50;
-}
-
-.checkbox-group label {
-  display: block;
-  font-weight: normal;
-  color: #555;
-  margin-bottom: 5px;
-}
-
-.link-group {
+.link-item {
   display: flex;
   align-items: center;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 
-.link-group input {
-  flex: 1;
+.link-item input {
+  width: 80%;
+  padding: 8px;
+  font-size: 14px;
+  margin-right: 10px;
 }
 
-.link-group button {
-  background-color: #f44336;
+.add-link-btn,
+.remove-link-btn {
+  background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 4px;
-  padding: 5px;
-  margin-left: 5px;
-  cursor: pointer;
-}
-
-button[type="button"],
-button[type="submit"] {
-  padding: 8px 12px;
-  font-size: 0.9em;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button[type="button"] {
-  background-color: #f44336;
-  color: white;
-}
-
-button[type="submit"] {
-  background-color: #4CAF50;
-  color: white;
-  margin-top: 10px;
-  width: 100%;
-  font-size: 1.1em;
-}
-
-.tooltip {
-  position: absolute;
-  top: 50%;
-  left: 110%; /* Alinea el tooltip a la derecha */
-  transform: translateY(-50%); /* Centra el tooltip verticalmente */
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 5px;
   border-radius: 5px;
-  font-size: 12px;
-  z-index: 1;
-  white-space: nowrap;
-  display: none;
-}
-
-.error-icon:hover .tooltip {
-  display: block;
-}
-
-.error-icon {
-  position: relative;
-  display: inline-block;
-}
-
-.image-preview {
-  margin-top: 20px;
-}
-
-.image-upload {
-  display: flex;
-  justify-content: center;
-}
-
-.image-label {
+  padding: 5px 10px;
   cursor: pointer;
-  background-color: #ddd;
-  padding: 10px;
-  border-radius: 5px;
+  font-size: 14px;
 }
 
-.image-input {
-  display: none;
+.add-link-btn:hover,
+.remove-link-btn:hover {
+  background-color: #0056b3;
 }
 </style>
