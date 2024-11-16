@@ -165,7 +165,7 @@ export default {
   display: grid;
   grid-template-columns: 150px auto; /* Columna de la imagen y columna del texto */
   gap: 20px; /* Espaciado entre la imagen y el texto */
-  align-items: flex-start; /* Asegura que todo comience en la parte superior */
+  align-items: flex-start;
   width: 100%;
 }
 .image-container img {
@@ -198,7 +198,7 @@ export default {
   align-items: center; /* Alinea el título y la estrella en una fila */
   flex-direction: row;
   justify-content: space-between; /* Espacia el título y la estrella */
-  width: 100%; /* Asegura que ocupen todo el ancho disponible */
+  width: 100%; 
 }
 .left-section {
   display: flex;
