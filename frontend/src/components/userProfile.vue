@@ -31,7 +31,10 @@
           <h2>Your Wishlist</h2>
           <ul>
             <li v-for="book in user.wishlist" :key="book.id">
-              <strong>{{ book.title }}</strong> - {{ book.author }}
+              <router-link :to="{ path: '/book', query: { bookId: book.id } }">
+                <strong>{{ book.title }}</strong>
+              </router-link>
+              - {{ book.author }}
             </li>
           </ul>
           <button @click="closeWishlist" class="close-button">Close</button>
