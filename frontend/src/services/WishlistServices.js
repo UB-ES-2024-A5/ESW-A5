@@ -12,6 +12,7 @@ class WishlistService {
   readBooksOfWishlist (id) {
     return http.get(`/api/v1/wishlists/${id}/books`)
   }
+create-wishlist-on-login
   async createWishlistOnLogin () {
     const response = await this.getMyWishlists()
     console.log(response.data.count)
@@ -25,5 +26,6 @@ class WishlistService {
       })
     }
   }
+dev
 }
 export default new WishlistService()
