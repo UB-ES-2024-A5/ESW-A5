@@ -119,7 +119,7 @@
             <input type="checkbox" v-model="agreedToTerms" required />
             <label>I agree to all statements in <span class="terms-link">terms and conditions</span></label>
           </div>
-          <button type="submit" @click="register_user" class="signup-button">register</button>
+          <button type="submit" class="signup-button">register</button>
         </form>
 
         <!-- Enlace para Iniciar Sesión -->
@@ -188,11 +188,11 @@ export default {
   },
   methods: {
     validateName () {
-      const nameRegex = /^[a-zA-ZÀ-ÿ]+(?:\s[a-zA-ZÀ-ÿ]+)*$/; // only letters
+      const nameRegex = /^[a-zA-ZÀ-ÿ]+(?:\s[a-zA-ZÀ-ÿ]+)*$/ // only letters
       this.nameValid = nameRegex.test(this.name)
     },
     validateSurname () {
-      const surnameRegex = /^[a-zA-ZÀ-ÿ]+(?:\s[a-zA-ZÀ-ÿ]+)*$/; // only letters
+      const surnameRegex = /^[a-zA-ZÀ-ÿ]+(?:\s[a-zA-ZÀ-ÿ]+)*$/ // only letters
       this.surnameValid = surnameRegex.test(this.surname)
     },
     validateEmail () {
@@ -200,11 +200,9 @@ export default {
       this.emailValid = emailRegex.test(this.email)
     },
     validatePassword () {
-      const length = /^.{8,40}$/;
+      const length = /^.{8,40}$/
       const hasUppercase = /[A-Z]/
       const hasSymbol = /[\W_]/
-      
-
       const isValidLength = length.test(this.password)
       const containsUppercase = hasUppercase.test(this.password)
       const containsSymbol = hasSymbol.test(this.password)
