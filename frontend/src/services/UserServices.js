@@ -37,7 +37,7 @@ class UserService {
   }
 
   create (data) {
-    return http.post('/api/v1/users/', data)
+    return http.post('/api/v1/users/open/', data)
       .then((res) => {
         return res.data
       })
