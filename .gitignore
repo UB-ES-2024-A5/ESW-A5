@@ -11,6 +11,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+!backend/app/email-templates/build/
 develop-eggs/
 dist/
 downloads/
@@ -244,3 +245,6 @@ fabric.properties
 docs/book
 
 !frontend/build/
+
+frontend/coverage
+frontend/test-results

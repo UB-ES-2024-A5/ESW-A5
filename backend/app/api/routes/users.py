@@ -1,6 +1,6 @@
 """ User management routes """
 from typing import Any
-
+import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import col, delete, func, select
 
@@ -60,6 +60,15 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
             status_code=400,
             detail="The user with this email already exists in the system.",
         )
+
+    if user_in.is_editor:
+        user = crud.user.get_user_by_cif(session=session, cif=user_in.cif)
+
+        if user:
+            raise HTTPException(
+                status_code=400,
+                detail="The editorial with this CIF already exists in the system.",
+            )
 
     user = crud.user.create_user(session=session, user_create=user_in)
     if settings.emails_enabled and user_in.email:
@@ -138,6 +147,10 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     user_create = UserCreate.from_orm(user_in)
     user = crud.user.create_user(session=session, user_create=user_create)
     return user
+@router.get("/user/{email}", response_model=UserPublic)
+def read_user_by_email_master(email:str, session:SessionDep) -> Any:
+    user = crud.user.get_user_by_email(session=session, email=email)
+    return user
 
 @router.get(
     "/{email}",
@@ -157,7 +170,7 @@ def read_user_by_email(
             response_model=UserPublic, responses={404: {"description": "Not found"}},
             dependencies=[Depends(get_current_active_superuser)],)
 def read_user_by_id(
-    user_id: int, session: SessionDep, current_user: CurrentUser
+    user_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
 ) -> Any:
     """
     Get a specific user by id.
@@ -181,7 +194,7 @@ def read_user_by_id(
 def update_user(
     *,
     session: SessionDep,
-    user_id: int,
+    user_id: uuid.UUID,
     user_in: UserUpdate,
 ) -> Any:
     """
@@ -209,7 +222,7 @@ def update_user(
     "/{user_id}",
     dependencies=[Depends(get_current_active_superuser)],)
 def delete_user(
-    session: SessionDep, current_user: CurrentUser, user_id: int
+    session: SessionDep, current_user: CurrentUser, user_id: uuid.UUID
 ) -> Message:
     """
     Delete a user.

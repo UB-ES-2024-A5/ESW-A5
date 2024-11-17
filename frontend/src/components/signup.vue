@@ -103,7 +103,7 @@
               required
               @input="validateConfirmPassword"
             />
-            <span class="toggle-password" @click="toggleShowConfirmPassword">
+            <span class="toggle-confirm-password" @click="toggleShowConfirmPassword">
               <i :class="showConfirmPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
             </span>
             <span v-if="confirmPasswordValid !== null" class="validation-icon">
@@ -137,35 +137,41 @@
 
 <script>
 import UserService from '../services/UserServices'
+import AccountService from '../services/AccountServices'
 export default {
   data () {
     return {
       name: '',
-      surname: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
       nameValid: null,
-      surnameValid: null,
-      emailValid: null,
-      passwordValid: null,
-      confirmPasswordValid: null,
-      agreedToTerms: false,
       nameErrorMessage: 'Only letters are allowed.',
-      surnameErrorMessage: 'Only letters are allowed.',
-      emailErrorMessage: 'Please enter a valid email address -> example@gmail.com',
-      passwordErrorMessage: 'Password must be at least 8 characters, contain a symbol and an uppercase letter.',
-      confirmPasswordErrorMessage: 'Passwords do not match.',
-      showPassword: false,
-      showConfirmPassword: false,
+      backgroundImage: require('@/assets/foto_fondo_login.png'),
       accountIcon: require('@/assets/account_icon.png'),
+
+      surname: '',
+      surnameValid: null,
+      surnameErrorMessage: 'Only letters are allowed.',
+
+      email: '',
+      emailValid: null,
+      emailErrorMessage: 'Please enter a valid email address -> example@gmail.com',
       mailIcon: require('@/assets/mail_icon.png'),
+
+      password: '',
+      passwordValid: null,
+      showPassword: false,
+      passwordErrorMessage: 'Password must be at least 8 characters, contain a symbol and an uppercase letter.',
       lockIcon: require('@/assets/lock_icon.png'),
+
+      confirmPassword: '',
+      confirmPasswordValid: null,
+      confirmPasswordErrorMessage: 'Passwords do not match.',
       keyIcon: require('@/assets/key_icon.png'),
+      showConfirmPassword: false,
+
+      agreedToTerms: false,
       checkIcon: require('@/assets/check_icon.png'),
       errorIcon: require('@/assets/error_icon.png'),
-      boxImage: require('@/assets/foto_signup.png'),
-      backgroundImage: require('@/assets/foto_fondo_login.png')
+      boxImage: require('@/assets/foto_signup.png')
     }
   },
   computed: {
@@ -182,11 +188,11 @@ export default {
   },
   methods: {
     validateName () {
-      const nameRegex = /^[a-zA-ZÀ-ÿ\s]+$/ // only letters
+      const nameRegex = /^[a-zA-ZÀ-ÿ]+(?:\s[a-zA-ZÀ-ÿ]+)*$/ // only letters
       this.nameValid = nameRegex.test(this.name)
     },
     validateSurname () {
-      const surnameRegex = /^[a-zA-ZÀ-ÿ\s]+$/ // only letters
+      const surnameRegex = /^[a-zA-ZÀ-ÿ]+(?:\s[a-zA-ZÀ-ÿ]+)*$/ // only letters
       this.surnameValid = surnameRegex.test(this.surname)
     },
     validateEmail () {
@@ -194,14 +200,14 @@ export default {
       this.emailValid = emailRegex.test(this.email)
     },
     validatePassword () {
-      const minLength = /.{8,}/
+      const length = /^.{8,40}$/
       const hasUppercase = /[A-Z]/
       const hasSymbol = /[\W_]/
-
-      const isValidLength = minLength.test(this.password)
+      const isValidLength = length.test(this.password)
       const containsUppercase = hasUppercase.test(this.password)
       const containsSymbol = hasSymbol.test(this.password)
       this.passwordValid = isValidLength && containsUppercase && containsSymbol
+      this.validateConfirmPassword()
     },
     validateConfirmPassword () {
       this.confirmPasswordValid = this.password === this.confirmPassword
@@ -221,8 +227,13 @@ export default {
           password: this.password
         }
         UserService.create(data)
-          .then(() => {
+          .then((res) => {
+            const userId = res.id
+            console.log(typeof userId)
             alert('La cuenta se ha creado correctamente. Por favor inicie sesión.')
+            AccountService.create(userId)
+              .then(() => {
+              })
             this.$router.push({ path: '/login' })
           })
           .catch((error) => {
@@ -347,6 +358,14 @@ h1 {
 }
 
 .toggle-password {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #000;
+}
+
+.toggle-confirm-password {
   position: absolute;
   right: 10px;
   cursor: pointer;
