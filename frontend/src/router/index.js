@@ -64,6 +64,8 @@ export default new Router({
       path: '/book',
       name: 'book',
       component: book
+    },
+    {
       path: '/create_publication',
       name: 'create_publication',
       component: createPublication

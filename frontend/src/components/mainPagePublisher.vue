@@ -2,7 +2,7 @@
   <div class="background-container">
     <!-- Header con campo de búsqueda y botón de inicio de sesión -->
     <header class="header">
-      <input type="text" placeholder="Search for a publication" class="search-bar" />
+      <!--<input type="text" placeholder="Search for a publication" class="search-bar" /> -->
       <router-link to="/" class="sign-in-btn">Log out</router-link>
 
       <!-- Enlace al perfil de usuario con icono de imagen -->
@@ -18,7 +18,7 @@
       <!-- Carrusel de imágenes -->
       <div class="carousel-container">
         <!-- Botón de agregar publicación -->
-        <router-link to="/publish_content" class="add-button">+</router-link>
+        <router-link to="/create_publication" class="add-button">+</router-link>
 
         <button class="carousel-btn left-btn" @click="previousSlide">‹</button>
         <div class="carousel">

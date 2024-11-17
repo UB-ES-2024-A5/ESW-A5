@@ -354,6 +354,7 @@ export default {
           // Enviar los datos al backend
           await BookServices.createBook(data)
           alert('Publication created successfully!')
+          this.$router.push({ path: '/mainPage_publisher', query: { token: localStorage.getItem('token') } })
         } catch (error) {
           console.error('Error while creating book:', error)
           alert('Failed to create publication. Please try again.')
