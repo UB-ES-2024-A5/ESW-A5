@@ -17,6 +17,7 @@ class BookService {
         console.error('Error al obtener los libros', error)
       })
   }
+
   getAllBooks () {
     const token = localStorage.getItem('token')
     return http.get(`/api/v1/books/`, {
@@ -30,7 +31,9 @@ class BookService {
       })
       .catch(error => {
         console.error('Error al obtener los libros', error)
-      
+      }) // Ensure this line ends with a semicolon
+  }
+
   createBook (data) {
     const token = localStorage.getItem('token')
     if (!token) {

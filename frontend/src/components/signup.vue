@@ -119,7 +119,7 @@
             <input type="checkbox" v-model="agreedToTerms" required />
             <label>I agree to all statements in <span class="terms-link">terms and conditions</span></label>
           </div>
-          <button type="submit" class="signup-button">register</button>
+          <button type="submit" @click="register_user" class="signup-button">register</button>
         </form>
 
         <!-- Enlace para Iniciar Sesión -->

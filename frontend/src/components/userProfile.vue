@@ -30,7 +30,7 @@
         <div class="wishlist-content">
           <h2>Your Wishlist</h2>
           <ul>
-            <li v-for="book in user.wishlist" :key="book.id">
+            <li v-for="book in user.wishlist.data" :key="book.id">
               <router-link :to="{ path: '/book', query: { bookId: book.id } }">
                 <strong>{{ book.title }}</strong>
               </router-link>
@@ -100,18 +100,16 @@ export default {
     },
     async fetchWishlistsInformation () {
       const res = await wishlistServices.getMyWishlists()
-      this.wishlistId = res.data.data[0].id
+      this.wishlistId = res.data[0].id
       this.fetchBooksInWishlist(this.wishlistId)
     },
     async fetchBooksInWishlist (id) {
       const res = await wishlistServices.readBooksOfWishlist(id)
       console.log(res)
-      this.user.wishlist = res.data.data
-      console.log(this.user.wishlist)
+      this.user.wishlist = res.data
     }
   },
   mounted () {
-    console.log('Componente montado')
     this.fetchUserProfile()
   }
 }

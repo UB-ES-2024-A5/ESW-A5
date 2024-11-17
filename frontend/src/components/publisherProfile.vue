@@ -3,7 +3,7 @@
   <div class="profile-container" :style="{ backgroundImage: 'url(' + backgroundImage + ')' }">
     <div class="profile-box">
       <div class="profile-info">
-        <h1>User Profile</h1>
+        <h1>Publisher Profile</h1>
         <div class="profile-image">
           <img :src="userProfileImage" alt="Profile Picture" />
         </div>
@@ -33,8 +33,8 @@ import bookServices from '../services/BookServices.js'
 export default {
   data () {
     return {
-      backgroundImage: require('@/assets/foto_fondo_login.png'),
-      userProfileImage: require('@/assets/user_icon.png'), // Default image
+      backgroundImage: require('@/assets/fondo_profile.png'),
+      userProfileImage: require('@/assets/placeholder_image.png'), // Default placeholder image
       user: {
         name: '',
         email: '',
@@ -89,8 +89,9 @@ export default {
 /* Profile box style */
 .profile-box {
   display: flex;
-  width: 1000px;
-  padding: 30px;
+  width: 600px; /* Ajustar el ancho si es necesario */
+  height: 400px;
+  padding: 40px;
   background: rgba(255, 255, 255, 0.8);
   border-radius: 10px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
