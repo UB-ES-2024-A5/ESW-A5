@@ -2,7 +2,6 @@
   <div class="background-container">
     <!-- Header con campo de búsqueda y botón de inicio de sesión en la esquina superior derecha -->
     <header class="header">
-      <input type="text" placeholder="Search for a publication" class="search-bar" />
       <router-link to="/login" class="sign-in-btn">Sign in</router-link>
     </header>
 
@@ -12,7 +11,8 @@
       <p class="subtitle">The most complete reading social network in the world</p>
       <div class="buttons">
         <router-link to="/signup" class="sign-up-btn">Sign up as user</router-link>
-        <router-link to="/signuppublisher" class="sign-up-btn">Sign up as publisher</router-link>
+        <router-link to="/signupEdit" class="sign-up-btn">Sign up as publisher</router-link>
+        <router-link to="/mainpage_guest" class="sign-up-btn">Guest access</router-link>
       </div>
     </main>
   </div>

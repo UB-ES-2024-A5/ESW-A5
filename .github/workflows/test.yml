@@ -84,6 +84,31 @@ jobs:
         with:
           name: coverage-html
           path: backend/htmlcov
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+          
+      - name: Run Jest tests
+        run: |
+          cd frontend
+          npm test
+      - name: Run Playwright tests
+        run: |
+          # Iniciar el backend
+          cd ../backend
+          nohup poetry run uvicorn app.main:app --reload &
+          # Esperar a que el backend inicie
+          sleep 5
+          # Iniciar el frontend
+          cd ../frontend
+          nohup npm run dev &
+          # Esperar a que el frontend inicie
+          sleep 5
+          # Ejecutar las pruebas de Playwright
+          npx playwright test --project=chromium
+
   # https://github.com/marketplace/actions/alls-green#why
   alls-green:  # This job does nothing and is only used for the branch protection
     if: always()
