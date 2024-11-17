@@ -10,6 +10,7 @@ import mainpagePublisher from '../components/mainPagePublisher.vue'
 import userProfile from '../components/userProfile.vue'
 import publisherProfile from '../components/publisherProfile.vue'
 import book from '../components/book.vue'
+import createPublication from '../components/createPublication.vue'
 
 Vue.use(Router)
 export default new Router({
@@ -63,6 +64,9 @@ export default new Router({
       path: '/book',
       name: 'book',
       component: book
+      path: '/create_publication',
+      name: 'create_publication',
+      component: createPublication
     }
   ]
 })
