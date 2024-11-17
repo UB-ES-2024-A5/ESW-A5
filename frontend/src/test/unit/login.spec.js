@@ -1,12 +1,39 @@
-import { mount } from '@vue/test-utils';
+import { mount, createLocalVue } from '@vue/test-utils';
+import VueRouter from 'vue-router';
 import Login from '../../components/login.vue';
-import LoginService from '../../services/LoginServices';
+import userServices from '../../services/UserServices';
 
 import axios from 'axios';
 
-jest.mock('axios', () => ({
-  post: jest.fn(),
-  create : jest.fn()
+
+const localVue = createLocalVue();
+localVue.use(VueRouter);
+const router = new VueRouter();
+jest.mock('axios', () => {
+  return {
+    post: jest.fn(),
+    create: jest.fn(() => ({
+      interceptors: {
+        request: { use: jest.fn(), eject: jest.fn() },
+        response: { use: jest.fn(), eject: jest.fn() },
+      },
+    })),
+    defaults: {
+      headers: {
+        common: {
+          Authorization: '', // Mocking Authorization header
+        },
+      },
+    },
+    interceptors: {
+      request: { use: jest.fn(), eject: jest.fn() },
+      response: { use: jest.fn(), eject: jest.fn() },
+    },
+  };
+});
+
+jest.mock('../../services/UserServices', () => ({
+  getActualUser: jest.fn(),
 }));
   
   describe('login.vue', () => {
@@ -15,10 +42,14 @@ jest.mock('axios', () => ({
     beforeEach(() => {
       wrapper = mount(Login, {
         stubs: {
-          'router-link': true
-        }
+          'router-link': true,
+        },
       });
-      wrapper.vm.$router = { push: jest.fn() };
+  
+      // Mock the $router.push method
+      wrapper.vm.$router = {
+        push: jest.fn(), // Mock the push function
+      };
     });
   
     it('renders correctly', () => {
@@ -28,6 +59,11 @@ jest.mock('axios', () => ({
     it('should login successfully and redirect to main page', async () => {
 
         axios.post.mockResolvedValue({ data: { access_token: 'dummy_token' } });
+
+        userServices.getActualUser = jest.fn().mockResolvedValue({
+          email: 'test@example.com',
+          is_editor: false
+        });
       
         await wrapper.setData({
           email: 'test@example.com',
@@ -43,10 +79,11 @@ jest.mock('axios', () => ({
             { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
           );
        
+        await wrapper.vm.$nextTick();
       
         expect(wrapper.vm.$router.push).toHaveBeenCalledWith({
-            path: '/mainpage_user',
-            query: { email: 'test@example.com', logged: true, token: 'dummy_token' }
+            path: '/mainPage_user',
+            query: { email: 'test@example.com', token: 'dummy_token' }
           });
       });
 
