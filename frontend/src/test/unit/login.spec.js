@@ -2,13 +2,14 @@ import { mount, createLocalVue } from '@vue/test-utils';
 import VueRouter from 'vue-router';
 import Login from '../../components/login.vue';
 import userServices from '../../services/UserServices';
+import WishlistServices from '../../services/WishlistServices';
+
 
 import axios from 'axios';
+function flushPromises() {
+  return new Promise(resolve => setImmediate(resolve));
+}
 
-
-const localVue = createLocalVue();
-localVue.use(VueRouter);
-const router = new VueRouter();
 jest.mock('axios', () => {
   return {
     post: jest.fn(),
@@ -21,7 +22,7 @@ jest.mock('axios', () => {
     defaults: {
       headers: {
         common: {
-          Authorization: '', // Mocking Authorization header
+          Authorization: '',
         },
       },
     },
@@ -35,6 +36,10 @@ jest.mock('axios', () => {
 jest.mock('../../services/UserServices', () => ({
   getActualUser: jest.fn(),
 }));
+
+jest.mock('../../services/WishlistServices', () => ({
+  createWishlistOnLogin : jest.fn(),
+}))
   
   describe('login.vue', () => {
     let wrapper;
@@ -59,18 +64,21 @@ jest.mock('../../services/UserServices', () => ({
     it('should login successfully and redirect to main page', async () => {
 
         axios.post.mockResolvedValue({ data: { access_token: 'dummy_token' } });
+        WishlistServices.createWishlistOnLogin = jest.fn().mockResolvedValue()
 
         userServices.getActualUser = jest.fn().mockResolvedValue({
           email: 'test@example.com',
           is_editor: false
         });
+
+       
       
         await wrapper.setData({
           email: 'test@example.com',
           password: 'correctpassword'
         });
     
-        await wrapper.find('.login-button').trigger('click');
+        await wrapper.find('form').trigger('submit.prevent');
         await wrapper.vm.$nextTick();
       
         expect(axios.post).toHaveBeenCalledWith(
@@ -80,9 +88,47 @@ jest.mock('../../services/UserServices', () => ({
           );
        
         await wrapper.vm.$nextTick();
+        
+        expect(WishlistServices.createWishlistOnLogin).toHaveBeenCalled();
+        await wrapper.vm.$nextTick();
+        await flushPromises();
       
         expect(wrapper.vm.$router.push).toHaveBeenCalledWith({
             path: '/mainPage_user',
+            query: { email: 'test@example.com', token: 'dummy_token' }
+          });
+      });
+
+      it('should login successfully and redirect to editor page', async () => {
+
+        axios.post.mockResolvedValue({ data: { access_token: 'dummy_token' } });
+        WishlistServices.createWishlistOnLogin = jest.fn().mockResolvedValue()
+
+        userServices.getActualUser = jest.fn().mockResolvedValue({
+          email: 'test@example.com',
+          is_editor: true
+        });
+
+       
+      
+        await wrapper.setData({
+          email: 'test@example.com',
+          password: 'correctpassword'
+        });
+    
+        await wrapper.find('form').trigger('submit.prevent');
+        await wrapper.vm.$nextTick();
+      
+        expect(axios.post).toHaveBeenCalledWith(
+            `${process.env.API_URL}/api/v1/login/access-token`, 
+            'username=test@example.com&password=correctpassword',
+            { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+          );
+       
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.vm.$router.push).toHaveBeenCalledWith({
+            path: '/mainPage_publisher',
             query: { email: 'test@example.com', token: 'dummy_token' }
           });
       });
@@ -96,7 +142,7 @@ jest.mock('../../services/UserServices', () => ({
           email: 'test@example.com',
           password: 'incorrectpassword'
         });
-        await wrapper.find('.login-button').trigger('click');
+        await wrapper.find('form').trigger('submit.prevent');
         await wrapper.vm.$nextTick();
 
         expect(window.alert).toHaveBeenCalledWith('Email or Password incorrect');
