@@ -54,7 +54,7 @@ test.afterEach(async ({page}) => {
   
       await page.click('button.login-button');
 
-      await expect(page).toHaveURL(new RegExp('/mainpage_user'));
+      await expect(page).toHaveURL(new RegExp('/mainPage_user'));
 
     });
 
