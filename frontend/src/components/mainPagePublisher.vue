@@ -23,7 +23,7 @@
         <button class="carousel-btn left-btn" @click="previousSlide">‹</button>
         <div class="carousel">
           <div class="carousel-track" :style="{ transform: `translateX(-${currentIndex * 100}%)` }">
-            <img v-for="(image, index) in images" :key="index" :src="image" class="carousel-image" />
+           <img v-for="(book, index) in books" :key="index" :src="book.img" class="carousel-image" @click="goToBook(book.id)" />
           </div>
         </div>
         <button class="carousel-btn right-btn" @click="nextSlide">›</button>
@@ -33,6 +33,7 @@
 </template>
 
 <script>
+import BookServices from '../services/BookServices'
 export default {
   name: 'mainPageGuest',
   data () {
@@ -47,7 +48,8 @@ export default {
         require('@/assets/19557g.png')
       ],
       currentIndex: 0,
-      imagesPerSlide: 5
+      imagesPerSlide: 5,
+      books: []
     }
   },
   computed: {
@@ -65,7 +67,19 @@ export default {
       if (this.currentIndex > 0) {
         this.currentIndex--
       }
+    },
+    goToBook (index) {
+      this.$router.push({path: '/book', query: {bookId: index}})
+    },
+
+    async getAllBooks () {
+      BookServices.getAllBooks().then(async data => {
+        this.books = data.data
+      })
     }
+  },
+  mounted () {
+    this.getAllBooks()
   }
 }
 </script>
