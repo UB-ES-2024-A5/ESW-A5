@@ -124,12 +124,6 @@ jobs:
           npx playwright install
           # Ejecutar las pruebas de Playwright
           npx playwright test --project=chromium
-        continue-on-error: true
-      - name: Upload Playwright traces
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-traces
-          path: frontend/test-results/**/*.zip
 
   # https://github.com/marketplace/actions/alls-green#why
   alls-green:  # This job does nothing and is only used for the branch protection
