@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "axios": "^0.25.0",
+    "pg": "^8.13.1",
     "sqlite3": "^5.1.7",
     "vue": "^2.5.2",
     "vue-carousel": "^0.18.0",

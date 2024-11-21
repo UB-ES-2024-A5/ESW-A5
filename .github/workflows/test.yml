@@ -51,6 +51,7 @@ jobs:
           python-version: '3.10'
       - uses: Gr1N/setup-poetry@v8
       - run: poetry --version
+
       - name: Install dependencies
         run: |
           cd backend          
@@ -94,18 +95,32 @@ jobs:
         run: |
           cd frontend
           npm test
+
+      - name: Install Playwright dependencies
+        run: sudo npx playwright install-deps
+
       - name: Run Playwright tests
+        env:
+            ENVIRONMENT: "staging"
+            PROJECT_NAME: ${{ env.APPLICATION_NAME }}
+            FIRST_SUPERUSER: ${{ env.ADMIN_USER }}
+            FIRST_SUPERUSER_PASSWORD: ${{ env.ADMIN_PASSWORD }}
+            BACKEND_CORS_ORIGINS: http://localhost:8080
+
         run: |
           # Iniciar el backend
-          cd ../backend
+          echo "API_V1_STR: ${API_V1_STR}"
+          cd backend
           nohup poetry run uvicorn app.main:app --reload &
           # Esperar a que el backend inicie
           sleep 5
           # Iniciar el frontend
           cd ../frontend
+          echo "API_V1_STR: ${API_V1_STR}"
           nohup npm run dev &
           # Esperar a que el frontend inicie
           sleep 5
+          npx playwright install
           # Ejecutar las pruebas de Playwright
           npx playwright test --project=chromium
 
