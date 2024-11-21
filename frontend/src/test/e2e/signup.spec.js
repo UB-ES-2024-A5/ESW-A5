@@ -17,8 +17,8 @@ async function clearUserDatabase() {
 
     try {
       await client.connect();
-      const res1 = await client.query("SELECT * FROM user");
-      console.log(res1.rows);
+      const res1 = await client.query('SELECT * FROM "user"');
+      console.log('QUERY RESULTS', res1);
       const res = await client.query('DELETE FROM "user"');
       console.log('Número de filas afectadas:', res.rowCount);
     } catch (err) {
