@@ -19,7 +19,7 @@ env:
   ADMIN_USER: admin@example.com
   ADMIN_PASSWORD: admin_pass
   APPLICATION_NAME: ub_es_a5
-  API_URL: "http://localhost:8000"
+  API_URL: http://localhost:8000/
 jobs:
 
   test:
