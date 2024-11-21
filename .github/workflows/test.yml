@@ -19,7 +19,7 @@ env:
   ADMIN_USER: admin@example.com
   ADMIN_PASSWORD: admin_pass
   APPLICATION_NAME: ub_es_a5
-  API_URL: http://localhost:8000/
+  API_URL: http://localhost:8000
 jobs:
 
   test:
@@ -110,7 +110,7 @@ jobs:
         run: |
           # Iniciar el backend
           cd backend
-          nohup poetry run uvicorn app.main:app --reload &
+          nohup poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload &
           # Esperar a que el backend inicie
           sleep 5
           # Iniciar el frontend
