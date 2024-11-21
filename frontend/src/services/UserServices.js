@@ -23,7 +23,7 @@ class UserService {
   }
 
   update (id, data) {
-    return http.put(`/api/v1/users/${id}`, data)
+    return http.put(`http://localhost:8000/api/v1/users/${id}`, data)
       .then((res) => {
         return res.data
       })
