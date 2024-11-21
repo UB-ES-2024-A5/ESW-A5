@@ -19,6 +19,7 @@ env:
   ADMIN_USER: admin@example.com
   ADMIN_PASSWORD: admin_pass
   APPLICATION_NAME: ub_es_a5
+  API_URL: "http://localhost:8000"
 jobs:
 
   test:
@@ -105,6 +106,7 @@ jobs:
             PROJECT_NAME: ${{ env.APPLICATION_NAME }}
             FIRST_SUPERUSER: ${{ env.ADMIN_USER }}
             FIRST_SUPERUSER_PASSWORD: ${{ env.ADMIN_PASSWORD }}
+            API_URL: ${{ env.API_URL }}
         run: |
           # Iniciar el backend
           cd backend
