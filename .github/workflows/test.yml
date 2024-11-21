@@ -19,7 +19,6 @@ env:
   ADMIN_USER: admin@example.com
   ADMIN_PASSWORD: admin_pass
   APPLICATION_NAME: ub_es_a5
-  # API_URL: http://localhost:8000
 jobs:
 
   test:
@@ -107,7 +106,7 @@ jobs:
             FIRST_SUPERUSER: ${{ env.ADMIN_USER }}
             FIRST_SUPERUSER_PASSWORD: ${{ env.ADMIN_PASSWORD }}
             BACKEND_CORS_ORIGINS: http://localhost:8080
-            # API_URL: ${{ env.API_URL }}
+
         run: |
           # Iniciar el backend
           echo "API_V1_STR: ${API_V1_STR}"
