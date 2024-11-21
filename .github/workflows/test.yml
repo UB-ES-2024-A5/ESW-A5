@@ -109,11 +109,11 @@ jobs:
             API_URL: ${{ env.API_URL }}
         run: |
           # Iniciar el backend
+          echo "API_V1_STR: ${API_V1_STR}"
           cd backend
           nohup poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload &
           # Esperar a que el backend inicie
           sleep 5
-          poetry run python -c "from app.settings import settings; print(settings.API_V1_STR)"
           # Iniciar el frontend
           cd ../frontend
           nohup npm run dev &
