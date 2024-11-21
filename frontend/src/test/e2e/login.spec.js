@@ -17,7 +17,7 @@ async function clearUserDatabase() {
     try {
       await client.connect();
       const res = await client.query('DELETE FROM "user"');
-      console.log('Número de filas afectadas:', res.rowCount);
+      console.log('Número de filas afectadas: LOGIN', res.rowCount);
     } catch (err) {
       console.error('Error al conectar o limpiar la base de datos PostgreSQL', err.stack);
     } finally {
