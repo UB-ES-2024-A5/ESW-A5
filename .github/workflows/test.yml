@@ -106,6 +106,7 @@ jobs:
             PROJECT_NAME: ${{ env.APPLICATION_NAME }}
             FIRST_SUPERUSER: ${{ env.ADMIN_USER }}
             FIRST_SUPERUSER_PASSWORD: ${{ env.ADMIN_PASSWORD }}
+            BACKEND_CORS_ORIGINS: http://localhost:8080
             # API_URL: ${{ env.API_URL }}
         run: |
           # Iniciar el backend
@@ -120,7 +121,6 @@ jobs:
           nohup npm run dev &
           # Esperar a que el frontend inicie
           sleep 5
-          netstat -tuln | grep LISTEN || echo "No se encontró un servidor ejecutándose"
           npx playwright install
           # Ejecutar las pruebas de Playwright
           npx playwright test --project=chromium
