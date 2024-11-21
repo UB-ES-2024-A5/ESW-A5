@@ -16,14 +16,14 @@ class UserService {
   }
 
   create (data) {
-    return http.post('/api/v1/users/', data)
+    return http.post('http://localhost:8000/api/v1/users/', data)
       .then((res) => {
         return res.data
       })
   }
 
   update (id, data) {
-    return http.put(`http://localhost:8000/api/v1/users/${id}`, data)
+    return http.put(`/api/v1/users/${id}`, data)
       .then((res) => {
         return res.data
       })
