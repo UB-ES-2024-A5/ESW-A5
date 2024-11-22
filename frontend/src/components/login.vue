@@ -27,6 +27,7 @@
 
 <script>
 import axios from 'axios'
+import Swal from 'sweetalert2'
 import userServices from '../services/UserServices.js'
 import WishlistServices from '../services/WishlistServices.js'
 
@@ -68,21 +69,33 @@ export default {
 
         // Verificamos si el usuario es editor y redirige en consecuencia
         if (userInfo.is_editor) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Welcome!',
+            text: 'Redirecting to the publisher\'s page...',
+            timer: 2000,
+            showConfirmButton: false
+          })
           this.$router.push({ path: '/mainPage_publisher', query: { email: this.email, token: this.token } })
         } else {
           await this.createWishlist()
+          Swal.fire({
+            icon: 'success',
+            title: 'Welcome!',
+            text: 'Redirecting to the user\'s page...',
+            timer: 2000,
+            showConfirmButton: false
+          })
           this.$router.push({ path: '/mainPage_user', query: { email: this.email, token: this.token } })
         }
       } catch (error) {
         console.error(error)
-        alert('Email or Password incorrect')
+        Swal.fire({
+          icon: 'error',
+          title: 'Login Failed',
+          text: 'Email or Password incorrect. Please try again.'
+        })
       }
-    },
-    register_user () {
-      this.$router.push('/create-account')
-    },
-    back_matches () {
-      this.$router.push('/')
     },
     async createWishlist () {
       await WishlistServices.createWishlistOnLogin()
@@ -152,6 +165,9 @@ h1 {
 
 /* Login button */
 .login-button {
+  font-family: 'Roboto', sans-serif; /* Nueva fuente */
+  font-weight: bold; /* Negrita */
+  font-size: 16px;
   width: 100%;
   padding: 12px;
   background-color: #007bff;

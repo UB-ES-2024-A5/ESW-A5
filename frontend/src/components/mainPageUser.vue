@@ -2,8 +2,7 @@
   <div class="background-container">
     <!-- Header con campo de búsqueda y botón de inicio de sesión -->
     <header class="header">
-      <!--
-      <input type="text" placeholder="Search for a publication" class="search-bar" />-->
+      <input type="text" placeholder="Search for a publication" class="search-bar" />
       <router-link to="/" class="sign-in-btn">Log out</router-link>
 
       <!-- Enlace al perfil de usuario con icono de imagen -->
