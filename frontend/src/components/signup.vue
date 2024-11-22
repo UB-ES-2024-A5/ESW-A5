@@ -119,7 +119,7 @@
             <input type="checkbox" v-model="agreedToTerms" required />
             <label>I agree to all statements in <span class="terms-link">terms and conditions</span></label>
           </div>
-          <button type="submit" @click="register_user" class="signup-button">register</button>
+          <button type="submit" @click="register_user" class="signup-button">Register</button>
         </form>
 
         <!-- Enlace para Iniciar Sesión -->
@@ -136,8 +136,10 @@
 </template>
 
 <script>
+import Swal from 'sweetalert2'
 import UserService from '../services/UserServices'
 import AccountService from '../services/AccountServices'
+
 export default {
   data () {
     return {
@@ -229,18 +231,29 @@ export default {
         UserService.create(data)
           .then((res) => {
             const userId = res.id
-            alert('La cuenta se ha creado correctamente. Por favor inicie sesión.')
+            Swal.fire({
+              title: 'Account Created!',
+              text: 'La cuenta se ha creado correctamente. Por favor inicie sesión.',
+              icon: 'success',
+              confirmButtonText: 'OK'
+            })
             AccountService.create(userId)
-              .then(() => {
-              })
             this.$router.push({ path: '/login' })
           })
           .catch((error) => {
             console.error(error)
-            alert('Hubo un error al crear la cuenta.')
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'There was an error creating your account.'
+            })
           })
       } else {
-        alert('Please correct the errors in the form.')
+        Swal.fire({
+          icon: 'warning',
+          title: 'Form Error',
+          text: 'Please correct the errors in the form.'
+        })
       }
     }
   }
@@ -248,6 +261,12 @@ export default {
 </script>
 
 <style scoped>
+.signup-button {
+  font-family: 'Roboto', sans-serif; /* Nueva fuente */
+  font-weight: bold;
+  font-size: 16px;
+}
+
 .input-group {
   position: relative;
   margin-bottom: 15px;

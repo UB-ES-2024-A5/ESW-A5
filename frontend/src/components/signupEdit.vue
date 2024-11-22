@@ -137,8 +137,10 @@
 </template>
 
 <script>
+import Swal from 'sweetalert2'
 import UserService from '../services/UserServices'
 import AccountService from '../services/AccountServices'
+
 export default {
   data () {
     return {
@@ -229,18 +231,31 @@ export default {
         UserService.create(data)
           .then((res) => {
             const userId = res.id
-            alert('La cuenta se ha creado correctamente. Por favor inicie sesión.')
-            AccountService.create(userId)
-              .then(() => {
-              })
+            Swal.fire({
+              title: 'Account Created!',
+              text: 'La cuenta se ha creado correctamente. Por favor inicie sesión.',
+              icon: 'success',
+              confirmButtonText: 'OK'
+            })
+            AccountService.create(userId).then(() => {})
             this.$router.push({ path: '/login' })
           })
           .catch((error) => {
             console.error(error)
-            alert('Hubo un error al crear la cuenta.')
+            Swal.fire({
+              title: 'Error',
+              text: 'Hubo un error al crear la cuenta.',
+              icon: 'error',
+              confirmButtonText: 'Try Again'
+            })
           })
       } else {
-        alert('Please correct the errors in the form.')
+        Swal.fire({
+          title: 'Form Errors',
+          text: 'Please correct the errors in the form.',
+          icon: 'warning',
+          confirmButtonText: 'Review'
+        })
       }
     }
   }
@@ -248,6 +263,13 @@ export default {
 </script>
 
 <style scoped>
+
+.signup-button {
+  font-family: 'Roboto', sans-serif; /* Nueva fuente */
+  font-weight: bold;
+  font-size: 16px;
+}
+
 .input-group {
   position: relative;
   margin-bottom: 15px;
