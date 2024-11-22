@@ -37,7 +37,7 @@ async function clearUserDatabase() {
   }
 }
 
-test.describe('Signup Page Tests', () => {
+test.describe('Signup Publisher Page Tests', () => {
   
     test('should successfully create a new user account', async ({ page }) => {
   
