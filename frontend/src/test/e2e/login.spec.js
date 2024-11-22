@@ -18,7 +18,6 @@ async function clearUserDatabase() {
     try {
       await client.connect();
       const res = await client.query('DELETE FROM "user"');
-      console.log('Número de filas afectadas: LOGIN', res.rowCount);
     } catch (err) {
       console.error('Error al conectar o limpiar la base de datos PostgreSQL', err.stack);
     } finally {
@@ -42,7 +41,6 @@ async function clearUserDatabase() {
   
   test.describe('Login Page Tests', () => {
     test('should successfully log in with the created user', async ({ page }) => {
-      console.log('API_URL:', process.env.API_URL);
 
       await clearUserDatabase();
       await page.goto('http://localhost:8080/#/');
