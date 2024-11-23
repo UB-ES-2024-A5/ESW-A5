@@ -14,9 +14,9 @@ class FollowerBase(SQLModel):
 class Follower(FollowerBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     # ID de la cuenta que sigue
-    follower_id: uuid.UUID = Field(foreign_key="account.id", ondelete="CASCADE")
+    follower_id: uuid.UUID = Field(foreign_key="account.id")
     # ID de la cuenta que es seguida
-    following_id: uuid.UUID = Field(foreign_key="account.id", ondelete="CASCADE")
+    following_id: uuid.UUID = Field(foreign_key="account.id")
     # Relación con la cuenta que sigue
     follower_account: "Account" = Relationship(back_populates="following")
     # Relación con la cuenta que es seguida
