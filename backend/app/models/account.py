@@ -16,8 +16,13 @@ class Account(AccountBase, table=True):
     wishlists: List["WishList"] = Relationship(back_populates="account")
     reviews: List["Review"] = Relationship(back_populates="account")
     # El cascade sirve para assegurar que si una cuenta es eliminada, todos los Follower relacionados con esta cuenta se elimina
-    following: List["Follower"] = Relationship(back_populates="following_account", sa_relationship_kwargs={"cascade": "all, delete"})
-    followers: List["Follower"] = Relationship(back_populates="followers_account", sa_relationship_kwargs={"cascade": "all, delete"})
+    following: List["Follower"] = Relationship(
+        back_populates="following_account",
+        sa_relationship_kwargs={"cascade": "all, delete", "foreign_keys": "Follower.following_id"}    )
+    followers: List["Follower"] = Relationship(
+        back_populates="followers_account",
+        sa_relationship_kwargs={"cascade": "all, delete", "foreign_keys": "Follower.follower_id"}
+   )
 
 class AccountUpdate(SQLModel):
     photo: str | None = None
