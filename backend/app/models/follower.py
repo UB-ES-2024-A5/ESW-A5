@@ -18,7 +18,7 @@ class Follower(FollowerBase, table=True):
     # ID de la cuenta que es seguida
     following_id: uuid.UUID = Field(foreign_key="account.id")
     # Relación con la cuenta que sigue
-    follower_account: "Account" = Relationship(
+    followers_account: "Account" = Relationship(
         back_populates="following",
         sa_relationship_kwargs=dict(foreign_keys="Follower.follower_id")
     )
