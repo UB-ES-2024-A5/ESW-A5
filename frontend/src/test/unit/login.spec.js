@@ -3,6 +3,7 @@ import VueRouter from 'vue-router';
 import Login from '../../components/login.vue';
 import userServices from '../../services/UserServices';
 import WishlistServices from '../../services/WishlistServices';
+import Swal from 'sweetalert2';
 
 
 import axios from 'axios';
@@ -71,7 +72,7 @@ jest.mock('../../services/WishlistServices', () => ({
           is_editor: false
         });
 
-       
+        const SwalMock = jest.spyOn(Swal, 'fire').mockResolvedValue();
       
         await wrapper.setData({
           email: 'test@example.com',
@@ -92,6 +93,16 @@ jest.mock('../../services/WishlistServices', () => ({
         expect(WishlistServices.createWishlistOnLogin).toHaveBeenCalled();
         await wrapper.vm.$nextTick();
         await flushPromises();
+
+        expect(SwalMock).toHaveBeenCalledWith({
+          icon: 'success',
+          title: 'Welcome!',
+          text: "Redirecting to the user's page...",
+          timer: 2000,
+          showConfirmButton: false
+        });
+
+        SwalMock.mockRestore();
       
         expect(wrapper.vm.$router.push).toHaveBeenCalledWith({
             path: '/mainPage_user',
@@ -109,7 +120,7 @@ jest.mock('../../services/WishlistServices', () => ({
           is_editor: true
         });
 
-       
+        const SwalMock = jest.spyOn(Swal, 'fire').mockResolvedValue();
       
         await wrapper.setData({
           email: 'test@example.com',
@@ -127,6 +138,16 @@ jest.mock('../../services/WishlistServices', () => ({
        
         await wrapper.vm.$nextTick();
 
+        expect(SwalMock).toHaveBeenCalledWith({
+          icon: 'success',
+          title: 'Welcome!',
+          text: "Redirecting to the publisher's page...",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      
+        SwalMock.mockRestore();
+
         expect(wrapper.vm.$router.push).toHaveBeenCalledWith({
             path: '/mainPage_publisher',
             query: { email: 'test@example.com', token: 'dummy_token' }
@@ -136,7 +157,7 @@ jest.mock('../../services/WishlistServices', () => ({
       it('should show error if login fails', async () => {
         axios.post.mockRejectedValue(new Error('Invalid credentials'));
 
-        window.alert = jest.fn();
+        const SwalMock = jest.spyOn(Swal, 'fire').mockResolvedValue();
 
         await wrapper.setData({
           email: 'test@example.com',
@@ -145,7 +166,13 @@ jest.mock('../../services/WishlistServices', () => ({
         await wrapper.find('form').trigger('submit.prevent');
         await wrapper.vm.$nextTick();
 
-        expect(window.alert).toHaveBeenCalledWith('Email or Password incorrect');
+        expect(SwalMock).toHaveBeenCalledWith({
+          icon: 'error',
+          title: 'Login Failed',
+          text: 'Email or Password incorrect. Please try again.'
+        });
+      
+        SwalMock.mockRestore()
       
     });
 
