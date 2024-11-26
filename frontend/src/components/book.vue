@@ -19,7 +19,7 @@
         <div class="info">
           <p><strong>Author:</strong> {{ book.author || 'Author example' }}</p>
           <p><strong>Genre:</strong> {{ book.gender_main || 'Genre1, Genre2' }}</p>
-          <p><strong>Publisher:</strong> {{ user.publisher || 'Publisher example' }}</p>
+          <p><strong>Publisher:</strong> {{ user.name || 'Publisher example' }}</p>
           <p><strong>Year of the publication:</strong> {{ book.publication_year || 'Year example' }}</p>
           <p><strong>ISBN:</strong> {{ book.isbn || 'ISBN example' }}</p>
           <p><strong>Minimum Price:</strong> {{ book.price || 'Price example' }}</p>
@@ -72,7 +72,8 @@ export default {
             price: res.data.price,
             synopsis: res.data.synopsis,
             img: res.data.img,
-            list_links: res.data.list_links || []
+            list_links: res.data.list_links || [],
+            user_id: res.data.account_id
           }
 
           this.comments = res.data.comments || []
@@ -84,11 +85,13 @@ export default {
         })
     },
     fetchBookPublisher () {
-      const path = process.env.API_URL + '/api/v1/users/me'
+      const userid = this.book.user_id
+
+      const path = process.env.API_URL + '/api/v1/users/' + userid
       axios.get(path)
         .then((res) => {
           this.user = {
-            publisher: res.data.name
+            name: res.data.name
           }
         })
         .catch((error) => {
@@ -187,10 +190,10 @@ export default {
 }
 
 .image-container img {
-  width: 150px;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 10px;
+  width: 175px;
+  height: 250px;
+  object-fit: fill;
+  border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   margin-right: 0px;
 }
