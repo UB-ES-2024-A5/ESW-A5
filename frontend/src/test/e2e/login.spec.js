@@ -54,18 +54,17 @@ async function clearUserDatabase() {
       await page.check('input[type="checkbox"]');
       await page.click('button.signup-button');
 
-      // Esperar al diálogo que confirma que la cuenta se ha creado
-      const dialogPromise = new Promise((resolve) => {
-        page.on('dialog', async (dialog) => {
-          console.log('Diálogo detectado con mensaje:', dialog.message());
-          expect(dialog.message()).toBe('La cuenta se ha creado correctamente. Por favor inicie sesión.');
-          await dialog.accept();
-          resolve();
-        });
-      });
-      await dialogPromise;
+      const swal = page.locator('.swal2-container');
+      await expect(swal).toBeVisible();
 
-      // Asegurarse de que redirige a la página de login
+      const swalTitle = swal.locator('.swal2-title');
+      const swalText = swal.locator('.swal2-html-container');
+      await expect(swalTitle).toHaveText('Account Created!');
+      await expect(swalText).toHaveText('La cuenta se ha creado correctamente. Por favor inicie sesión.');
+
+      const confirmButton = swal.locator('.swal2-confirm');
+      await confirmButton.click();
+
       await expect(page).toHaveURL('http://localhost:8080/#/login');
       
 
@@ -87,16 +86,17 @@ async function clearUserDatabase() {
       await page.fill('input[placeholder="Password"]', 'wrongPassword!');
       await page.click('button.login-button');
   
-      const dialogPromise = new Promise(resolve => {
-        page.on('dialog', async dialog => {
-          console.log('Diálogo detectado con mensaje:', dialog.message());
-          expect(dialog.message()).toBe('Email or Password incorrect');
-          
-          await dialog.accept();
-          resolve();
-        });
-      });
-      await dialogPromise;
+      const swal = page.locator('.swal2-container');
+      await expect(swal).toBeVisible();
+
+      const swalTitle = swal.locator('.swal2-title');
+      const swalText = swal.locator('.swal2-html-container');
+      await expect(swalTitle).toHaveText('Login Failed');
+      await expect(swalText).toHaveText('Email or Password incorrect. Please try again.');
+
+      const confirmButton = swal.locator('.swal2-confirm');
+      await confirmButton.click();
+      
       await expect(page).toHaveURL('http://localhost:8080/#/login');
     });
     test('should navigate to the signup page when "Sign Up" link is clicked', async ({ page }) => {
