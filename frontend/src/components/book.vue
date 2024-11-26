@@ -19,7 +19,7 @@
         <div class="info">
           <p><strong>Author:</strong> {{ book.author || 'Author example' }}</p>
           <p><strong>Genre:</strong> {{ book.gender_main || 'Genre1, Genre2' }}</p>
-          <p><strong>Publisher:</strong> {{ book.publisher || 'Publisher example' }}</p>
+          <p><strong>Publisher:</strong> {{ user.publisher || 'Publisher example' }}</p>
           <p><strong>Year of the publication:</strong> {{ book.publication_year || 'Year example' }}</p>
           <p><strong>ISBN:</strong> {{ book.isbn || 'ISBN example' }}</p>
           <p><strong>Minimum Price:</strong> {{ book.price || 'Price example' }}</p>
@@ -51,7 +51,8 @@ export default {
       comments: [],
       starSelected: false,
       wishlistId: null,
-      bookid2: ''
+      bookid2: '',
+      user: {}
     }
   },
   methods: {
@@ -66,7 +67,6 @@ export default {
             title: res.data.title,
             author: res.data.author,
             gender_main: res.data.gender_main,
-            publisher: res.data.publisher,
             publication_year: res.data.publication_year,
             isbn: res.data.isbn,
             price: res.data.price,
@@ -77,6 +77,19 @@ export default {
 
           this.comments = res.data.comments || []
           this.checkIfBookInWishlist(res.data.isbn)
+        })
+        .catch((error) => {
+          console.error(error)
+          alert('Failed to load book details')
+        })
+    },
+    fetchBookPublisher () {
+      const path = process.env.API_URL + '/api/v1/users/me'
+      axios.get(path)
+        .then((res) => {
+          this.user = {
+            publisher: res.data.name
+          }
         })
         .catch((error) => {
           console.error(error)
@@ -133,6 +146,7 @@ export default {
   mounted () {
     this.fetchBookDetails()
     this.getWishlistId()
+    this.fetchBookPublisher()
   }
 }
 </script>
