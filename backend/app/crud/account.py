@@ -12,7 +12,9 @@ def create_account(session: Session, account: AccountCreate) -> Account:
     db_obj = Account(
         id=account.id,
         photo=account.photo,
-        bio=account.bio
+        bio=account.bio,
+        num_followers=0,
+        num_following=0
     )
     session.add(db_obj)
     session.commit()
