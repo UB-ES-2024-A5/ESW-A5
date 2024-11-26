@@ -72,9 +72,14 @@ test.describe('Signup Publisher Page Tests', () => {
       await page.fill('input[placeholder="CIF"]', 'G90909090');
       await page.fill('input[placeholder="Password"]', 'Password!123');
       await page.fill('input[placeholder="Confirm Password"]', 'Password!123');   
+      await page.check('input[type="checkbox"]'); 
       await page.click('button.signup-button');
+      await page.screenshot({ path: 'screenshot-error-missing-email.png' });
+      
       const notification = page.locator('text=Completa este campo');
       await expect(notification).toBeVisible();
+
+      
     });
 
     test('should show error for email already registered', async ({ page }) => {
