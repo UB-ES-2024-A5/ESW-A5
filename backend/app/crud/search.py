@@ -1,0 +1,1 @@
+""" Searches related CRUD methods """
