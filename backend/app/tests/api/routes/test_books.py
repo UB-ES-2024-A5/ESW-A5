@@ -93,7 +93,7 @@ def test_create_book(create_account,authenticate):
     assert response.json()["isbn"] == book_data["isbn"]
 
 def test_create_book_with_same_isbn(authenticate):
-    account = client.get("/api/v1/users/user/usernew232@example.com/")
+    account = client.get("/api/v1/users/by_email/usernew232@example.com/")
     account_id = account.json()['id']
     book_data = {
         "title" : "Marina",
@@ -114,7 +114,7 @@ def test_create_book_with_same_isbn(authenticate):
     assert response.status_code == 400
 
 def test_get_book_by_id(authenticate):
-    account = client.get("/api/v1/users/user/usernew232@example.com/")
+    account = client.get("/api/v1/users/by_email/usernew232@example.com/")
     account_id = account.json()['id']
     book_data = {
         "title" : "Marina",
@@ -163,7 +163,7 @@ def test_create_book_being_normal_user(create_account_2,authenticate_2):
     assert response.json()["detail"] == "User must be an editorial user."
 
 def test_create_book_not_being_current_user():
-    account = client.get("/api/v1/users/user/usernew232@example.com/")
+    account = client.get("/api/v1/users/by_email/usernew232@example.com/")
     account_id = account.json()['id']
     book_data = {
         "title" : "Marina",
@@ -181,7 +181,7 @@ def test_create_book_not_being_current_user():
    
 
 def test_create_book_with_repeated_links(authenticate):
-    account = client.get("/api/v1/users/user/usernew232@example.com/")
+    account = client.get("/api/v1/users/by_email/usernew232@example.com/")
     account_id = account.json()['id']
     book_data = {
         "title" : "Marina",
@@ -204,7 +204,7 @@ def test_create_book_with_repeated_links(authenticate):
 
 
 def test_create_book_with_isbn_with_less_than_10_digits(authenticate):
-    account = client.get("/api/v1/users/user/usernew232@example.com/")
+    account = client.get("/api/v1/users/by_email/usernew232@example.com/")
     account_id = account.json()['id']
     book_data = {
         "title" : "Marina",
@@ -226,8 +226,8 @@ def test_create_book_with_isbn_with_less_than_10_digits(authenticate):
     assert response.status_code == 422
 
 
-def test_create_book_with_isbn_with_less_than_10_digits(authenticate):
-    account = client.get("/api/v1/users/user/usernew232@example.com/")
+def test_create_book_with_isbn_with_more_than_13_digits(authenticate):
+    account = client.get("/api/v1/users/by_email/usernew232@example.com/")
     account_id = account.json()['id']
     book_data = {
         "title" : "Marina",
