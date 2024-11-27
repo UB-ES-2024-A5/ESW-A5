@@ -1,6 +1,6 @@
 """ Searches management routes """
 from fastapi import APIRouter, Depends, HTTPException, Query
-from typing import List, Union
+from typing import Any
 from sqlmodel import col, delete, func, select
 
 from app import crud
@@ -17,8 +17,8 @@ from app.models import (
 
 router = APIRouter()
 
-@router.get("/", response_model=List[Union[BookOut, UserPublic]])
-def get_search(*, session: SessionDep, query: str, limit: int = 10) -> Union[BookOut, UserPublic]:
+@router.get("/")
+def get_search(*, session: SessionDep, query: str, limit: int = 10) -> Any:
     """
     Gets a list of books and users matching the query.
     """

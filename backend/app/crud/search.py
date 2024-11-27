@@ -30,14 +30,17 @@ def query_items(session: Session, query: str, limit: int) -> Any:
     # Combinar resultados en una sola lista
     combined_results = []
 
+    # Si se quiere poner score para que se ordenen de una manera u otra, descomentar lineas
     for book in book_results:
         converted_book = convert_book_bookOut(book)
-        combined_results.append({"type": "book", "data": converted_book, "score": 1})
+        combined_results.append({"type": "book", "data": converted_book})
+        # combined_results.append({"type": "book", "data": converted_book, "score": 1})
 
     for user in user_results:
-        combined_results.append({"type": "user", "data": user, "score": 1})
+        combined_results.append({"type": "user", "data": user})
+        # combined_results.append({"type": "user", "data": user, "score": 1})
 
     # Ordenar por puntuación y limitar a los limit más relevantes
-    combined_results.sort(key=lambda x: x["score"], reverse=True)
+    # combined_results.sort(key=lambda x: x["score"], reverse=True)
 
     return combined_results[:limit]
