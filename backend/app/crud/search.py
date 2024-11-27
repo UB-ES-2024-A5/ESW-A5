@@ -18,14 +18,14 @@ def query_items(session: Session, query: str, limit: int) -> Any:
             )
         )
     )
-    book_results = session.exec(book_statement).all()
+    book_results = session.exec(book_statement).all()[:limit]
 
     # Búsqueda en usuarios
     user_statement = (
         select(User)
         .where(ilike_op(User.email, f"%{query}%"),)
     )
-    user_results = session.exec(user_statement).all()
+    user_results = session.exec(user_statement).all()[:limit]
 
     # Combinar resultados en una sola lista
     combined_results = []
@@ -43,4 +43,4 @@ def query_items(session: Session, query: str, limit: int) -> Any:
     # Ordenar por puntuación y limitar a los limit más relevantes
     # combined_results.sort(key=lambda x: x["score"], reverse=True)
 
-    return combined_results[:limit]
+    return combined_results
