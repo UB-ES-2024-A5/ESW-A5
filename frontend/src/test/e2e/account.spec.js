@@ -117,15 +117,16 @@ test.describe('Account creation Tests', () => {
         await page.fill('input[placeholder="Confirm Password"]', 'Password!123');
         await page.check('input[type="checkbox"]');    
         await page.click('button.signup-button');
-        const dialogPromise = new Promise(resolve => {
-          page.on('dialog', async dialog => {
-            console.log('Diálogo detectado con mensaje:', dialog.message());
-            expect(dialog.message()).toBe('La cuenta se ha creado correctamente. Por favor inicie sesión.');
-            await dialog.accept();
-            resolve();
-          });
-        });
-        await dialogPromise;
+        const swal = page.locator('.swal2-container');
+        await expect(swal).toBeVisible();
+
+        const swalTitle = swal.locator('.swal2-title');
+        const swalText = swal.locator('.swal2-html-container');
+        await expect(swalTitle).toHaveText('Account Created!');
+        await expect(swalText).toHaveText('La cuenta se ha creado correctamente. Por favor inicie sesión.');
+
+        const confirmButton = swal.locator('.swal2-confirm');
+        await confirmButton.click();
 
         await new Promise(resolve => setTimeout(resolve, 100));
         
@@ -154,15 +155,16 @@ test.describe('Account creation Tests', () => {
         await page.fill('input[placeholder="Confirm Password"]', 'Password!123');
         await page.check('input[type="checkbox"]');    
         await page.click('button.signup-button');
-        const dialogPromise = new Promise(resolve => {
-          page.on('dialog', async dialog => {
-            console.log('Diálogo detectado con mensaje:', dialog.message());
-            expect(dialog.message()).toBe('La cuenta se ha creado correctamente. Por favor inicie sesión.');
-            await dialog.accept();
-            resolve();
-          });
-        });
-        await dialogPromise;
+        const swal = page.locator('.swal2-container');
+        await expect(swal).toBeVisible();
+
+        const swalTitle = swal.locator('.swal2-title');
+        const swalText = swal.locator('.swal2-html-container');
+        await expect(swalTitle).toHaveText('Account Created!');
+        await expect(swalText).toHaveText('La cuenta se ha creado correctamente. Por favor inicie sesión.');
+
+        const confirmButton = swal.locator('.swal2-confirm');
+        await confirmButton.click();
 
         await new Promise(resolve => setTimeout(resolve, 100));
         

@@ -49,15 +49,17 @@ test.describe('Signup Page Tests', () => {
     await page.fill('input[placeholder="Confirm Password"]', 'Password!123');
     await page.check('input[type="checkbox"]');    
     await page.click('button.signup-button');
-    const dialogPromise = new Promise(resolve => {
-      page.on('dialog', async dialog => {
-        console.log('Diálogo detectado con mensaje:', dialog.message()); // Log para ver el mensaje
-        expect(dialog.message()).toBe('La cuenta se ha creado correctamente. Por favor inicie sesión.');
-        await dialog.accept();
-        resolve(); // Resuelve la promesa una vez aceptado el diálogo
-      });
-    });
-    await dialogPromise;
+
+    const swal = page.locator('.swal2-container');
+    await expect(swal).toBeVisible();
+
+    const swalTitle = swal.locator('.swal2-title');
+    const swalText = swal.locator('.swal2-html-container');
+    await expect(swalTitle).toHaveText('Account Created!');
+    await expect(swalText).toHaveText('La cuenta se ha creado correctamente. Por favor inicie sesión.');
+
+    const confirmButton = swal.locator('.swal2-confirm');
+    await confirmButton.click();
     await expect(page).toHaveURL('http://localhost:8080/#/login');
     
   });
@@ -71,11 +73,16 @@ test.describe('Signup Page Tests', () => {
     await page.fill('input[placeholder="Password"]', 'Password!123');
     await page.fill('input[placeholder="Confirm Password"]', 'Password!123');
     await page.click('button.signup-button');
-    page.on('dialog', async dialog => {
-        console.log(dialog.message());
-        expect(dialog.message()).toBe('Please correct the errors in the form.');
-        await dialog.accept();
-      });
+    const swal = page.locator('.swal2-container');
+    await expect(swal).toBeVisible();
+
+    const swalTitle = swal.locator('.swal2-title');
+    const swalText = swal.locator('.swal2-html-container');
+    await expect(swalTitle).toHaveText('Form Error');
+    await expect(swalText).toHaveText('Please correct the errors in the form.');
+
+    const confirmButton = swal.locator('.swal2-confirm');
+    await confirmButton.click();
   });
   test('should show error for email already registered', async ({ page }) => {
     await page.goto('http://localhost:8080/#/');
@@ -87,10 +94,15 @@ test.describe('Signup Page Tests', () => {
     await page.fill('input[placeholder="Confirm Password"]', 'Password!123');
     await page.check('input[type="checkbox"]');
     await page.click('button.signup-button');
-    page.on('dialog', async dialog => {
-        expect(dialog.message()).toBe('Hubo un error al crear la cuenta.');
-        await dialog.accept();
-      });
+    const swal = page.locator('.swal2-container');
+    await expect(swal).toBeVisible();
+
+    const swalTitle = swal.locator('.swal2-title');
+    const swalText = swal.locator('.swal2-html-container');
+    await expect(swalTitle).toHaveText('Oops...');
+    await expect(swalText).toHaveText('There was an error creating your account.');
+    const confirmButton = swal.locator('.swal2-confirm');
+    await confirmButton.click();
   });
 
 });

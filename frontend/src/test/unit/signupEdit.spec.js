@@ -2,6 +2,7 @@ import { mount } from '@vue/test-utils';
 import Signup from '../../components/signupEdit.vue';
 import UserService from '../../services/UserServices';
 import AccountServices from '../../services/AccountServices';
+import Swal from 'sweetalert2'
 
 // Mockear UserService
 jest.mock('../../services/UserServices', () => ({
@@ -310,7 +311,7 @@ it('calls UserService.create when form is valid and button is clicked', async ()
   });
   UserService.create.mockResolvedValue({ id: 123 });
   AccountServices.create.mockResolvedValue({});;
-  window.alert = jest.fn();
+  const SwalMock = jest.spyOn(Swal, 'fire').mockResolvedValue();
   await wrapper.find('form').trigger('submit');
   expect(UserService.create).toHaveBeenCalledWith({
     name: 'John',
@@ -320,7 +321,13 @@ it('calls UserService.create when form is valid and button is clicked', async ()
     password: 'Password@123'
   });
   expect(AccountServices.create).toHaveBeenCalledWith(123);
-  expect(window.alert).toHaveBeenCalledWith('La cuenta se ha creado correctamente. Por favor inicie sesión.');
+  expect(SwalMock).toHaveBeenCalledWith({
+    title: 'Account Created!',
+    text: 'La cuenta se ha creado correctamente. Por favor inicie sesión.',
+    icon: 'success',
+    confirmButtonText: 'OK'
+  });
+  SwalMock.mockRestore();
   expect(wrapper.vm.$router.push).toHaveBeenCalledWith({ path: '/login' });
 });
 
@@ -339,7 +346,7 @@ it('handles error when creating a user', async () => {
     agreedToTerms: true
   });
   const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-  window.alert = jest.fn();
+  const SwalMock = jest.spyOn(Swal, 'fire').mockResolvedValue();
   UserService.create.mockRejectedValue(new Error('Error de creación'));
   await wrapper.find('form').trigger('submit');
   await wrapper.vm.$nextTick();
@@ -351,14 +358,27 @@ it('handles error when creating a user', async () => {
     password: 'Password@123'
   });
   expect(consoleErrorSpy).toHaveBeenCalledWith(expect.any(Error));
-  expect(window.alert).toHaveBeenCalledWith('Hubo un error al crear la cuenta.');
+  expect(SwalMock).toHaveBeenCalledWith({
+    icon: 'error',
+    title: 'Error',
+    text: 'Hubo un error al crear la cuenta.',
+    confirmButtonText: 'Try Again'
+  });
+  SwalMock.mockRestore();
+  consoleErrorSpy.mockRestore();
 });
 
 it('shows alert if canRegister is false', async() => {
   wrapper.setData({ nameValid: false });
-  window.alert = jest.fn();
+  const SwalMock = jest.spyOn(Swal, 'fire').mockResolvedValue();
   await wrapper.find('form').trigger('submit');
-  expect(window.alert).toHaveBeenCalledWith('Please correct the errors in the form.');
+  expect(SwalMock).toHaveBeenCalledWith({
+    icon: 'warning',
+    title: 'Form Errors',
+    text: 'Please correct the errors in the form.',
+    confirmButtonText: 'Review'
+  });
+  SwalMock.mockRestore();
 });
 
 });

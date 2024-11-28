@@ -6,4 +6,4 @@ from . import book
 from . import wishlist
 from . import review
 from . import follower
-
+from . import search
