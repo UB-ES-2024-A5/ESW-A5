@@ -108,8 +108,28 @@ router.beforeEach(async (to, from, next) => {
       // Obtenemos la información del usuario
       const userInfo = await userServices.getActualUser()
 
-      // Si el usuario ya está autenticado y trata de acceder a login o signup o a la pagina principal de invitado, redirigimios a la página principal correspondiente
-      if ((to.path === '/login' || to.path === '/signup' || to.path === '/signupEdit' || to.path === '/mainpage_guest' || to.path === '/') && userInfo) {
+      // Restricción de acceso según el rol del usuario
+      if (userInfo) {
+        // Rutas prohibidas para usuarios no editores
+        const editorOnlyRoutes = ['/create_publication', '/mainPage_publisher', '/publisher_profile']
+        if (!userInfo.is_editor && editorOnlyRoutes.includes(to.path)) {
+          console.log('Acceso denegado: Usuario no es editor.')
+          return next('/mainPage_user') // Redirigir al área del usuario normal
+        }
+
+        // Rutas prohibidas para editores
+        const userOnlyRoutes = ['/user_profile', '/mainPage_user']
+        if (userInfo.is_editor && userOnlyRoutes.includes(to.path)) {
+          console.log('Acceso denegado: Usuario es editor.')
+          return next('/mainPage_publisher') // Redirigir al área del editor
+        }
+      }
+
+      // Si el usuario ya está autenticado y trata de acceder a login, signup, o mainPage_guest, redirigimos a su página principal
+      if (
+        (to.path === '/login' || to.path === '/signup' || to.path === '/signupEdit' || to.path === '/mainpage_guest' || to.path === '/') &&
+        userInfo
+      ) {
         if (userInfo.is_editor) {
           console.log('Usuario autenticado como editor, redirigiendo a /mainPage_publisher...')
           return next('/mainPage_publisher')
