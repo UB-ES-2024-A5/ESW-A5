@@ -8,7 +8,10 @@
         <div class="left-section">
           <div class="title-container">
             <h1 class="title">{{ book.title || 'Title of the publication' }}</h1>
-            <div class="star" @click="toggleStar(wishlistId, bookid2)" :class="{ selected: starSelected }"> ★
+
+             <!-- Mostrar la estrella solo si el usuario no es editor -->
+            <div
+              v-if="!user.is_editor" class="star" @click="toggleStar(wishlistId, bookid2)" :class="{ selected: starSelected }"> ★
             </div>
           </div>
           <div class="image-container">
@@ -19,7 +22,7 @@
         <div class="info">
           <p><strong>Author:</strong> {{ book.author || 'Author example' }}</p>
           <p><strong>Genre:</strong> {{ book.gender_main || 'Genre1, Genre2' }}</p>
-          <p><strong>Publisher:</strong> {{ user.name || this.user_id }}</p>
+          <p><strong>Publisher:</strong> {{ user.name || 'Publisher' }}</p>
           <p><strong>Year of the publication:</strong> {{ book.publication_year || 'Year example' }}</p>
           <p><strong>ISBN:</strong> {{ book.isbn || 'ISBN example' }}</p>
           <p><strong>Minimum Price:</strong> {{ book.price || 'Price example' }}</p>
@@ -90,7 +93,8 @@ export default {
       axios.get(path)
         .then((res) => {
           this.user = {
-            name: res.data.name
+            name: res.data.name,
+            is_editor: res.data.is_editor
           }
         })
         .catch((error) => {
@@ -147,7 +151,7 @@ export default {
   },
   mounted () {
     this.fetchBookDetails()
-    // this.getWishlistId()
+    this.getWishlistId()
   }
 }
 </script>
