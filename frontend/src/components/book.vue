@@ -19,7 +19,7 @@
         <div class="info">
           <p><strong>Author:</strong> {{ book.author || 'Author example' }}</p>
           <p><strong>Genre:</strong> {{ book.gender_main || 'Genre1, Genre2' }}</p>
-          <p><strong>Publisher:</strong> {{ user.name || 'Publisher example' }}</p>
+          <p><strong>Publisher:</strong> {{ user.name || this.user_id }}</p>
           <p><strong>Year of the publication:</strong> {{ book.publication_year || 'Year example' }}</p>
           <p><strong>ISBN:</strong> {{ book.isbn || 'ISBN example' }}</p>
           <p><strong>Minimum Price:</strong> {{ book.price || 'Price example' }}</p>
@@ -52,7 +52,8 @@ export default {
       starSelected: false,
       wishlistId: null,
       bookid2: '',
-      user: {}
+      user: {},
+      user_id: ''
     }
   },
   methods: {
@@ -73,11 +74,11 @@ export default {
             synopsis: res.data.synopsis,
             img: res.data.img,
             list_links: res.data.list_links || [],
-            user_id: res.data.account_id
+            account_id: res.data.account_id
           }
-
+          this.user_id = this.book.account_id
           this.comments = res.data.comments || []
-          this.checkIfBookInWishlist(res.data.isbn)
+          this.fetchBookPublisher()
         })
         .catch((error) => {
           console.error(error)
@@ -85,9 +86,7 @@ export default {
         })
     },
     fetchBookPublisher () {
-      const userid = this.book.user_id
-
-      const path = process.env.API_URL + '/api/v1/users/' + userid
+      const path = process.env.API_URL + '/api/v1/users/by_id/' + this.user_id
       axios.get(path)
         .then((res) => {
           this.user = {
@@ -148,8 +147,7 @@ export default {
   },
   mounted () {
     this.fetchBookDetails()
-    this.getWishlistId()
-    this.fetchBookPublisher()
+    // this.getWishlistId()
   }
 }
 </script>
