@@ -3,7 +3,8 @@
     <!-- Header con campo de búsqueda y botón de inicio de sesión -->
     <header class="header">
       <input type="text" placeholder="Search for a publication" class="search-bar" />
-      <router-link to="/" class="sign-in-btn">Log out</router-link>
+      <!-- Cambiamos el router-link por un botón que ejecuta la función logout -->
+      <button @click="logout" class="sign-in-btn">Log out</button>
 
       <!-- Enlace al perfil de usuario con icono de imagen -->
       <router-link to="/publisher_profile" class="profile-link">
@@ -76,6 +77,13 @@ export default {
       BookServices.getAllBooks().then(async data => {
         this.books = data.data
       })
+    },
+    logout () {
+      // Eliminamos el token del localStorage
+      localStorage.removeItem('token')
+
+      // Redirigimos al usuario a la página de inicio
+      this.$router.push('/')
     }
   },
   mounted () {
