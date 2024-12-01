@@ -31,7 +31,7 @@ jobs:
       with:
         push: true
         tags: esa05.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_0bcfec242461420ebd3331448cbe4910 }}/backend-a05:${{ github.sha }}
-        file: ./Dockerfile
+        file: ./backend/Dockerfile  # Ruta correcta al Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
