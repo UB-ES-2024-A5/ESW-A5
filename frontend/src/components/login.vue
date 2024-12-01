@@ -76,7 +76,7 @@ export default {
             timer: 2000,
             showConfirmButton: false
           })
-          this.$router.push({ path: '/mainPage_publisher', query: { email: this.email, token: this.token } })
+          this.$router.push({ path: '/mainPage_publisher' })
         } else {
           await this.createWishlist()
           Swal.fire({
@@ -86,7 +86,7 @@ export default {
             timer: 2000,
             showConfirmButton: false
           })
-          this.$router.push({ path: '/mainPage_user', query: { email: this.email, token: this.token } })
+          this.$router.push({ path: '/mainPage_user' })
         }
       } catch (error) {
         console.error(error)
