@@ -106,7 +106,7 @@ export default {
     },
     async getUser () {
       try {
-        this.user_me = await UserServices.getActualUser() // Guardar todo el objeto en user_me
+        this.user_me = await UserServices.getActualUser() // Guardar el objeto en user_me
       } catch (error) {
         console.error('Error al obtener el usuario:', error)
       }
