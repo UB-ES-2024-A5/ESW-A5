@@ -11,7 +11,7 @@
 
              <!-- Mostrar la estrella solo si el usuario no es editor -->
             <div
-              v-if="!user.is_editor" class="star" @click="toggleStar(wishlistId, bookid2)" :class="{ selected: starSelected }"> ★
+              v-if="!user_me.is_editor" class="star" @click="toggleStar(wishlistId, bookid2)" :class="{ selected: starSelected }"> ★
             </div>
           </div>
           <div class="image-container">
@@ -43,6 +43,7 @@
 <script>
 import WishlistService from '../services/WishlistServices'
 import axios from 'axios'
+import UserServices from '../services/UserServices'
 
 export default {
   name: 'BookDetails',
@@ -56,7 +57,8 @@ export default {
       wishlistId: null,
       bookid2: '',
       user: {},
-      user_id: ''
+      user_id: '',
+      user_me: {}
     }
   },
   methods: {
@@ -82,6 +84,7 @@ export default {
           this.user_id = this.book.account_id
           this.comments = res.data.comments || []
           this.fetchBookPublisher()
+          this.checkIfBookInWishlist(this.book)
         })
         .catch((error) => {
           console.error(error)
@@ -93,8 +96,7 @@ export default {
       axios.get(path)
         .then((res) => {
           this.user = {
-            name: res.data.name,
-            is_editor: res.data.is_editor
+            name: res.data.name
           }
         })
         .catch((error) => {
@@ -102,17 +104,12 @@ export default {
           alert('Failed to load book details')
         })
     },
-    checkIfBookInWishlist (isbn) {
-      // Verifica si el libro está en la wishlist
-      const path = process.env.API_URL + '/api/v1/wishlists/' + this.wishlistId + '/books'
-      axios.get(path)
-        .then((res) => {
-          const bookInWishlist = res.data.some(book => book.isbn === isbn)
-          this.starSelected = bookInWishlist
-        })
-        .catch((error) => {
-          console.error(error)
-        })
+    async getUser () {
+      try {
+        this.user_me = await UserServices.getActualUser() // Guardar todo el objeto en user_me
+      } catch (error) {
+        console.error('Error al obtener el usuario:', error)
+      }
     },
     loadMoreComments () {
       console.log('Load more comments')
@@ -128,7 +125,39 @@ export default {
         }
       } catch (error) {
         console.error('Error al obtener o crear wishlist', error)
+        throw error
       }
+    },
+    checkIfBookInWishlist (bookActual) {
+      if (!this.wishlistId || !this.book.isbn) {
+        console.warn('No hay wishlistId o ISBN para verificar.')
+        return
+      }
+      // Verifica si el libro está en la wishlist
+      const path = process.env.API_URL + '/api/v1/wishlists/' + this.wishlistId + '/books'
+      axios.get(path)
+        .then((res) => {
+          let bookInWishlist = false
+          if (res.data.length === 0) {
+            console.error('LISTA VACIA ME CAGOENTO')
+          }
+          if (!Array.isArray(res.data)) {
+            console.error('LISTA VACIA ME CAGOENTO')
+          }
+          if (!res.data) {
+            console.error('No existe la data')
+          }
+          for (let i = 0; i < res.data.length; i++) {
+            console.error('Comparando ISBN:' + bookActual.isbn)
+            if (res.data[i].isbn === this.book.isbn) {
+              bookInWishlist = true
+            }
+          }
+          this.starSelected = bookInWishlist
+        })
+        .catch((error) => {
+          console.error(error)
+        })
     },
     async toggleStar (wishlistId, bookid) {
       this.starSelected = !this.starSelected
@@ -145,13 +174,16 @@ export default {
           await WishlistService.deleteBookWishlist(wishlistId, bookid)
         } catch (error) {
           console.error('Error al eliminar libro de la wishlist', error)
+          this.starSelected = !this.starSelected // se revierte en caso de error mi compadre
         }
       }
     }
   },
-  mounted () {
+  async mounted () {
+    await this.getWishlistId()
     this.fetchBookDetails()
-    this.getWishlistId()
+
+    await this.getUser()
   }
 }
 </script>
