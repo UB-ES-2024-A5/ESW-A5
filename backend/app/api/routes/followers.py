@@ -51,7 +51,7 @@ def add_followed(*, session: SessionDep, current_user: CurrentUser, account_id: 
         )
 
     statement = select(Follower).where(
-        Follower.follower_id == current_user.account.id and Follower.following_id == account_id)
+        (Follower.follower_id == current_user.account.id), (Follower.following_id == account_id))
     follow = session.exec(statement).first()
     if follow:
         raise HTTPException(

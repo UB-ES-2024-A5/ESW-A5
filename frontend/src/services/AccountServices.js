@@ -36,5 +36,11 @@ class AccountService {
         throw error
       })
   }
+  get (id) {
+    return http.get(`/api/v1/accounts/${id}`)
+      .then((res) => {
+        return res.data
+      })
+  }
 }
 export default new AccountService()
