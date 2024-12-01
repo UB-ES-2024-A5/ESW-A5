@@ -84,7 +84,6 @@ export default {
           this.user_id = this.book.account_id
           this.comments = res.data.comments || []
           this.fetchBookPublisher()
-          this.checkIfBookInWishlist(this.book)
         })
         .catch((error) => {
           console.error(error)
@@ -122,42 +121,27 @@ export default {
         // Si se crea una nueva wishlist, asignamos su ID
         if (wishlistResponse && wishlistResponse.data.length > 0) {
           this.wishlistId = wishlistResponse.data[0].id
+          await this.checkifBookinWishlist(this.wishlistId)
         }
       } catch (error) {
         console.error('Error al obtener o crear wishlist', error)
         throw error
       }
     },
-    checkIfBookInWishlist (bookActual) {
-      if (!this.wishlistId || !this.book.isbn) {
-        console.warn('No hay wishlistId o ISBN para verificar.')
-        return
+    async checkifBookinWishlist (id) {
+      try {
+        const wishlistResponse = await WishlistService.getWishlistsBooks(id)
+        if (wishlistResponse.data.length > 0) {
+          console.log(wishlistResponse.data.length)
+        }
+        for (let i = 0; i < wishlistResponse.data.length; i++) {
+          if (wishlistResponse.data[i].isbn === this.book.isbn) {
+            this.starSelected = true
+          }
+        }
+      } catch (error) {
+        console.error('Error al saber si el libro esta en la wishlist', error)
       }
-      // Verifica si el libro está en la wishlist
-      const path = process.env.API_URL + '/api/v1/wishlists/' + this.wishlistId + '/books'
-      axios.get(path)
-        .then((res) => {
-          let bookInWishlist = false
-          if (res.data.length === 0) {
-            console.error('LISTA VACIA ME CAGOENTO')
-          }
-          if (!Array.isArray(res.data)) {
-            console.error('LISTA VACIA ME CAGOENTO')
-          }
-          if (!res.data) {
-            console.error('No existe la data')
-          }
-          for (let i = 0; i < res.data.length; i++) {
-            console.error('Comparando ISBN:' + bookActual.isbn)
-            if (res.data[i].isbn === this.book.isbn) {
-              bookInWishlist = true
-            }
-          }
-          this.starSelected = bookInWishlist
-        })
-        .catch((error) => {
-          console.error(error)
-        })
     },
     async toggleStar (wishlistId, bookid) {
       this.starSelected = !this.starSelected
@@ -180,9 +164,9 @@ export default {
     }
   },
   async mounted () {
-    await this.getWishlistId()
-    this.fetchBookDetails()
 
+    this.fetchBookDetails()
+    await this.getWishlistId()
     await this.getUser()
   }
 }
