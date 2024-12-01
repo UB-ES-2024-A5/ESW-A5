@@ -105,8 +105,7 @@ jest.mock('../../services/WishlistServices', () => ({
         SwalMock.mockRestore();
       
         expect(wrapper.vm.$router.push).toHaveBeenCalledWith({
-            path: '/mainPage_user',
-            query: { email: 'test@example.com', token: 'dummy_token' }
+            path: '/mainPage_user'
           });
       });
 
@@ -149,8 +148,7 @@ jest.mock('../../services/WishlistServices', () => ({
         SwalMock.mockRestore();
 
         expect(wrapper.vm.$router.push).toHaveBeenCalledWith({
-            path: '/mainPage_publisher',
-            query: { email: 'test@example.com', token: 'dummy_token' }
+            path: '/mainPage_publisher'
           });
       });
 
