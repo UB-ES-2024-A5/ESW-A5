@@ -30,6 +30,7 @@ import axios from 'axios'
 import Swal from 'sweetalert2'
 import userServices from '../services/UserServices.js'
 import WishlistServices from '../services/WishlistServices.js'
+import http from "../http-common";
 
 export default {
   data () {
@@ -45,7 +46,7 @@ export default {
   methods: {
     async login_user (event) {
       const data = `username=${this.email}&password=${this.password}`
-      const path = process.env.API_URL + '/api/v1/login/access-token'
+      const path = 'https://esa05-cyc9agehcmd3gudg.francecentral-01.azurewebsites.net/api/v1/login/access-token';
 
       try {
         const res = await axios.post(path, data, {
@@ -53,7 +54,6 @@ export default {
             'Content-Type': 'application/x-www-form-urlencoded'
           }
         })
-
         console.log(res)
         this.is_authenticated = true
         this.token = res.data.access_token
