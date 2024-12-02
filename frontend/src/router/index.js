@@ -11,81 +11,77 @@ import UserProfile from '../components/userProfile.vue'
 import PublisherProfile from '../components/publisherProfile.vue'
 import Book from '../components/book.vue'
 import CreatePublication from '../components/createPublication.vue'
-import axios from 'axios'
-import userServices from '../services/UserServices.js'
 import searchUserProfile from '../components/searchUserProfile.vue'
 import searchPublisherProfile from '../components/searchPublisherProfile.vue'
 
 Vue.use(Router)
-
-const router = new Router({
+export default new Router({
   mode: 'history',
   routes: [
     {
       path: '/',
       name: 'guestaccess',
-      component: GuessAccess,
+      component: GuessAccess
     },
     {
       path: '/login',
       name: 'login',
-      component: Login,
+      component: Login
     },
     {
       path: '/signup',
       name: 'signup',
-      component: Signup,
+      component: Signup
     },
     {
       path: '/signupEdit',
       name: 'signupEdit',
-      component: SignupEdit,
+      component: SignupEdit
     },
     {
       path: '/mainPage_guest',
       name: 'mainPage_guest',
-      component: MainPageGuest,
+      component: MainPageGuest
     },
     {
       path: '/mainPage_user',
       name: 'mainPage_user',
-      component: MainPageUser,
+      component: MainPageUser
     },
     {
       path: '/mainPage_publisher',
       name: 'mainPage_publisher',
-      component: MainPagePublisher,
+      component: MainPagePublisher
     },
     {
       path: '/user_profile',
       name: 'user_profile',
-      component: UserProfile,
+      component: UserProfile
     },
     {
       path: '/publisher_profile',
       name: 'publisher_profile',
-      component: PublisherProfile,
+      component: PublisherProfile
     },
     {
       path: '/search_user_profile',
       name: 'search_user_profile',
-      component: searchUserProfile,
+      component: searchUserProfile
     },
     {
       path: '/search_publisher_profile',
       name: 'search_publisher_profile',
-      component: searchPublisherProfile,
+      component: searchPublisherProfile
     },
     {
       path: '/book',
       name: 'book',
-      component: Book,
+      component: Book
     },
     {
       path: '/create_publication',
       name: 'create_publication',
-      component: CreatePublication,
+      component: CreatePublication
     }
   ]
 })
-
