@@ -1,10 +1,11 @@
 """ User related CRUD methods """
+import uuid
 from typing import Any
 
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import User, UserCreate, UserUpdate
+from app.models import User, UserCreate, UserUpdate, UserPublic
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -38,6 +39,12 @@ def get_user_by_email(*, session: Session, email: str) -> User | None:
 
 def get_user_by_cif(*, session: Session, cif: str) -> User | None:
     statement = select(User).where(User.cif == cif)
+    session_user = session.exec(statement).first()
+    return session_user
+
+
+def get_user_by_id(*, session: Session, user_id: uuid.UUID) -> User | None:
+    statement = select(User).where(User.id == user_id)
     session_user = session.exec(statement).first()
     return session_user
 

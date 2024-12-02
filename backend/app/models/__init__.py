@@ -9,3 +9,4 @@ from .book import *
 from .wishlist import *
 from .review import *
 from .comment import *
+from .follower import *
