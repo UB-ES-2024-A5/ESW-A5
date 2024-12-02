@@ -5,20 +5,20 @@ from sqlmodel import Session
 from app.main import app
 from app import crud
 from app.core.config import settings
-
-from uuid import uuid4
-import pytest
+from app.models import UserCreate
 from app.tests.utils.utils import random_email, random_lower_string
+import pytest
+from uuid import uuid4
 
 client = TestClient(app)
 
 @pytest.fixture
 def create_user():
     user_data = {
-        "email": "editor23@example.com",
+        "email": "editorial23@example.com",
         "password": "password123",
-        "name": "Editor1",
-        "cif": "g66666666",
+        "name": "new",
+        "cif" :"b32546798",
         "is_editor": True
     }
     response = client.post("/api/v1/users/", json=user_data)
@@ -27,12 +27,12 @@ def create_user():
 @pytest.fixture
 def create_account(create_user):
     user_out = create_user.json()
-    user_id = user_out['id']
+    user_id = user_out["id"]
     account_data = {
         "id": user_id
     }
 
-    response = client.post("/api/v1/accounts/", json=account_data)
+    response = client.post("api/v1/accounts/", json=account_data)
     return response
 
 @pytest.fixture
@@ -117,7 +117,7 @@ def create_account_5(create_user_5):
 
 @pytest.fixture
 def authenticate():
-    email = "editor23@example.com"
+    email = "editorial23@example.com"
     password = "password123"
 
     response = client.post("/api/v1/login/access-token/", data={"username":email, "password":password})
@@ -125,7 +125,7 @@ def authenticate():
 
 @pytest.fixture
 def create_book1(authenticate):
-    account = client.get("/api/v1/users/by_email/editor23@example.com")
+    account = client.get("/api/v1/users/by_email/editorial23@example.com")
     account_id = account.json()['id']
     book_data = {
         "title" : "El camino de los reyes",
@@ -148,7 +148,7 @@ def create_book1(authenticate):
 
 @pytest.fixture
 def create_book2(authenticate):
-    account = client.get("/api/v1/users/by_email/editor23@example.com")
+    account = client.get("/api/v1/users/by_email/editorial23@example.com")
     account_id = account.json()['id']
     book_data = {
         "title" : "Palabras Radiantes",
@@ -171,7 +171,7 @@ def create_book2(authenticate):
 
 @pytest.fixture
 def create_book3(authenticate):
-    account = client.get("/api/v1/users/by_email/editor23@example.com")
+    account = client.get("/api/v1/users/by_email/editorial23@example.com")
     account_id = account.json()['id']
     book_data = {
         "title" : "Juramentada",
@@ -194,7 +194,7 @@ def create_book3(authenticate):
 
 @pytest.fixture
 def create_book4(authenticate):
-    account = client.get("/api/v1/users/by_email/editor23@example.com")
+    account = client.get("/api/v1/users/by_email/editorial23@example.com")
     account_id = account.json()['id']
     book_data = {
         "title" : "El principe de la niebla",
@@ -214,3 +214,41 @@ def create_book4(authenticate):
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
     return response
+
+
+def test_search_books_and_users(create_account, create_book1, create_book2, create_user_2):
+    """
+    Prueba que la query 'brandon' devuelve los libros y el usuario relacionado.
+    """
+    account = create_account
+    # Ejecutar el endpoint de búsqueda
+    response = client.get("/api/v1/search/", params={"query": "brandon", "limit": 10})
+    assert response.status_code == 200
+
+    # Verificar el contenido de los resultados
+    results = response.json()
+
+    # Comprobar que hay exactamente 3 resultados
+    assert len(results) == 3
+
+    # Comprobar los datos de los libros
+    book_titles = {result["title"] for result in results if result.get("title")}
+    assert "El camino de los reyes" in book_titles
+    assert "Palabras Radiantes" in book_titles
+
+    # Comprobar los datos del usuario
+    user_emails = {result["email"] for result in results if result.get("email")}
+    assert "brandon@example.com" in user_emails
+
+
+def test_search_with_empty_result(create_book4):
+    """
+    Prueba que la query que no coincide con ningún libro o usuario devuelve una lista vacía.
+    """
+    # Ejecutar el endpoint con una query que no debe encontrar resultados
+    response = client.get("/api/v1/search/", params={"query": "nonexistentquery", "limit": 10})
+    assert response.status_code == 200
+
+    # Verificar que los resultados están vacíos
+    results = response.json()
+    assert len(results) == 0
