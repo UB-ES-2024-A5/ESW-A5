@@ -1,7 +1,29 @@
 const { test, expect } = require('@playwright/test');
 const sqlite3 = require('sqlite3').verbose();
+const { Client } = require('pg');
 
 async function clearUserDatabase() {
+  const environment = process.env.ENVIRONMENT;
+
+  if (environment === 'staging') {
+    console.log('API_URL:', process.env.API_URL);
+    const client = new Client({
+      user: process.env.DB_USER,
+      host: process.env.DB_HOST,
+      database: process.env.DB_NAME,
+      password: process.env.DB_PASSWORD,
+      port: 5432,
+    });
+
+    try {
+      await client.connect();
+      const res = await client.query('DELETE FROM "user"');
+    } catch (err) {
+      console.error('Error al conectar o limpiar la base de datos PostgreSQL', err.stack);
+    } finally {
+      await client.end();
+    }
+  } else {
     const path = require('path');
     const dbPath = path.resolve(__dirname, '../../../../test_db.sqlite');
     const db = new sqlite3.Database(dbPath);
@@ -10,18 +32,17 @@ async function clearUserDatabase() {
     });
 
     db.close();
+  }
 }
 
-test.afterEach(async ({page}) => {
-  await clearUserDatabase();
-});
+
 
   
   
   test.describe('Login Page Tests', () => {
     test('should successfully log in with the created user', async ({ page }) => {
 
-
+      await clearUserDatabase();
       await page.goto('http://localhost:8080/#/');
 
       await page.click('text=Sign up as user');
@@ -33,18 +54,17 @@ test.afterEach(async ({page}) => {
       await page.check('input[type="checkbox"]');
       await page.click('button.signup-button');
 
-      // Esperar al diálogo que confirma que la cuenta se ha creado
-      const dialogPromise = new Promise((resolve) => {
-        page.on('dialog', async (dialog) => {
-          console.log('Diálogo detectado con mensaje:', dialog.message());
-          expect(dialog.message()).toBe('La cuenta se ha creado correctamente. Por favor inicie sesión.');
-          await dialog.accept();
-          resolve();
-        });
-      });
-      await dialogPromise;
+      const swal = page.locator('.swal2-container');
+      await expect(swal).toBeVisible();
 
-      // Asegurarse de que redirige a la página de login
+      const swalTitle = swal.locator('.swal2-title');
+      const swalText = swal.locator('.swal2-html-container');
+      await expect(swalTitle).toHaveText('Account Created!');
+      await expect(swalText).toHaveText('La cuenta se ha creado correctamente. Por favor inicie sesión.');
+
+      const confirmButton = swal.locator('.swal2-confirm');
+      await confirmButton.click();
+
       await expect(page).toHaveURL('http://localhost:8080/#/login');
       
 
@@ -54,7 +74,7 @@ test.afterEach(async ({page}) => {
   
       await page.click('button.login-button');
 
-      await expect(page).toHaveURL(new RegExp('/mainpage_user'));
+      await expect(page).toHaveURL(new RegExp('/mainPage_user'));
 
     });
 
@@ -66,16 +86,17 @@ test.afterEach(async ({page}) => {
       await page.fill('input[placeholder="Password"]', 'wrongPassword!');
       await page.click('button.login-button');
   
-      const dialogPromise = new Promise(resolve => {
-        page.on('dialog', async dialog => {
-          console.log('Diálogo detectado con mensaje:', dialog.message());
-          expect(dialog.message()).toBe('Email or Password incorrect');
-          
-          await dialog.accept();
-          resolve();
-        });
-      });
-      await dialogPromise;
+      const swal = page.locator('.swal2-container');
+      await expect(swal).toBeVisible();
+
+      const swalTitle = swal.locator('.swal2-title');
+      const swalText = swal.locator('.swal2-html-container');
+      await expect(swalTitle).toHaveText('Login Failed');
+      await expect(swalText).toHaveText('Email or Password incorrect. Please try again.');
+
+      const confirmButton = swal.locator('.swal2-confirm');
+      await confirmButton.click();
+      
       await expect(page).toHaveURL('http://localhost:8080/#/login');
     });
     test('should navigate to the signup page when "Sign Up" link is clicked', async ({ page }) => {

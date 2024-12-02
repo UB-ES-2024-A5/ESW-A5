@@ -147,41 +147,23 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     user_create = UserCreate.from_orm(user_in)
     user = crud.user.create_user(session=session, user_create=user_create)
     return user
-@router.get("/user/{email}", response_model=UserPublic)
-def read_user_by_email_master(email:str, session:SessionDep) -> Any:
+@router.get("/by_email/{email}", response_model=UserPublic)
+def read_user_by_email(email: str, session: SessionDep) -> Any:
     user = crud.user.get_user_by_email(session=session, email=email)
     return user
 
-@router.get(
-    "/{email}",
-    response_model=UserPublic)
-def read_user_by_email(
-    email: str, session: SessionDep, current_user: CurrentUser
-) -> Any:
-    """
-    Get a specific user by email (mes endavant per buscar usuaris).
-    """
-    user = crud.user.get_user_by_email(session=session, email=email)
-    if user == current_user:
-        return user
 
-    return user
-@router.get("/{user_id}",
-            response_model=UserPublic, responses={404: {"description": "Not found"}},
-            dependencies=[Depends(get_current_active_superuser)],)
-def read_user_by_id(
-    user_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
-) -> Any:
+@router.get("/by_id/{user_id}", response_model=UserPublic)
+def read_user_by_id(session: SessionDep, current_user: CurrentUser, user_id: uuid.UUID) -> Any:
     """
     Get a specific user by id.
     """
-    user = session.get(User, user_id)
+    user = crud.user.get_user_by_id(session=session, user_id=user_id)
     if user == current_user:
         return user
-    if not current_user.is_superuser:
+    if not user:
         raise HTTPException(
-            status_code=403,
-            detail="The user doesn't have enough privileges",
+            status_code=404, detail="User not found"
         )
     return user
 

@@ -42,7 +42,7 @@ IMPORTANTE:
 **npm update**
 
 IMPORTANTE: tendreis que tener la base de datos de test_db.sqlite. Si no la tenéis, leed el paso 1 donde explico los test de backend.
-Para ejecutar y comprobar los test hay que iniciar tanto el backend y el frontend. y cuando ya lo tengais haceis desde el directorio frontend:
+Para ejecutar y comprobar los test hay que iniciar tanto el backend (antes usar $env:ENVIRONMENT = "testing") y el frontend. y cuando ya lo tengais haceis desde el directorio frontend:
 
 **npx playwright test --project=chromium**
 

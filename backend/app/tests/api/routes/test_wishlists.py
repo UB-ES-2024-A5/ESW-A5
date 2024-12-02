@@ -80,7 +80,7 @@ def authenticate():
 
 @pytest.fixture
 def create_book(authenticate):
-    account = client.get("/api/v1/users/user/editorial99@example.com")
+    account = client.get("/api/v1/users/by_email/editorial99@example.com")
     account_id = account.json()['id']
     book_data = {
         "title" : "Marina",
