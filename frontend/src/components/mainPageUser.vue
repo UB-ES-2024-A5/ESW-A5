@@ -145,9 +145,10 @@ export default {
     },
     navigateToUserProfile (user) {
       if (user.is_editor) {
-        this.$router.push({path: '/publisher_profile', query: {userId: user.id}}) // Redirigir al perfil del usuario
+        console.log(user)
+        this.$router.push({path: '/search_publisher_profile', query: {userID: user.id}}) // Redirigir al perfil del usuario
       } else {
-        this.$router.push({path: '/user_profile', query: {userId: user.id}}) // Redirigir al perfil del usuario
+        this.$router.push({path: '/search_user_profile', query: {userID: user.id}}) // Redirigir al perfil del usuario
       }
     },
     hideDropdown () {
