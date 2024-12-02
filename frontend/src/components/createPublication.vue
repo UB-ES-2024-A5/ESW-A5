@@ -214,6 +214,7 @@
 
 <script>
 import BookServices from '../services/BookServices.js'
+import Swal from 'sweetalert2'
 export default {
   data () {
     return {
@@ -353,14 +354,27 @@ export default {
 
           // Enviar los datos al backend
           await BookServices.createBook(data)
-          alert('Publication created successfully!')
+          Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Publication created successfully!'
+          })
+
           this.$router.push({ path: '/mainPage_publisher', query: { token: localStorage.getItem('token') } })
         } catch (error) {
           console.error('Error while creating book:', error)
-          alert('Failed to create publication. Please try again.')
+          Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Failed to create publication. Please try again.'
+          })
         }
       } else {
-        alert('Please correct the errors in the form.')
+        Swal.fire({
+          icon: 'warning',
+          title: 'Form Incomplete',
+          text: 'Please correct the errors in the form.'
+        })
       }
     },
     convertImageToBase64 (image) {

@@ -29,6 +29,20 @@ class UserService {
       })
   }
 
+  getUserById (userId) {
+    const token = localStorage.getItem('token')
+    return http.get(`/api/v1/users/by_id/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then((res) => res.data)
+      .catch((error) => {
+        console.error('Error al obtener los datos del usuario:', error)
+        throw error
+      })
+  }
+
   getUserEmail (email) {
     return http.get(`/api/v1/users/${email}`)
       .then((res) => {
@@ -37,7 +51,7 @@ class UserService {
   }
 
   create (data) {
-    return http.post('/api/v1/users/', data)
+    return http.post('http://localhost:8000/api/v1/users/', data)
       .then((res) => {
         return res.data
       })
