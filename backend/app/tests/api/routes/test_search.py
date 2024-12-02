@@ -216,39 +216,99 @@ def create_book4(authenticate):
     return response
 
 
-def test_search_books_and_users(create_account, create_book1, create_book2, create_user_2):
+def test_search_books_and_users(create_account, create_book1, create_book2, create_book3, create_book4, create_account_2, create_account_3, create_account_4, create_account_5):
     """
     Prueba que la query 'brandon' devuelve los libros y el usuario relacionado.
     """
-    # account = create_account
-    # Ejecutar el endpoint de búsqueda
+
     response = client.get("/api/v1/search/", params={"query": "brandon", "limit": 10})
     assert response.status_code == 200
 
-    # Verificar el contenido de los resultados
     results = response.json()
+    assert len(results) == 4
 
-    # Comprobar que hay exactamente 3 resultados
-    assert len(results) == 3
-
-    # Comprobar los datos de los libros
     book_titles = {result["title"] for result in results if result.get("title")}
     assert "El camino de los reyes" in book_titles
     assert "Palabras Radiantes" in book_titles
+    assert "Juramentada" in book_titles
 
-    # Comprobar los datos del usuario
     user_emails = {result["email"] for result in results if result.get("email")}
     assert "brandon@example.com" in user_emails
 
+def test_search_books_and_users2():
+    """
+    Prueba que la query 'br' devuelve los libros y el usuario relacionado.
+    """
 
-def test_search_with_empty_result(create_book4):
+    response = client.get("/api/v1/search/", params={"query": "br", "limit": 10})
+    assert response.status_code == 200
+
+    results = response.json()
+    assert len(results) == 6
+
+    book_titles = {result["title"] for result in results if result.get("title")}
+    assert "El camino de los reyes" in book_titles
+    assert "Palabras Radiantes" in book_titles
+    assert "Juramentada" in book_titles
+
+    user_emails = {result["email"] for result in results if result.get("email")}
+    assert "brandon@example.com" in user_emails
+    assert "bruno@example.com" in user_emails
+    assert "broncano@example.com" in user_emails
+
+def test_search_books_by_isbn():
+    """
+    Prueba que la query '9788408163541' devuelve el libro relacionado
+    """
+
+    response = client.get("/api/v1/search/", params={"query": "9788408163541", "limit": 10})
+    assert response.status_code == 200
+
+    results = response.json()
+    assert len(results) == 1
+
+    book_titles = {result["title"] for result in results if result.get("title")}
+    assert "El principe de la niebla" in book_titles
+
+def test_search_books_by_title():
+    """
+    Prueba que la query 'El' devuelve el libro relacionado
+    """
+
+    response = client.get("/api/v1/search/", params={"query": "El", "limit": 10})
+    assert response.status_code == 200
+
+    results = response.json()
+    assert len(results) == 3
+
+    book_titles = {result["title"] for result in results if result.get("title")}
+    assert "El principe de la niebla" in book_titles
+    assert "El camino de los reyes" in book_titles
+
+    user_emails = {result["email"] for result in results if result.get("email")}
+    assert "anabel@example.com" in user_emails
+
+def test_search_books_by_title2():
+    """
+    Prueba que la query 'El camino' devuelve el libro relacionado
+    """
+
+    response = client.get("/api/v1/search/", params={"query": "El camino", "limit": 10})
+    assert response.status_code == 200
+
+    results = response.json()
+    assert len(results) == 1
+
+    book_titles = {result["title"] for result in results if result.get("title")}
+    assert "El camino de los reyes" in book_titles
+
+
+def test_search_with_empty_result():
     """
     Prueba que la query que no coincide con ningún libro o usuario devuelve una lista vacía.
     """
-    # Ejecutar el endpoint con una query que no debe encontrar resultados
     response = client.get("/api/v1/search/", params={"query": "nonexistentquery", "limit": 10})
     assert response.status_code == 200
 
-    # Verificar que los resultados están vacíos
     results = response.json()
     assert len(results) == 0
