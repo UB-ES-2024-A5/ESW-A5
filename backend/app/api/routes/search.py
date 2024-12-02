@@ -17,12 +17,12 @@ from app.models import (
 
 router = APIRouter()
 
-@router.get("/")
+@router.get("/{query}")
 def get_search(*, session: SessionDep, query: str, limit: int = 10) -> Any:
     """
     Gets a list of books and users matching the query.
     """
-    results = crud.search.query_items(query=query, limit=limit, session=session)
+    results = crud.search.query_items(session=session, query=query, limit=limit)
 
     # Convertir los resultados para la respuesta
     response = []
@@ -33,3 +33,4 @@ def get_search(*, session: SessionDep, query: str, limit: int = 10) -> Any:
             response.append(UserPublic.from_orm(result["data"]))
 
     return response
+

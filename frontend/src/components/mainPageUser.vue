@@ -119,7 +119,7 @@ export default {
             .filter(result => !(userId && !result.title && result.id === userId)) // Excluir el usuario logueado
             .map(async result => {
               if (!result.title) { // Es un usuario
-                const account = await AccountServices.get(result.id)
+                const account = await AccountServices.getAccountById(result.id)
                 result.img = account.photo || 'default_account_icon.png'
               }
               return result
