@@ -5,6 +5,7 @@ import MainPagePublisher from '../../components/mainPagePublisher.vue';
 import CreatePublication from '../../components/createPublication.vue';
 import Login from '../../components/login.vue';
 
+global.URL.createObjectURL = jest.fn(() => 'mockedObjectURL');
 
 describe('Create publication tests', () => {
     let router;
@@ -287,8 +288,69 @@ describe('Create publication tests', () => {
           });
           
           
+          it('should set image and preview for valid JPEG file', async () => {
           
-          
-          
-          
+            const mockFile = new File(['dummy content'], 'test.jpg', { type: 'image/jpeg' });
+            
+            const event = { target: { files: [mockFile] } };
+            await wrapper.vm.handleImageUpload(event);
+            
+            expect(global.URL.createObjectURL).toHaveBeenCalledWith(mockFile);
+
+            expect(wrapper.vm.image).toBe(mockFile);
+            expect(wrapper.vm.imageError).toBe('');
+            expect(wrapper.vm.imagePreview).toBe(URL.createObjectURL(mockFile));
+          });
+
+
+          it('should set an error for invalid file type', async () => {
+            const mockFile = new File(['dummy content'], 'test.png', { type: 'image/png' });
+            
+            const event = { target: { files: [mockFile] } };
+            await wrapper.vm.handleImageUpload(event);
+        
+            expect(wrapper.vm.image).toBeNull();
+            expect(wrapper.vm.imagePreview).toBeNull();
+            expect(wrapper.vm.imageError).toBe('Only JPEG images are allowed.');
+          });
+
+          it('should convert an image to Base64', async () => {
+            const mockFile = new File(['dummy content'], 'test.jpg', { type: 'image/jpeg' });
+        
+            const result = await wrapper.vm.convertImageToBase64(mockFile);
+        
+            expect(result).toContain('data:image/jpeg;base64');
+          });
+
+
+          it('canSubmit should be true if all fields are filled', async () => {
+            
+            wrapper.setData({titleValid: true});
+            wrapper.setData({authorValid : true});
+            wrapper.setData({editorialValid : true});
+            wrapper.setData({yearValid : true});
+            wrapper.setData({isbnValid : true});
+            wrapper.setData({priceValid: true});
+            wrapper.setData({synopsisValid: true});
+            wrapper.setData({ selectedGenres: ['Fiction', 'Non-fiction'] });
+            console.log(wrapper.vm.canSubmit)
+            wrapper.setData({ image: new File(['dummy content'], 'test.jpg', { type: 'image/jpeg' }) });
+            expect(wrapper.vm.canSubmit).toBe(true);
+          });
+
+
+          it('canSubmit is false when a field is missing', async () => {
+            // Completamos todos los campos requeridos
+            wrapper.setData({titleValid: true});
+            wrapper.setData({authorValid : true});
+            wrapper.setData({editorialValid : true});
+            wrapper.setData({yearValid : false});
+            wrapper.setData({isbnValid : true});
+            wrapper.setData({priceValid: true});
+            wrapper.setData({synopsisValid: true});
+            wrapper.setData({ selectedGenres: ['Fiction', 'Non-fiction'] });
+            console.log(wrapper.vm.canSubmit)
+            wrapper.setData({ image: new File(['dummy content'], 'test.jpg', { type: 'image/jpeg' }) });
+            expect(wrapper.vm.canSubmit).toBe(false);
+          });
 });
