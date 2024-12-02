@@ -129,6 +129,7 @@ export default {
     },
     async fetchUserProfile () {
       console.log('Fetching user profile...')
+      console.log(await wishlistServices.getMyWishlists())
       const userID = this.$route.query.userID // Obtén el userID desde la query string
       try {
         const userData = await userServices.getUserById(userID)
@@ -149,12 +150,17 @@ export default {
       }
     },
     async fetchWishlistsInformation () {
-      const res = await wishlistServices.getMyWishlists()
-      this.wishlistId = res.data[0].id
-      this.fetchBooksInWishlist(this.wishlistId)
+      const userId = this.$route.query.userID
+      try {
+        const res = await wishlistServices.getUserWishlist(userId)
+        this.user.wishlist = res.wishlist
+      } catch (error) {
+        console.error('Error al obtener la wishlist:', error)
+      }
     },
     async fetchBooksInWishlist (id) {
       const res = await wishlistServices.readBooksOfWishlist(id)
+      console.log('Cargando wishlist')
       console.log(res)
       this.user.wishlist = res.data
     },
