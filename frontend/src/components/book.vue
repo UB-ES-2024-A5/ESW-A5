@@ -164,7 +164,6 @@ export default {
     }
   },
   async mounted () {
-
     this.fetchBookDetails()
     await this.getWishlistId()
     await this.getUser()
