@@ -55,25 +55,25 @@ const router = new Router({
       path: '/mainPage_user',
       name: 'mainPage_user',
       component: MainPageUser,
-      meta: { requiresAuth: true } // Requiere autenticación
+      meta: { requiresAuth: false } // Requiere autenticación
     },
     {
       path: '/mainPage_publisher',
       name: 'mainPage_publisher',
       component: MainPagePublisher,
-      meta: { requiresAuth: true } // Requiere autenticación
+      meta: { requiresAuth: false } // Requiere autenticación
     },
     {
       path: '/user_profile',
       name: 'user_profile',
       component: UserProfile,
-      meta: { requiresAuth: true } // Requiere autenticación
+      meta: { requiresAuth: false } // Requiere autenticación
     },
     {
       path: '/publisher_profile',
       name: 'publisher_profile',
       component: PublisherProfile,
-      meta: { requiresAuth: true } // Requiere autenticación
+      meta: { requiresAuth: false } // Requiere autenticación
     },
     {
       path: '/search_user_profile',
@@ -91,13 +91,13 @@ const router = new Router({
       path: '/book',
       name: 'book',
       component: Book,
-      meta: { requiresAuth: true } // Requiere autenticación
+      meta: { requiresAuth: false } // Requiere autenticación
     },
     {
       path: '/create_publication',
       name: 'create_publication',
       component: CreatePublication,
-      meta: { requiresAuth: true } // Requiere autenticación
+      meta: { requiresAuth: false } // Requiere autenticación
     }
   ]
 })
