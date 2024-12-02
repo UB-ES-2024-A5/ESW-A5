@@ -11,9 +11,10 @@ import UserProfile from '../components/userProfile.vue'
 import PublisherProfile from '../components/publisherProfile.vue'
 import Book from '../components/book.vue'
 import CreatePublication from '../components/createPublication.vue'
-
 import axios from 'axios'
 import userServices from '../services/UserServices.js'
+import searchUserProfile from '../components/searchUserProfile.vue'
+import searchPublisherProfile from '../components/searchPublisherProfile.vue'
 
 Vue.use(Router)
 
@@ -73,6 +74,18 @@ const router = new Router({
       name: 'publisher_profile',
       component: PublisherProfile,
       meta: { requiresAuth: true } // Requiere autenticación
+    },
+    {
+      path: '/search_user_profile',
+      name: 'search_user_profile',
+      component: searchUserProfile,
+      meta: { requiresAuth: false } // Requiere autenticación
+    },
+    {
+      path: '/search_publisher_profile',
+      name: 'search_publisher_profile',
+      component: searchPublisherProfile,
+      meta: { requiresAuth: false } // Requiere autenticación
     },
     {
       path: '/book',

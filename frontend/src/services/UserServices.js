@@ -29,6 +29,20 @@ class UserService {
       })
   }
 
+  getUserById (userId) {
+    const token = localStorage.getItem('token')
+    return http.get(`/api/v1/users/by_id/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then((res) => res.data)
+      .catch((error) => {
+        console.error('Error al obtener los datos del usuario:', error)
+        throw error
+      })
+  }
+
   getUserEmail (email) {
     return http.get(`/api/v1/users/${email}`)
       .then((res) => {
