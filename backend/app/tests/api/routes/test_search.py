@@ -18,7 +18,7 @@ def create_user():
         "email": "editorial23@example.com",
         "password": "password123",
         "name": "new",
-        "cif" :"b32546798",
+        "cif" :"b12345678",
         "is_editor": True
     }
     response = client.post("/api/v1/users/", json=user_data)
@@ -220,7 +220,7 @@ def test_search_books_and_users(create_account, create_book1, create_book2, crea
     """
     Prueba que la query 'brandon' devuelve los libros y el usuario relacionado.
     """
-    account = create_account
+    # account = create_account
     # Ejecutar el endpoint de búsqueda
     response = client.get("/api/v1/search/", params={"query": "brandon", "limit": 10})
     assert response.status_code == 200
