@@ -23,6 +23,20 @@ class AccountService {
       })
   }
 
+  getAccountById (accountId) {
+    const token = localStorage.getItem('token')
+    return http.get(`/api/v1/accounts/${accountId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then((res) => res.data)
+      .catch((error) => {
+        console.error('Error al obtener los datos del usuario:', error)
+        throw error
+      })
+  }
+
   updateAccount (data) {
     const token = localStorage.getItem('token')
     return http.patch(`/api/v1/accounts/me`, data, {
@@ -36,10 +50,46 @@ class AccountService {
         throw error
       })
   }
-  get (id) {
-    return http.get(`/api/v1/accounts/${id}`)
-      .then((res) => {
-        return res.data
+
+  followAccount (accountId) {
+    const token = localStorage.getItem('token')
+    return http.post(`/api/v1/followers/${accountId}`, {}, { // Nota el objeto vacío para el body
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then((res) => res.data)
+      .catch((error) => {
+        console.error('Error al seguir al usuario:', error.response?.data || error.message)
+        throw error
+      })
+  }
+
+  unfollowAccount (accountId) {
+    const token = localStorage.getItem('token')
+    return http.delete(`/api/v1/followers/${accountId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then((res) => res.data)
+      .catch((error) => {
+        console.error('Error al dejar de seguir al usuario:', error.response?.data || error.message)
+        throw error
+      })
+  }
+
+  getFollowingAccounts () {
+    const token = localStorage.getItem('token')
+    return http.get(`/api/v1/followers/me_following`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then((res) => res.data)
+      .catch((error) => {
+        console.error('Error al obtener los datos del usuario:', error)
+        throw error
       })
   }
 }

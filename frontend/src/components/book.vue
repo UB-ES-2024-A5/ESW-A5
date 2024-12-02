@@ -8,7 +8,10 @@
         <div class="left-section">
           <div class="title-container">
             <h1 class="title">{{ book.title || 'Title of the publication' }}</h1>
-            <div class="star" @click="toggleStar(wishlistId, bookid2)" :class="{ selected: starSelected }"> ★
+
+             <!-- Mostrar la estrella solo si el usuario no es editor -->
+            <div
+              v-if="!user_me.is_editor" class="star" @click="toggleStar(wishlistId, bookid2)" :class="{ selected: starSelected }"> ★
             </div>
           </div>
           <div class="image-container">
@@ -19,7 +22,7 @@
         <div class="info">
           <p><strong>Author:</strong> {{ book.author || 'Author example' }}</p>
           <p><strong>Genre:</strong> {{ book.gender_main || 'Genre1, Genre2' }}</p>
-          <p><strong>Publisher:</strong> {{ user.name || this.user_id }}</p>
+          <p><strong>Publisher:</strong> {{ user.name || 'Publisher' }}</p>
           <p><strong>Year of the publication:</strong> {{ book.publication_year || 'Year example' }}</p>
           <p><strong>ISBN:</strong> {{ book.isbn || 'ISBN example' }}</p>
           <p><strong>Minimum Price:</strong> {{ book.price || 'Price example' }}</p>
@@ -40,6 +43,7 @@
 <script>
 import WishlistService from '../services/WishlistServices'
 import axios from 'axios'
+import UserServices from '../services/UserServices'
 
 export default {
   name: 'BookDetails',
@@ -53,7 +57,8 @@ export default {
       wishlistId: null,
       bookid2: '',
       user: {},
-      user_id: ''
+      user_id: '',
+      user_me: {}
     }
   },
   methods: {
@@ -98,17 +103,12 @@ export default {
           alert('Failed to load book details')
         })
     },
-    checkIfBookInWishlist (isbn) {
-      // Verifica si el libro está en la wishlist
-      const path = process.env.API_URL + '/api/v1/wishlists/' + this.wishlistId + '/books'
-      axios.get(path)
-        .then((res) => {
-          const bookInWishlist = res.data.some(book => book.isbn === isbn)
-          this.starSelected = bookInWishlist
-        })
-        .catch((error) => {
-          console.error(error)
-        })
+    async getUser () {
+      try {
+        this.user_me = await UserServices.getActualUser() // Guardar el objeto en user_me
+      } catch (error) {
+        console.error('Error al obtener el usuario:', error)
+      }
     },
     loadMoreComments () {
       console.log('Load more comments')
@@ -121,9 +121,26 @@ export default {
         // Si se crea una nueva wishlist, asignamos su ID
         if (wishlistResponse && wishlistResponse.data.length > 0) {
           this.wishlistId = wishlistResponse.data[0].id
+          await this.checkifBookinWishlist(this.wishlistId)
         }
       } catch (error) {
         console.error('Error al obtener o crear wishlist', error)
+        throw error
+      }
+    },
+    async checkifBookinWishlist (id) {
+      try {
+        const wishlistResponse = await WishlistService.getWishlistsBooks(id)
+        if (wishlistResponse.data.length > 0) {
+          console.log(wishlistResponse.data.length)
+        }
+        for (let i = 0; i < wishlistResponse.data.length; i++) {
+          if (wishlistResponse.data[i].isbn === this.book.isbn) {
+            this.starSelected = true
+          }
+        }
+      } catch (error) {
+        console.error('Error al saber si el libro esta en la wishlist', error)
       }
     },
     async toggleStar (wishlistId, bookid) {
@@ -141,13 +158,16 @@ export default {
           await WishlistService.deleteBookWishlist(wishlistId, bookid)
         } catch (error) {
           console.error('Error al eliminar libro de la wishlist', error)
+          this.starSelected = !this.starSelected // se revierte en caso de error mi compadre
         }
       }
     }
   },
-  mounted () {
+  async mounted () {
+
     this.fetchBookDetails()
-    // this.getWishlistId()
+    await this.getWishlistId()
+    await this.getUser()
   }
 }
 </script>

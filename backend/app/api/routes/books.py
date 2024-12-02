@@ -99,6 +99,32 @@ def read_all_my_books(session: SessionDep, current_user: CurrentUser, skip: int 
 
     return BooksOut(data=books_out, count=count)
 
+@router.get("/{account_id}", response_model=BooksOut)
+def read_all_other_books(session: SessionDep, account_id: uuid.UUID, skip: int = 0, limit: int = 100) -> Any:
+    """
+    Get all books of a user by id, editorial user only.
+    """
+
+    # Obtener la cuenta del usuario actual
+    account = session.get(Account, account_id)
+
+    if not account.user.is_editor:
+        raise HTTPException(
+            status_code=400, detail="User must be an editorial user."
+        )
+
+    # Obtener el número total de libros del usuario
+    count_statement = select(func.count()).select_from(Book).where(Book.account_id == account.id)
+    count = session.exec(count_statement).one()
+
+    # Obtener los libros del usuario
+    statement = select(Book).where(Book.account_id == account.id).offset(skip).limit(limit)
+    books = session.exec(statement).all()
+
+    books_out = [crud.book.convert_book_bookOut(book=book) for book in books]
+
+    return BooksOut(data=books_out, count=count)
+
 
 
 @router.post("/", response_model=BookOut)
