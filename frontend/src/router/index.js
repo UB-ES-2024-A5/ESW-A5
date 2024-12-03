@@ -11,10 +11,9 @@ import UserProfile from '../components/userProfile.vue'
 import PublisherProfile from '../components/publisherProfile.vue'
 import Book from '../components/book.vue'
 import CreatePublication from '../components/createPublication.vue'
+
 import axios from 'axios'
 import userServices from '../services/UserServices.js'
-import searchUserProfile from '../components/searchUserProfile.vue'
-import searchPublisherProfile from '../components/searchPublisherProfile.vue'
 
 Vue.use(Router)
 
@@ -55,49 +54,37 @@ const router = new Router({
       path: '/mainPage_user',
       name: 'mainPage_user',
       component: MainPageUser,
-      meta: { requiresAuth: false } // Requiere autenticación
+      meta: { requiresAuth: true } // Requiere autenticación
     },
     {
       path: '/mainPage_publisher',
       name: 'mainPage_publisher',
       component: MainPagePublisher,
-      meta: { requiresAuth: false } // Requiere autenticación
+      meta: { requiresAuth: true } // Requiere autenticación
     },
     {
       path: '/user_profile',
       name: 'user_profile',
       component: UserProfile,
-      meta: { requiresAuth: false } // Requiere autenticación
+      meta: { requiresAuth: true } // Requiere autenticación
     },
     {
       path: '/publisher_profile',
       name: 'publisher_profile',
       component: PublisherProfile,
-      meta: { requiresAuth: false } // Requiere autenticación
-    },
-    {
-      path: '/search_user_profile',
-      name: 'search_user_profile',
-      component: searchUserProfile,
-      meta: { requiresAuth: false } // Requiere autenticación
-    },
-    {
-      path: '/search_publisher_profile',
-      name: 'search_publisher_profile',
-      component: searchPublisherProfile,
-      meta: { requiresAuth: false } // Requiere autenticación
+      meta: { requiresAuth: true } // Requiere autenticación
     },
     {
       path: '/book',
       name: 'book',
       component: Book,
-      meta: { requiresAuth: false } // Requiere autenticación
+      meta: { requiresAuth: true } // Requiere autenticación
     },
     {
       path: '/create_publication',
       name: 'create_publication',
       component: CreatePublication,
-      meta: { requiresAuth: false } // Requiere autenticación
+      meta: { requiresAuth: true } // Requiere autenticación
     }
   ]
 })
