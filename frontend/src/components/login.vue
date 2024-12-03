@@ -45,7 +45,7 @@ export default {
   methods: {
     async login_user (event) {
       const data = `username=${this.email}&password=${this.password}`
-      const path = process.env.API_URL + '/api/v1/login/access-token'
+      const path = 'https://esa05-cyc9agehcmd3gudg.francecentral-01.azurewebsites.net/api/v1/login/access-token'
 
       try {
         const res = await axios.post(path, data, {
@@ -53,7 +53,6 @@ export default {
             'Content-Type': 'application/x-www-form-urlencoded'
           }
         })
-
         console.log(res)
         this.is_authenticated = true
         this.token = res.data.access_token
@@ -76,7 +75,7 @@ export default {
             timer: 2000,
             showConfirmButton: false
           })
-          this.$router.push({ path: '/mainPage_publisher', query: { email: this.email, token: this.token } })
+          this.$router.push({ path: '/mainPage_publisher' })
         } else {
           await this.createWishlist()
           Swal.fire({
@@ -86,7 +85,7 @@ export default {
             timer: 2000,
             showConfirmButton: false
           })
-          this.$router.push({ path: '/mainPage_user', query: { email: this.email, token: this.token } })
+          this.$router.push({ path: '/mainPage_user' })
         }
       } catch (error) {
         console.error(error)

@@ -8,7 +8,10 @@
         <div class="left-section">
           <div class="title-container">
             <h1 class="title">{{ book.title || 'Title of the publication' }}</h1>
-            <div class="star" @click="toggleStar(wishlistId, bookid2)" :class="{ selected: starSelected }"> ★
+
+             <!-- Mostrar la estrella solo si el usuario no es editor -->
+            <div
+              v-if="!user_me.is_editor" class="star" @click="toggleStar(wishlistId, bookid2)" :class="{ selected: starSelected }"> ★
             </div>
           </div>
           <div class="image-container">
@@ -19,11 +22,18 @@
         <div class="info">
           <p><strong>Author:</strong> {{ book.author || 'Author example' }}</p>
           <p><strong>Genre:</strong> {{ book.gender_main || 'Genre1, Genre2' }}</p>
-          <p><strong>Publisher:</strong> {{ book.publisher || 'Publisher example' }}</p>
+          <p><strong>Publisher:</strong> {{ user.name || 'Publisher' }}</p>
           <p><strong>Year of the publication:</strong> {{ book.publication_year || 'Year example' }}</p>
           <p><strong>ISBN:</strong> {{ book.isbn || 'ISBN example' }}</p>
           <p><strong>Minimum Price:</strong> {{ book.price || 'Price example' }}</p>
           <p><strong>Synopsis:</strong> {{ book.synopsis || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate.' }}</p>
+          <strong>Links de compra:</strong> <ul>
+          <li v-for="(link,index) in book.list_links" :key="link" class="link-item">
+                <a :href="link" target="_blank" rel="noopener noreferrer">
+                  <button class="link-button">Link {{ index + 1}}</button>
+                </a>
+              </li>
+        </ul>
         </div>
       </div>
     </div>
@@ -33,6 +43,7 @@
 <script>
 import WishlistService from '../services/WishlistServices'
 import axios from 'axios'
+import UserServices from '../services/UserServices'
 
 export default {
   name: 'BookDetails',
@@ -44,14 +55,17 @@ export default {
       comments: [],
       starSelected: false,
       wishlistId: null,
-      bookid2: ''
+      bookid2: '',
+      user: {},
+      user_id: '',
+      user_me: {}
     }
   },
   methods: {
     fetchBookDetails () {
       const bookId = this.$route.query.bookId
       this.bookid2 = bookId
-      const path = process.env.API_URL + '/api/v1/books/search_id/' + bookId
+      const path = 'https://esa05-cyc9agehcmd3gudg.francecentral-01.azurewebsites.net' + '/api/v1/books/search_id/' + bookId
 
       axios.get(path)
         .then((res) => {
@@ -59,33 +73,41 @@ export default {
             title: res.data.title,
             author: res.data.author,
             gender_main: res.data.gender_main,
-            publisher: res.data.publisher,
             publication_year: res.data.publication_year,
             isbn: res.data.isbn,
             price: res.data.price,
             synopsis: res.data.synopsis,
-            img: res.data.img
+            img: res.data.img,
+            list_links: res.data.list_links || [],
+            account_id: res.data.account_id
           }
-
+          this.user_id = this.book.account_id
           this.comments = res.data.comments || []
-          this.checkIfBookInWishlist(res.data.isbn)
+          this.fetchBookPublisher()
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    },
+    fetchBookPublisher () {
+      const path = 'https://esa05-cyc9agehcmd3gudg.francecentral-01.azurewebsites.net' + '/api/v1/users/by_id/' + this.user_id
+      axios.get(path)
+        .then((res) => {
+          this.user = {
+            name: res.data.name
+          }
         })
         .catch((error) => {
           console.error(error)
           alert('Failed to load book details')
         })
     },
-    checkIfBookInWishlist (isbn) {
-      // Verifica si el libro está en la wishlist
-      const path = process.env.API_URL + '/api/v1/wishlists/' + this.wishlistId + '/books'
-      axios.get(path)
-        .then((res) => {
-          const bookInWishlist = res.data.some(book => book.isbn === isbn)
-          this.starSelected = bookInWishlist
-        })
-        .catch((error) => {
-          console.error(error)
-        })
+    async getUser () {
+      try {
+        this.user_me = await UserServices.getActualUser() // Guardar el objeto en user_me
+      } catch (error) {
+        console.error('Error al obtener el usuario:', error)
+      }
     },
     loadMoreComments () {
       console.log('Load more comments')
@@ -98,9 +120,26 @@ export default {
         // Si se crea una nueva wishlist, asignamos su ID
         if (wishlistResponse && wishlistResponse.data.length > 0) {
           this.wishlistId = wishlistResponse.data[0].id
+          await this.checkifBookinWishlist(this.wishlistId)
         }
       } catch (error) {
         console.error('Error al obtener o crear wishlist', error)
+        throw error
+      }
+    },
+    async checkifBookinWishlist (id) {
+      try {
+        const wishlistResponse = await WishlistService.getWishlistsBooks(id)
+        if (wishlistResponse.data.length > 0) {
+          console.log(wishlistResponse.data.length)
+        }
+        for (let i = 0; i < wishlistResponse.data.length; i++) {
+          if (wishlistResponse.data[i].isbn === this.book.isbn) {
+            this.starSelected = true
+          }
+        }
+      } catch (error) {
+        console.error('Error al saber si el libro esta en la wishlist', error)
       }
     },
     async toggleStar (wishlistId, bookid) {
@@ -118,13 +157,15 @@ export default {
           await WishlistService.deleteBookWishlist(wishlistId, bookid)
         } catch (error) {
           console.error('Error al eliminar libro de la wishlist', error)
+          this.starSelected = !this.starSelected // se revierte en caso de error mi compadre
         }
       }
     }
   },
-  mounted () {
+  async mounted () {
     this.fetchBookDetails()
-    this.getWishlistId()
+    await this.getWishlistId()
+    await this.getUser()
   }
 }
 </script>
@@ -165,10 +206,10 @@ export default {
 }
 
 .image-container img {
-  width: 150px;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 10px;
+  width: 175px;
+  height: 250px;
+  object-fit: fill;
+  border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   margin-right: 0px;
 }
@@ -252,4 +293,39 @@ export default {
 .star.selected {
   color: goldenrod;
 }
+.link-item{
+  color: #0073e6; /* Un azul profesional */
+  text-decoration: none; /* Elimina el subrayado por defecto */
+  font-weight: bold; /* Da énfasis al texto */
+  padding: 5px; /* Espaciado alrededor del texto */
+  border-radius: 5px; /* Bordes redondeados */
+  transition: all 0.4s ease; /* Suaviza las animaciones */
+  display: inline-block; /* Asegura que respeta el padding */
+  text-align: left;
+
+}
+
+.link-button {
+  background-color: #007bff; /* Fondo azul */
+  color: white; /* Texto blanco */
+  border: none; /* Sin bordes */
+  border-radius: 10px; /* Bordes redondeados */
+  padding: 10px 15px; /* Espaciado interno */
+  font-size: 16px; /* Tamaño de la fuente */
+  font-weight: bold; /* Texto en negrita */
+  cursor: pointer; /* Mostrar el cursor de mano */
+  transition: background-color 0.3s, transform 0.2s; /* Animación suave */
+  text-align: left;
+
+}
+.link-button:hover {
+  background-color: #0056b3; /* Azul más oscuro al pasar el ratón */
+  transform: scale(1.10); /* Efecto de zoom */
+}
+
+.link-button:active {
+  transform: scale(1); /* Reducir zoom al hacer clic */
+  background-color: #004494; /* Fondo aún más oscuro */
+}
+
 </style>

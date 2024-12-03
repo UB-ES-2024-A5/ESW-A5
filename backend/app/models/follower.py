@@ -13,19 +13,19 @@ class FollowerBase(SQLModel):
 
 class Follower(FollowerBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    # ID de la cuenta que sigue
+    # ID de la cuenta que empieza a seguir (current_user)
     follower_id: uuid.UUID = Field(foreign_key="account.id")
-    # ID de la cuenta que es seguida
+    # ID de la cuenta que es seguida (a quien quiero seguir)
     following_id: uuid.UUID = Field(foreign_key="account.id")
-    # Relación con la cuenta que sigue
+    # Relación con la cuenta que empieza a seguir
     followers_account: "Account" = Relationship(
         back_populates="following",
-        sa_relationship_kwargs=dict(foreign_keys="Follower.follower_id")
+        sa_relationship_kwargs={"foreign_keys": "Follower.follower_id"}
     )
     # Relación con la cuenta que es seguida
     following_account: "Account" = Relationship(
         back_populates="followers",
-        sa_relationship_kwargs=dict(foreign_keys="Follower.following_id")
+        sa_relationship_kwargs={"foreign_keys": "Follower.following_id"}
     )
 
 
@@ -39,6 +39,8 @@ class FollowerUpdate(FollowerBase):
 
 class FollowerOut(FollowerBase):
     id: uuid.UUID
+    follower_id: uuid.UUID
+    following_id: uuid.UUID
 
 
 class FollowersOut(SQLModel):

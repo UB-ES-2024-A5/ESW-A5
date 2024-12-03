@@ -1,24 +1,27 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Login from '../components/login.vue'
-import signup from '../components/signup.vue'
-import guessaccess from '../components/welcomePage.vue'
-import signupEdit from '../components/signupEdit.vue'
-import mainpageGuest from '../components/mainPageGuest.vue'
-import mainpageUser from '../components/mainPageUser.vue'
-import mainpagePublisher from '../components/mainPagePublisher.vue'
-import userProfile from '../components/userProfile.vue'
-import publisherProfile from '../components/publisherProfile.vue'
-import book from '../components/book.vue'
-import createPublication from '../components/createPublication.vue'
+import Signup from '../components/signup.vue'
+import GuessAccess from '../components/welcomePage.vue'
+import SignupEdit from '../components/signupEdit.vue'
+import MainPageGuest from '../components/mainPageGuest.vue'
+import MainPageUser from '../components/mainPageUser.vue'
+import MainPagePublisher from '../components/mainPagePublisher.vue'
+import UserProfile from '../components/userProfile.vue'
+import PublisherProfile from '../components/publisherProfile.vue'
+import Book from '../components/book.vue'
+import CreatePublication from '../components/createPublication.vue'
+import searchUserProfile from '../components/searchUserProfile.vue'
+import searchPublisherProfile from '../components/searchPublisherProfile.vue'
 
 Vue.use(Router)
 export default new Router({
+  mode: 'history',
   routes: [
     {
       path: '/',
       name: 'guestaccess',
-      component: guessaccess
+      component: GuessAccess
     },
     {
       path: '/login',
@@ -28,47 +31,57 @@ export default new Router({
     {
       path: '/signup',
       name: 'signup',
-      component: signup
+      component: Signup
     },
     {
       path: '/signupEdit',
       name: 'signupEdit',
-      component: signupEdit
+      component: SignupEdit
     },
     {
       path: '/mainPage_guest',
       name: 'mainPage_guest',
-      component: mainpageGuest
+      component: MainPageGuest
     },
     {
       path: '/mainPage_user',
       name: 'mainPage_user',
-      component: mainpageUser
+      component: MainPageUser
     },
     {
       path: '/mainPage_publisher',
       name: 'mainPage_publisher',
-      component: mainpagePublisher
+      component: MainPagePublisher
     },
     {
       path: '/user_profile',
       name: 'user_profile',
-      component: userProfile
+      component: UserProfile
     },
     {
       path: '/publisher_profile',
       name: 'publisher_profile',
-      component: publisherProfile
+      component: PublisherProfile
+    },
+    {
+      path: '/search_user_profile',
+      name: 'search_user_profile',
+      component: searchUserProfile
+    },
+    {
+      path: '/search_publisher_profile',
+      name: 'search_publisher_profile',
+      component: searchPublisherProfile
     },
     {
       path: '/book',
       name: 'book',
-      component: book
+      component: Book
     },
     {
       path: '/create_publication',
       name: 'create_publication',
-      component: createPublication
+      component: CreatePublication
     }
   ]
 })

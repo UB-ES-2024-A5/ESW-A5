@@ -9,15 +9,17 @@
       </button>
       <div class="profile-image-container">
         <img :src="userProfileImage" alt="Profile Icon" class="profile-image">
-        <button @click="selectImage" class="change-icon-btn" aria-label="Change profile icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
-            <path d="M5 20h4l11-11-4-4L5 16v4zm14-14l-4-4 2-2 4 4-2 2z" />
-          </svg>
-        </button>
-        <input type="file" accept="image/jpeg" ref="fileInput" style="display: none;" @change="handleFileChange">
       </div>
       <div class="user-info">
         <h1>{{ user.name }} {{ user.surname }}</h1>
+        <button
+          class="follow-button"
+          :class="{ 'following': isFollowing, 'disabled': !isLoggedIn }"
+          @click="toggleFollow"
+          :disabled="!isLoggedIn"
+        >
+          {{ isFollowing ? 'Unfollow' : 'Follow' }}
+        </button>
         <p>{{ user.email }}</p>
       </div>
       <div class="follow-info">
@@ -38,15 +40,31 @@
       </div>
       <div class="biography-section">
         <h2>Biography</h2>
-        <p v-if="!isEditingBio">{{ account.bio }}</p>
-        <textarea v-else v-model="editedBiography" rows="4" class="bio-textarea"></textarea>
-        <button @click="toggleEditBio" class="edit-bio-btn">
-          {{ isEditingBio ? 'Save' : 'Edit Biography' }}
-        </button>
+        <p>{{ account.bio }}</p>
       </div>
 
-      <button @click="showWishlist" class="wishlist-btn">
+      <button
+        v-if="isFollowing"
+        @click="showWishlist"
+        class="wishlist-btn"
+        :disabled="!isLoggedIn"
+        :class="{ 'disabled': !isLoggedIn }"
+        title="You must be logged in to see the wishlist"
+      >
         <!-- Ícono de estrella para la wishlist -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
+          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+        </svg>
+        <span>Wishlist</span>
+      </button>
+
+      <button
+        v-else
+        class="wishlist-btn disabled"
+        disabled
+        title="You must follow this user to see their wishlist"
+      >
+        <!-- Ícono de estrella para indicar inaccesible -->
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
           <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
         </svg>
@@ -56,7 +74,7 @@
       <!-- Wishlist Popup -->
       <div v-if="wishlistVisible" class="wishlist-popup">
         <div class="wishlist-content">
-          <h2>Your Wishlist</h2>
+          <h2>{{ user.name }} Wishlist</h2>
           <ul>
             <li v-for="book in user.wishlist.data" :key="book.id">
               <router-link :to="{ path: '/book', query: { bookId: book.id } }">
@@ -68,6 +86,7 @@
           <button @click="closeWishlist" class="close-button">Close</button>
         </div>
       </div>
+
     </div>
   </div>
 </template>
@@ -75,7 +94,6 @@
 <script>
 import userServices from '../services/UserServices.js'
 import accountServices from '../services/AccountServices.js'
-import Swal from 'sweetalert2'
 import wishlistServices from '../services/WishlistServices.js'
 export default {
   data () {
@@ -97,8 +115,8 @@ export default {
         bio: ''
       },
       wishlistVisible: false,
-      isEditingBio: false, // Estado de edición de la biografía
-      editedBiography: '' // Biografía temporal mientras se edita
+      isFollowing: false, // Estado de seguimiento
+      isLoggedIn: false // Estado de inicio de sesión
     }
   },
   methods: {
@@ -111,9 +129,11 @@ export default {
     },
     async fetchUserProfile () {
       console.log('Fetching user profile...')
+      console.log(await wishlistServices.getMyWishlists())
+      const userID = this.$route.query.userID // Obtén el userID desde la query string
       try {
-        const userData = await userServices.getActualUser()
-        const accountData = await accountServices.getActualAccount()
+        const userData = await userServices.getUserById(userID)
+        const accountData = await accountServices.getAccountById(userID)
         console.log('User data:', userData)
         this.user.name = userData.name
         this.user.surname = userData.surname
@@ -123,115 +143,66 @@ export default {
         this.account.bio = accountData.bio
         // Mostrar placeholder si no hay foto de perfil
         this.userProfileImage = accountData.photo || this.profileIcon
+        // Verifica si ya sigues al usuario
+        await this.checkIfFollowing()
       } catch (error) {
         console.error('Error al obtener los datos del usuario:', error)
       }
     },
     async fetchWishlistsInformation () {
-      const res = await wishlistServices.getMyWishlists()
-      this.wishlistId = res.data[0].id
-      this.fetchBooksInWishlist(this.wishlistId)
+      const userId = this.$route.query.userID
+      try {
+        const res = await wishlistServices.getUserWishlist(userId)
+        this.user.wishlist = res.wishlist
+      } catch (error) {
+        console.error('Error al obtener la wishlist:', error)
+      }
     },
     async fetchBooksInWishlist (id) {
       const res = await wishlistServices.readBooksOfWishlist(id)
+      console.log('Cargando wishlist')
       console.log(res)
       this.user.wishlist = res.data
     },
-    async toggleEditBio () {
-      if (this.isEditingBio) {
-        // Validar la biografía antes de guardar
-        const trimmedBio = this.editedBiography.trim()
-        if (trimmedBio.length > 200) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'The biography cannot exceed 200 characters.',
-            timer: 2000,
-            showConfirmButton: false
-          })
-          return // No guardar si no cumple con la validación
-        }
-
-        if (this.editedBiography !== trimmedBio) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'The biography cannot have any blank spaces at the beginning or end.',
-            timer: 2000,
-            showConfirmButton: false
-          })
-          return // No guardar si no cumple con la validación
-        }
-        // Guardar en el servidor
-        const data = {
-          bio: trimmedBio
-        }
-        await accountServices.updateAccount(data)
-        await this.fetchUserProfile()
-      } else {
-        // Entrar en modo edición
-        this.editedBiography = this.account.bio
-      }
-      this.isEditingBio = !this.isEditingBio
-    },
-    selectImage () {
-      this.$refs.fileInput.click()
-    },
-    async handleFileChange (event) {
-      const file = event.target.files[0]
-      if (!file || file.type !== 'image/jpeg') {
-        Swal.fire({
-          icon: 'error',
-          title: 'Invalid format',
-          text: 'Por favor selecciona un archivo JPEG.',
-          timer: 2000,
-          showConfirmButton: false
-        })
-        return
-      }
-
-      try {
-        const imageBase64 = await this.convertImageToBase64(file)
-        this.userProfileImage = imageBase64
-
-        // Guardar en el servidor
-        const data = {
-          photo: imageBase64
-        }
-        await accountServices.updateAccount(data)
-        await this.fetchUserProfile()
-        Swal.fire({
-          icon: 'success',
-          title: 'Photo updated',
-          text: 'Your profile photo has been updated successfully.',
-          timer: 2000,
-          showConfirmButton: false
-        })
-      } catch (error) {
-        console.error('Error al actualizar la foto:', error)
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'The profile picture could not be updated.',
-          timer: 2000,
-          showConfirmButton: false
-        })
-      }
-    },
-    convertImageToBase64 (image) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onloadend = () => resolve(reader.result)
-        reader.onerror = reject
-        reader.readAsDataURL(image)
-      })
-    },
     goBack () {
       this.$router.push('/mainPage_user')
+    },
+    async checkIfFollowing () {
+      try {
+        const userID = this.$route.query.userID // Obtén el userID desde la query string
+        const followingData = await accountServices.getFollowingAccounts() // Obtén la lista de seguidos
+        this.isFollowing = followingData.data.some(
+          (data) => data.following_id.toString().trim() === userID.toString().trim()
+        )
+      } catch (error) {
+        console.error('Error al verificar el estado de seguimiento:', error)
+      }
+    },
+    async toggleFollow () {
+      const userID = this.$route.query.userID // Obtén el userID desde la query string
+      try {
+        if (this.isFollowing) {
+          // Si ya sigues, deja de seguir
+          await accountServices.unfollowAccount(userID)
+        } else {
+          // Si no sigues, empieza a seguir
+          await accountServices.followAccount(userID)
+        }
+        // Actualiza el estado de seguimiento
+        await this.fetchUserProfile()
+      } catch (error) {
+        console.error('Error al alternar el estado de seguimiento:', error)
+      }
+    },
+    isUserLoggedIn () {
+      // Verifica si hay un token presente
+      return !!localStorage.getItem('token')
     }
   },
   mounted () {
+    this.isLoggedIn = this.isUserLoggedIn() // Establece el estado de inicio de sesión
     this.fetchUserProfile()
+    this.checkIfFollowing() // Llama después de cargar el perfil
   }
 }
 </script>
@@ -274,27 +245,6 @@ export default {
   object-fit: cover;
   border: 3px solid white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.change-icon-btn {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  background-color: white;
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s;
-}
-
-.change-icon-btn:hover {
-  background-color: #f0f0f0;
 }
 
 .user-info {
@@ -357,31 +307,6 @@ export default {
   white-space: pre-wrap; /* Mantiene los saltos de línea escritos por el usuario */
 }
 
-.bio-textarea {
-  width: 100%;
-  padding: 0.5rem;
-  font-size: 0.9rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  resize: vertical; /* Permite al usuario ajustar el tamaño mientras edita */
-  margin-bottom: 0.5rem;
-  max-height: 150px; /* Altura máxima ajustable */
-}
-
-.edit-bio-btn {
-  background-color: #f0f0f0;
-  border: none;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.edit-bio-btn:hover {
-  background-color: #e0e0e0;
-}
-
 .wishlist-btn {
   display: flex;
   align-items: center;
@@ -423,6 +348,20 @@ export default {
   .wishlist-btn {
     font-size: 0.9rem;
   }
+}
+
+.follow-button.disabled,
+.wishlist-btn.disabled {
+  background-color: #ccc;
+  border: 1px solid #ccc;
+  cursor: not-allowed;
+  color: #666;
+}
+
+.follow-button.disabled:hover,
+.wishlist-btn.disabled:hover {
+  background-color: #ccc;
+  color: #666;
 }
 
 /* Wishlist popup */
@@ -507,5 +446,28 @@ input[type="file"] {
 
 .back-button:active {
   background-color: rgba(0, 0, 0, 0.2);
+}
+
+.follow-button {
+  margin-left: 10px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 20px;
+  border: 1px solid #007bff;
+  background-color: white;
+  color: #007bff;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.follow-button.following {
+  background-color: #f1f1f1;
+  color: #666;
+  border-color: #ccc;
+}
+
+.follow-button:hover {
+  background-color: #007bff;
+  color: white;
 }
 </style>

@@ -16,6 +16,23 @@ class WishlistService {
         console.error('Error al obtener las wishlists', error)
       })
   }
+  getWishlistsBooks (id) {
+    const token = localStorage.getItem('token')
+    return http.get(`/api/v1/wishlists/${id}/books`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => {
+        console.log(res.data)
+        console.log('AQUI VA LA VUELTA')
+        return res.data
+      })
+      .catch(error => {
+        console.error('Error al obtener los libros de la  wishlists', error)
+      })
+  }
+
   addBookWishlist (whishlistid, bookid) {
     const token = localStorage.getItem('token')
     return http.patch(`/api/v1/wishlists/${whishlistid}/${bookid}`, {
@@ -62,6 +79,10 @@ class WishlistService {
         }
       })
     }
+  }
+  async getUserWishlist (userId) {
+    const response = await http.get(`/wishlists/user/${userId}`)
+    return response.data
   }
 }
 export default new WishlistService()

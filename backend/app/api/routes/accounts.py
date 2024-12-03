@@ -38,20 +38,16 @@ def read_account_me(session: SessionDep, current_user: CurrentUser) -> Any:
     return account
 
 @router.get("/{account_id}",
-            response_model=AccountOut,
-            dependencies=[Depends(get_current_active_superuser)])
+            response_model=AccountOut)
 def read_account_by_id(
-        account_id: uuid.UUID, session: SessionDep, current_user: CurrentUser) -> Any:
+        account_id: uuid.UUID, session: SessionDep) -> Any:
     """
     Get a specific account by ID (must be need superuser).
     """
     account = session.get(Account, account_id)
 
-    if not current_user.is_superuser:
-        raise HTTPException(
-            status_code=403,
-            detail="The user doesn't have enough privileges",
-        )
+    if not account:
+        raise HTTPException(status_code=404, detail="Account not found")
 
     return account
 
@@ -141,7 +137,7 @@ def update_account(
 
 @router.delete(
     "/me",
-    dependencies=[Depends(get_current_active_superuser)],)
+)
 def delete_account_me(
         session: SessionDep, current_user: CurrentUser
 ) -> Message:
