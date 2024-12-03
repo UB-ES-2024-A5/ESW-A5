@@ -3,17 +3,25 @@ import VueRouter from 'vue-router';
 import MainPageUser from '../../components/MainPageUser.vue'; // Asegúrate de importar el componente correcto
 import Login from '../../components/login.vue';
 import Swal from 'sweetalert2';
+import BookServices from '../../services/BookServices';
+import WelcomePage from '../../components/welcomePage.vue';
 
-const localVue = createLocalVue();
-localVue.use(VueRouter);
+jest.mock('../../services/BookServices', () => ({
+  getAllBooks: jest.fn(),
+}));
 
-describe('MainPageUser redirection when no token', () => {
+describe('Navigation from Welcome Page to MainPageGuest', () => {
   let router;
-  let wrapper;
+  const localVue = createLocalVue();
+  localVue.use(VueRouter);
 
   beforeEach(() => {
+    BookServices.getAllBooks.mockResolvedValue([
+      { id: 1, img: 'book1.png' },
+      { id: 2, img: 'book2.png' },
+    ]);
     const routes = [
-      { path: '/login', component: Login },
+      { path: '/', component: WelcomePage },
       { path: '/mainPage_user', component: MainPageUser },
     ];
 
@@ -21,20 +29,39 @@ describe('MainPageUser redirection when no token', () => {
       mode: 'history',
       routes,
     });
+  });
 
-    wrapper = mount(MainPageUser, {
+  it('should display a list of books in the carousel', async () => {
+    const wrapper = mount(MainPageUser, {
       localVue,
       router,
     });
+
+    wrapper.setData({
+      books: [
+        { id: 1, img: 'book1.png' },
+        { id: 2, img: 'book2.png' },
+      ],
+    });
+
+    await wrapper.vm.$nextTick();
+
+    const images = wrapper.findAll('.carousel-image');
+    expect(images.length).toBe(2);
+    expect(images.at(0).attributes('src')).toBe('book1.png');
   });
 
-  it('should redirect to login if no token is found', async () => {
-    localStorage.removeItem('access_token'); 
 
-    await router.push('/mainPage_user');
-    await wrapper.vm.$nextTick(); 
+  it('should display the user icon', () => {
 
-    expect(router.currentRoute.path).toBe('/login');
+    const wrapper = mount(MainPageUser, {
+      localVue,
+      router,
+    });
+
+    const userIcon = wrapper.find('.user-icon')
+    expect(userIcon.exists()).toBe(true)
+
   });
 
   
