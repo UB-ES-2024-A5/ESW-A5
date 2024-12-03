@@ -65,7 +65,7 @@ async function clearUserDatabase() {
       const confirmButton = swal.locator('.swal2-confirm');
       await confirmButton.click();
 
-      await expect(page).toHaveURL('http://localhost:8080/#/login');
+      await expect(page).toHaveURL('http://localhost:8080/login');
       
 
       await page.goto('http://localhost:8080/#/login');  
@@ -80,7 +80,7 @@ async function clearUserDatabase() {
 
     test('should display an error message for invalid credentials', async ({ page }) => {
   
-      await page.goto('http://localhost:8080/#/login');
+      await page.goto('http://localhost:8080/login');
   
       await page.fill('input[placeholder="Email"]', 'wrong.email@example.com');
       await page.fill('input[placeholder="Password"]', 'wrongPassword!');
@@ -97,14 +97,14 @@ async function clearUserDatabase() {
       const confirmButton = swal.locator('.swal2-confirm');
       await confirmButton.click();
       
-      await expect(page).toHaveURL('http://localhost:8080/#/login');
+      await expect(page).toHaveURL('http://localhost:8080/login');
     });
     test('should navigate to the signup page when "Sign Up" link is clicked', async ({ page }) => {
 
-      await page.goto('http://localhost:8080/#/login');
+      await page.goto('http://localhost:8080/login');
   
       await page.click('text=Sign Up');      
   
-      await expect(page).toHaveURL('http://localhost:8080/#/signup');
+      await expect(page).toHaveURL('http://localhost:8080/signup');
     });
   });
