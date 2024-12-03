@@ -271,7 +271,27 @@ def test_get_all_my_books(authenticate):
     assert response.status_code == 200
 
     results = response.json()
-    print(results)
+    assert len(results) == 2 # Hay dos marinas repetidos con diferente isbn
+
+    book_titles = {book["title"] for book in results["data"] if book.get("title")}
+    assert "Marina" in book_titles
+
+def test_get_all_other_books_not_editor():
+    account = client.get("/api/v1/users/by_email/usernew231@example.com/")
+    account_id = account.json()['id']
+
+    response = client.get(f"/api/v1/books/{account_id}")
+    assert response.status_code == 400
+    assert response.json()["detail"] == "User must be an editorial user."
+
+def test_get_all_other_books():
+    account = client.get("/api/v1/users/by_email/usernew232@example.com/")
+    account_id = account.json()['id']
+
+    response = client.get(f"/api/v1/books/{account_id}")
+    assert response.status_code == 200
+
+    results = response.json()
     assert len(results) == 2 # Hay dos marinas repetidos con diferente isbn
 
     book_titles = {book["title"] for book in results["data"] if book.get("title")}
