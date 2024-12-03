@@ -248,4 +248,31 @@ def test_create_book_with_isbn_with_more_than_13_digits(authenticate):
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
     assert response.status_code == 422
 
+def test_get_all_my_books_not_editor(authenticate_2):
+    account = client.get("/api/v1/users/by_email/usernew231@example.com/")
 
+    headers = {
+        "Authorization": f"Bearer {authenticate_2}"
+    }
+
+    response = client.get("/api/v1/books/my_books", headers=headers)
+    assert response.status_code == 400
+    assert response.json()["detail"] == "User must be an editorial user."
+
+def test_get_all_my_books(authenticate):
+    account = client.get("/api/v1/users/by_email/usernew232@example.com/")
+    account_id = account.json()['id']
+
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.get("/api/v1/books/my_books", headers=headers)
+    assert response.status_code == 200
+
+    results = response.json()
+    print(results)
+    assert len(results) == 2 # Hay dos marinas repetidos con diferente isbn
+
+    book_titles = {book["title"] for book in results["data"] if book.get("title")}
+    assert "Marina" in book_titles
