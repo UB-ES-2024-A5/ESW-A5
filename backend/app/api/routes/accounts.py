@@ -134,7 +134,7 @@ def update_account(
 
 @router.delete(
     "/me",
-    dependencies=[Depends(get_current_active_superuser)],)
+)
 def delete_account_me(
         session: SessionDep, current_user: CurrentUser
 ) -> Message:
