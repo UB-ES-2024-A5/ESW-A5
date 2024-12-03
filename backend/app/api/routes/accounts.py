@@ -46,6 +46,9 @@ def read_account_by_id(
     """
     account = session.get(Account, account_id)
 
+    if not account:
+        raise HTTPException(status_code=404, detail="Account not found")
+
     return account
 
 @router.get(
