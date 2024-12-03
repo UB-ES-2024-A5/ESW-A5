@@ -201,11 +201,11 @@ export default {
       this.emailValid = emailRegex.test(this.email)
     },
     validatePassword () {
-      const minLength = /.{8,}/
+      const length = /^.{8,40}$/
       const hasUppercase = /[A-Z]/
       const hasSymbol = /[\W_]/
 
-      const isValidLength = minLength.test(this.password)
+      const isValidLength = length.test(this.password)
       const containsUppercase = hasUppercase.test(this.password)
       const containsSymbol = hasSymbol.test(this.password)
       this.passwordValid = isValidLength && containsUppercase && containsSymbol

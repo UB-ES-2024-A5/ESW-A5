@@ -124,10 +124,10 @@ test.describe('Set up book', () => {
 
 test.describe('E2E Book Page', () => {
   test('Should be able to enter as a guest and get the books', async ({ page }) => {
-    await page.goto('http://localhost:8080/#/');
+    await page.goto('http://localhost:8080');
 
     await page.click('text=Guest access');
-    await expect(page).toHaveURL('http://localhost:8080/#/mainpage_guest'); 
+    await expect(page).toHaveURL('http://localhost:8080/mainpage_guest'); 
   
     const firstImage = await page.locator('.carousel-image').first(); 
     const imageUrl = await firstImage.getAttribute('src');
