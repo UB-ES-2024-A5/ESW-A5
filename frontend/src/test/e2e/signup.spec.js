@@ -60,7 +60,7 @@ test.describe('Signup Page Tests', () => {
 
     const confirmButton = swal.locator('.swal2-confirm');
     await confirmButton.click();
-    await expect(page).toHaveURL('http://localhost:8080/#/login');
+    await expect(page).toHaveURL('http://localhost:8080/login');
     
   });
 

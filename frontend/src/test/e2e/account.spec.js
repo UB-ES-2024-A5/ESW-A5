@@ -108,7 +108,7 @@ test.describe('Account creation Tests', () => {
         const testEmail = 'john.doe@example.com';
 
         await clearUserDatabase();
-        await page.goto('http://localhost:8080/#/');
+        await page.goto('http://localhost:8080');
         await page.click('text=Sign up as publisher');
         await page.fill('input[placeholder="Name"]', 'John');
         await page.fill('input[placeholder="CIF"]', 'G90909090');
@@ -136,7 +136,7 @@ test.describe('Account creation Tests', () => {
         expect(accountExists).toBe(true);
         
 
-        await expect(page).toHaveURL('http://localhost:8080/#/login');
+        await expect(page).toHaveURL('http://localhost:8080/login');
 
 
     });
@@ -146,7 +146,7 @@ test.describe('Account creation Tests', () => {
         const testEmail = 'john.doe2@example.com';
 
         await clearUserDatabase();
-        await page.goto('http://localhost:8080/#/');
+        await page.goto('http://localhost:8080');
         await page.click('text=Sign up as user');
         await page.fill('input[placeholder="Name"]', 'John');
         await page.fill('input[placeholder="Surname"]', 'Doe');
@@ -174,7 +174,7 @@ test.describe('Account creation Tests', () => {
         expect(accountExists).toBe(true);
         
 
-        await expect(page).toHaveURL('http://localhost:8080/#/login');
+        await expect(page).toHaveURL('http://localhost:8080/login');
 
 
     });
