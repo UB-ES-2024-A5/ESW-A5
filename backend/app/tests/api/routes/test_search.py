@@ -221,7 +221,7 @@ def test_search_books_and_users(create_account, create_book1, create_book2, crea
     Prueba que la query 'brandon' devuelve los libros y el usuario relacionado.
     """
 
-    response = client.get("/api/v1/search/", params={"query": "brandon", "limit": 10})
+    response = client.get("/api/v1/search/brandon", params={"limit": 10})
     assert response.status_code == 200
 
     results = response.json()
@@ -240,7 +240,7 @@ def test_search_books_and_users2():
     Prueba que la query 'br' devuelve los libros y el usuario relacionado.
     """
 
-    response = client.get("/api/v1/search/", params={"query": "br", "limit": 10})
+    response = client.get("/api/v1/search/br", params={"limit": 10})
     assert response.status_code == 200
 
     results = response.json()
@@ -261,7 +261,7 @@ def test_search_books_by_isbn():
     Prueba que la query '9788408163541' devuelve el libro relacionado
     """
 
-    response = client.get("/api/v1/search/", params={"query": "9788408163541", "limit": 10})
+    response = client.get("/api/v1/search/9788408163541", params={"limit": 10})
     assert response.status_code == 200
 
     results = response.json()
@@ -275,7 +275,7 @@ def test_search_books_by_title():
     Prueba que la query 'El' devuelve el libro relacionado
     """
 
-    response = client.get("/api/v1/search/", params={"query": "El", "limit": 10})
+    response = client.get("/api/v1/search/El", params={"limit": 10})
     assert response.status_code == 200
 
     results = response.json()
@@ -293,7 +293,7 @@ def test_search_books_by_title2():
     Prueba que la query 'El camino' devuelve el libro relacionado
     """
 
-    response = client.get("/api/v1/search/", params={"query": "El camino", "limit": 10})
+    response = client.get("/api/v1/search/El camino", params={"limit": 10})
     assert response.status_code == 200
 
     results = response.json()
@@ -307,7 +307,7 @@ def test_search_with_empty_result():
     """
     Prueba que la query que no coincide con ningún libro o usuario devuelve una lista vacía.
     """
-    response = client.get("/api/v1/search/", params={"query": "nonexistentquery", "limit": 10})
+    response = client.get("/api/v1/search/nonexistentquery", params={"limit": 10})
     assert response.status_code == 200
 
     results = response.json()
