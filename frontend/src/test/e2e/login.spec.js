@@ -43,7 +43,7 @@ async function clearUserDatabase() {
     test('should successfully log in with the created user', async ({ page }) => {
 
       await clearUserDatabase();
-      await page.goto('http://localhost:8080/#/');
+      await page.goto('http://localhost:8080');
 
       await page.click('text=Sign up as user');
       await page.fill('input[placeholder="Name"]', 'John');
@@ -68,7 +68,7 @@ async function clearUserDatabase() {
       await expect(page).toHaveURL('http://localhost:8080/login');
       
 
-      await page.goto('http://localhost:8080/#/login');  
+      await page.goto('http://localhost:8080/login');  
       await page.fill('input[placeholder="Email"]', 'john.doe2@example.com');
       await page.fill('input[placeholder="Password"]', 'Password!123');
   

@@ -117,6 +117,9 @@ test.describe('Account creation Tests', () => {
         await page.fill('input[placeholder="Confirm Password"]', 'Password!123');
         await page.check('input[type="checkbox"]');    
         await page.click('button.signup-button');
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         const swal = page.locator('.swal2-container');
         await expect(swal).toBeVisible();
 

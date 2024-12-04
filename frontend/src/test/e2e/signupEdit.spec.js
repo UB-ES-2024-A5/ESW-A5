@@ -42,7 +42,7 @@ test.describe('Signup Publisher Page Tests', () => {
     test('should successfully create a new user account', async ({ page }) => {
   
       await clearUserDatabase();
-      await page.goto('http://localhost:8080/#/');
+      await page.goto('http://localhost:8080');
       await page.click('text=Sign up as publisher');
       await page.fill('input[placeholder="Name"]', 'John');
       await page.fill('input[placeholder="CIF"]', 'G90909090');
@@ -82,7 +82,7 @@ test.describe('Signup Publisher Page Tests', () => {
     });
 
     test('should show error for email already registered', async ({ page }) => {
-      await page.goto('http://localhost:8080/#/');
+      await page.goto('http://localhost:8080');
       await page.click('text=Sign up as publisher');
       await page.fill('input[placeholder="Name"]', 'John');
       await page.fill('input[placeholder="CIF"]', 'G90919090');
@@ -104,7 +104,7 @@ test.describe('Signup Publisher Page Tests', () => {
     });
 
     test('should show error for CIF already registered', async ({ page }) => {
-        await page.goto('http://localhost:8080/#/');
+        await page.goto('http://localhost:8080');
         await page.click('text=Sign up as publisher');
         await page.fill('input[placeholder="Name"]', 'John');
         await page.fill('input[placeholder="CIF"]', 'G90909090');
