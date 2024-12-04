@@ -154,7 +154,7 @@ test.describe('Set up book', () => {
   });
 });
 
-test.describe('E2E Book Page', () => {
+test.describe('User profile', () => {
   test('Should be redirected if user is not logged', async ({ page }) => {
     await page.goto('http://localhost:8080/user_profile');
 
@@ -162,7 +162,7 @@ test.describe('E2E Book Page', () => {
 
   });
 
-  test('Should see the books in the carrousel', async ({ page }) => {
+  test('Should see the user details', async ({ page }) => {
     await page.goto('http://localhost:8080/login');
     await expect(page).toHaveURL('http://localhost:8080/login'); 
 
@@ -180,12 +180,93 @@ test.describe('E2E Book Page', () => {
 
     await expect(page).toHaveURL(new RegExp('/user_profile'));
 
+    await page.waitForTimeout(100);
+
     const userName = await page.textContent('.user-info h1');
     const userEmail = await page.textContent('.user-info p');
     
-    expect(userName).toContain('John Doe');
-    expect(userEmail).toContain('testuser2@example.com');
+    await expect(userName).toContain('John Doe');
+    await expect(userEmail).toContain('testuser2@example.com');
 
   
   });
+
+  test('should edit the bio correctly', async ({page}) => {
+
+    await page.goto('http://localhost:8080/login');
+    await expect(page).toHaveURL('http://localhost:8080/login'); 
+
+    await page.fill('input[placeholder="Email"]', 'testuser2@example.com');
+    await page.fill('input[placeholder="Password"]', 'testpassword');
+
+    await page.click('button.login-button');
+
+    await expect(page).toHaveURL(new RegExp('/mainPage_user'));
+
+    const profileIcon = page.locator('.user-icon');
+    await expect(profileIcon).toBeVisible();
+
+    await profileIcon.click();
+
+    await expect(page).toHaveURL(new RegExp('/user_profile'));
+    
+
+    // Hacer clic en el botón "Editar Biografía"
+    await page.click('.edit-bio-btn');
+
+    // Asegúrate de que el campo de texto se habilite para editar
+    const bioTextarea = await page.locator('.bio-textarea');
+    await expect(bioTextarea).toBeVisible();
+
+    // Cambiar la biografía en el campo de texto
+    const newBio = 'Esta es una nueva biografía editada para el test.';
+    await bioTextarea.fill(newBio); // Llenar el campo con la nueva biografía
+
+    // Hacer clic en el botón "Guardar" para guardar los cambios
+    await page.click('.edit-bio-btn');
+
+    // Verificar que la biografía haya sido actualizada en la interfaz
+    const updatedBioText = await page.textContent('.biography-section p');
+    expect(updatedBioText).toBe(newBio);
+
+  });
+
+
+  test('Should upload profile image correctly', async ({ page }) => {
+    // Iniciar sesión
+    await page.goto('http://localhost:8080/login');
+    await page.fill('input[placeholder="Email"]', 'testuser2@example.com');
+    await page.fill('input[placeholder="Password"]', 'testpassword');
+    await page.click('button.login-button');
+    await expect(page).toHaveURL('http://localhost:8080/mainPage_user');
+  
+    // Ir a la página de perfil (o donde sea que se cargue la imagen)
+    const profileIcon = page.locator('.user-icon');
+    await expect(profileIcon).toBeVisible();
+
+    await profileIcon.click();
+
+    await expect(page).toHaveURL(new RegExp('/user_profile'));
+    
+    await expect(page).toHaveURL('http://localhost:8080/user_profile');
+  
+    const profileImage = page.locator('.profile-image');
+    await expect(profileImage).toBeVisible();
+    
+    const imagePath = 'src/test/assets/prueba.jpg'; // Asegúrate de que la imagen exista en esa ruta
+
+    // 5. Simular la carga del archivo
+    const fileInput = page.locator('input[type="file"]');
+    await fileInput.setInputFiles(imagePath);
+
+    // 6. Esperar a que la imagen se actualice correctamente
+    const updatedProfileImage = page.locator('.profile-image');
+    await expect(updatedProfileImage).toHaveAttribute('src', /data:image\/jpeg/);
+
+    // 7. Verificar que el mensaje de éxito aparece
+    const successMessage = page.locator('.swal2-container');
+    await expect(successMessage).toBeVisible();
+  });
+  
+
 });
