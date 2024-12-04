@@ -16,6 +16,11 @@ async function clearUserDatabase() {
   
       try {
         await client.connect();
+        const res5 = await client.query('DELETE FROM "wishlistbooklink"')
+        const res4 = await client.query('DELETE FROM "wishlist"')
+        const res3 = await client.query('DELETE FROM "link"')
+        const res2 = await client.query('DELETE FROM "book"')
+        const res6 = await client.query('DELETE FROM "follower"')
         const res1 = await client.query('DELETE FROM  "account"')
         const res = await client.query('DELETE FROM "user"');
       } catch (err) {
@@ -136,7 +141,7 @@ async function clearUserDatabase() {
       await page.fill('input[placeholder="Email"]', 'testuser@example.com');
       await page.fill('input[placeholder="Password"]', 'testpassword');
       await page.click('button.login-button');
-      await expect(page)-toHaveURL('http://localhost:8080/mainPage_publisher');
+      await expect(page).toHaveURL('http://localhost:8080/mainPage_publisher');
 
       const addButton = page.locator('.add-button');
       await expect(addButton).toBeVisible();
@@ -154,7 +159,7 @@ async function clearUserDatabase() {
       await page.fill('input[placeholder="Email"]', 'testuser@example.com');
       await page.fill('input[placeholder="Password"]', 'testpassword');
       await page.click('button.login-button');
-      await expect(page)-toHaveURL('http://localhost:8080/mainPage_publisher');
+      await expect(page).toHaveURL('http://localhost:8080/mainPage_publisher');
 
       const addButton = page.locator('.add-button');
       await expect(addButton).toBeVisible();
@@ -179,7 +184,7 @@ async function clearUserDatabase() {
 
       const swalTitle = swal.locator('.swal2-title');
       const swalText = swal.locator('.swal2-html-container');
-      await expect(swalTitle).toHaveText('Success');
+      await expect(swalTitle).toHaveText('Success!');
 
     });
 
@@ -189,7 +194,7 @@ async function clearUserDatabase() {
       await page.fill('input[placeholder="Email"]', 'testuser@example.com');
       await page.fill('input[placeholder="Password"]', 'testpassword');
       await page.click('button.login-button');
-      await expect(page)-toHaveURL('http://localhost:8080/mainPage_publisher');
+      await expect(page).toHaveURL('http://localhost:8080/mainPage_publisher');
 
       const addButton = page.locator('.add-button');
       await expect(addButton).toBeVisible();

@@ -63,9 +63,15 @@ export default {
   },
   methods: {
     fetchBookDetails () {
+      /*
       const bookId = this.$route.query.bookId
       this.bookid2 = bookId
       const path = 'https://esa05-cyc9agehcmd3gudg.francecentral-01.azurewebsites.net' + '/api/v1/books/search_id/' + bookId
+      */
+
+      const bookId = this.$route.query.bookId
+      this.bookid2 = bookId
+      const path = process.env.API_URL + '/api/v1/books/search_id/' + bookId
 
       axios.get(path)
         .then((res) => {
@@ -90,7 +96,8 @@ export default {
         })
     },
     fetchBookPublisher () {
-      const path = 'https://esa05-cyc9agehcmd3gudg.francecentral-01.azurewebsites.net' + '/api/v1/users/by_id/' + this.user_id
+      // const path = 'https://esa05-cyc9agehcmd3gudg.francecentral-01.azurewebsites.net' + '/api/v1/users/by_id/' + this.user_id
+      const path = process.env.API_URL + '/api/v1/users/by_id/' + this.user_id
       axios.get(path)
         .then((res) => {
           this.user = {

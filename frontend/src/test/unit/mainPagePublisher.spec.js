@@ -3,9 +3,15 @@ import VueRouter from 'vue-router';
 import WelcomePage from '../../components/welcomePage.vue';
 import MainPagePublisher from '../../components/mainPagePublisher.vue';
 import BookServices from '../../services/BookServices';
+import UserServices from '../../services/UserServices';
+
 
 jest.mock('../../services/BookServices', () => ({
   getAllBooks: jest.fn(),
+}));
+
+jest.mock('../../services/UserServices', () => ({
+  getActualUser: jest.fn(),
 }));
 
 describe('Check info in MainPagePublisher', () => {
@@ -14,6 +20,7 @@ describe('Check info in MainPagePublisher', () => {
   localVue.use(VueRouter);
 
   beforeEach(() => {
+    UserServices.getActualUser.mockResolvedValue({ data: { id: 1, name: 'Test User' } });
     BookServices.getAllBooks.mockResolvedValue([
       { id: 1, img: 'book1.png' },
       { id: 2, img: 'book2.png' },

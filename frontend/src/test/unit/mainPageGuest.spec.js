@@ -1,7 +1,7 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import VueRouter from 'vue-router';
-import WelcomePage from '../../components/WelcomePage.vue';
-import MainPageGuest from '../../components/MainPageGuest.vue';
+import WelcomePage from '../../components/welcomePage.vue';
+import MainPageGuest from '../../components/mainPageGuest.vue';
 import BookServices from '../../services/BookServices';
 
 jest.mock('../../services/BookServices', () => ({

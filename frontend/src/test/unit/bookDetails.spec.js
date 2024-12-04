@@ -4,12 +4,21 @@ import MainPageUser from '../../components/mainPageUser.vue';
 import BookDetails from '../../components/book.vue';
 import BookServices from '../../services/BookServices';
 import axios from 'axios';
-
+import UserServices from '../../services/UserServices';
+import WishlistService from '../../services/WishlistServices';
 
 function flushPromises() {
     return new Promise(resolve => setImmediate(resolve));
   }
 
+  jest.mock('../../services/UserServices', () => ({
+    getActualUser: jest.fn(),
+  }));
+  
+  jest.mock('../../services/WishlistServices', () => ({
+    getMyWishlists: jest.fn(),
+    getWishlistsBooks: jest.fn(),
+  }));
 
 jest.mock('axios', () => ({
   get: jest.fn(),
@@ -48,6 +57,19 @@ describe('Navigation from MainPageGuest to BookDetails', () => {
         { id: '47a550e7-679d-4e30-8b78-635530c186ca', img: 'book1.png' },
         { id: 'b74c50f4-21f7-4b60-b678-d2b8d4b30f59', img: 'book2.png' },
       ]);
+      UserServices.getActualUser.mockResolvedValue({
+        data: { id: 1, name: 'Test User' },
+      });
+    
+      // Simula una respuesta exitosa para `getMyWishlists`
+      WishlistService.getMyWishlists.mockResolvedValue({
+        data: [{ id: 'wishlist-id' }],
+      });
+    
+      // Simula una respuesta exitosa para `getWishlistsBooks`
+      WishlistService.getWishlistsBooks.mockResolvedValue({
+        data: [{ isbn: '1234567890', title: 'Test Book' }],
+      });
     const routes = [
       { path: '/mainPage_user', component: MainPageUser },
       { path: '/book', component: BookDetails },
@@ -76,19 +98,15 @@ describe('Navigation from MainPageGuest to BookDetails', () => {
       },
     });
 
-    // Navigate to the /book route with a bookId query parameter
     router.push({ path: '/book', query: { bookId: '47a550e7-679d-4e30-8b78-635530c186ca' } });
 
-    // Ensure the Vue component updates after the route change
     await localVue.nextTick();
 
-    // Mount the BookDetails component with the router
     const wrapper = mount(BookDetails, {
       localVue,
       router,
     });
 
-    // Wait for the component to fetch the book details
     await wrapper.vm.fetchBookDetails();
 
     await wrapper.vm.$nextTick();

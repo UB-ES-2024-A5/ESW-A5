@@ -1,6 +1,6 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import VueRouter from 'vue-router';
-import WelcomePage from '../../components/WelcomePage.vue';
+import WelcomePage from '../../components/welcomePage.vue';
 import MainPagePublisher from '../../components/mainPagePublisher.vue';
 import CreatePublication from '../../components/createPublication.vue';
 import Login from '../../components/login.vue';
