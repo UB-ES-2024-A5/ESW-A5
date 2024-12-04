@@ -1,6 +1,6 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import VueRouter from 'vue-router';
-import MainPageUser from '../../components/mainPageUser.vue'; // Asegúrate de importar el componente correcto
+import MainPageUser from '../../components/mainPageUser.vue';
 import Login from '../../components/login.vue';
 import Swal from 'sweetalert2';
 import BookServices from '../../services/BookServices';

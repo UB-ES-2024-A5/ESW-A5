@@ -17,6 +17,8 @@ async function clearUserDatabase() {
 
     try {
       await client.connect();
+      const res3 = await client.query('DELETE FROM "link"')
+      const res2 = await client.query('DELETE FROM "book"')
       const res1 = await client.query('DELETE FROM  "account"')
       const res = await client.query('DELETE FROM "user"');
     } catch (err) {
@@ -118,7 +120,7 @@ test.describe('Account creation Tests', () => {
         await page.check('input[type="checkbox"]');    
         await page.click('button.signup-button');
 
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 6000));
 
         const swal = page.locator('.swal2-container');
         await expect(swal).toBeVisible();
@@ -158,6 +160,8 @@ test.describe('Account creation Tests', () => {
         await page.fill('input[placeholder="Confirm Password"]', 'Password!123');
         await page.check('input[type="checkbox"]');    
         await page.click('button.signup-button');
+
+        await new Promise(resolve => setTimeout(resolve, 6000));
         const swal = page.locator('.swal2-container');
         await expect(swal).toBeVisible();
 

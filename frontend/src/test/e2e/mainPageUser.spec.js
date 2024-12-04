@@ -18,6 +18,8 @@ async function clearUserDatabase() {
 
     try {
       await client.connect();
+      const res3 = await client.query('DELETE FROM "link"')
+      const res2 = await client.query('DELETE FROM "book"')
       const res1 = await client.query('DELETE FROM  "account"')
       const res = await client.query('DELETE FROM "user"');
     } catch (err) {
@@ -135,7 +137,7 @@ test.describe('Set up book', () => {
       });
   
       expect(response2.status).toBe(200);
-      const userDataResponse2 = await response.json();
+      const userDataResponse2 = await response2.json();
   
       const accountData2 = {
         id: userDataResponse2.id,

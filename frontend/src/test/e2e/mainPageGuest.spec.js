@@ -18,6 +18,8 @@ async function clearUserDatabase() {
 
     try {
       await client.connect();
+      const res3 = await client.query('DELETE FROM "link"')
+      const res2 = await client.query('DELETE FROM "book"')
       const res1 = await client.query('DELETE FROM  "account"')
       const res = await client.query('DELETE FROM "user"');
     } catch (err) {
