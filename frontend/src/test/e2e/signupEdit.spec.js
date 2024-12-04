@@ -42,7 +42,7 @@ test.describe('Signup Publisher Page Tests', () => {
     test('should successfully create a new user account', async ({ page }) => {
   
       await clearUserDatabase();
-      await page.goto('http://localhost:8080/#/');
+      await page.goto('http://localhost:8080');
       await page.click('text=Sign up as publisher');
       await page.fill('input[placeholder="Name"]', 'John');
       await page.fill('input[placeholder="CIF"]', 'G90909090');
@@ -61,12 +61,12 @@ test.describe('Signup Publisher Page Tests', () => {
 
       const confirmButton = swal.locator('.swal2-confirm');
       await confirmButton.click();
-      await expect(page).toHaveURL('http://localhost:8080/#/login');
+      await expect(page).toHaveURL('http://localhost:8080/login');
       
     });
   
     test('should show error for missing email', async ({ page }) => {
-      await page.goto('http://localhost:8080/#/');
+      await page.goto('http://localhost:8080');
       await page.click('text=Sign up as publisher');
       await page.fill('input[placeholder="Name"]', 'John');
       await page.fill('input[placeholder="CIF"]', 'G90909090');
@@ -76,13 +76,13 @@ test.describe('Signup Publisher Page Tests', () => {
       await page.click('button.signup-button');
 
       // Miramos que no haya enviado el formulario
-      await expect(page).toHaveURL('http://localhost:8080/#/signupEdit');
+      await expect(page).toHaveURL('http://localhost:8080/signupEdit');
 
       
     });
 
     test('should show error for email already registered', async ({ page }) => {
-      await page.goto('http://localhost:8080/#/');
+      await page.goto('http://localhost:8080');
       await page.click('text=Sign up as publisher');
       await page.fill('input[placeholder="Name"]', 'John');
       await page.fill('input[placeholder="CIF"]', 'G90919090');
@@ -104,7 +104,7 @@ test.describe('Signup Publisher Page Tests', () => {
     });
 
     test('should show error for CIF already registered', async ({ page }) => {
-        await page.goto('http://localhost:8080/#/');
+        await page.goto('http://localhost:8080');
         await page.click('text=Sign up as publisher');
         await page.fill('input[placeholder="Name"]', 'John');
         await page.fill('input[placeholder="CIF"]', 'G90909090');

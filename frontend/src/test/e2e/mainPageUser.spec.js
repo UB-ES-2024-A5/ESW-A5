@@ -119,23 +119,76 @@ test.describe('Set up book', () => {
 
     expect(bookDataResponse).toHaveProperty('id');
     expect(bookDataResponse.title).toBe(bookData.title);
+
+    const userData2 = {
+        email: 'testuser2@example.com',
+        name: 'John',
+        password: 'testpassword',
+        is_editor: false,
+        surname: 'Doe',
+      };
+  
+      let response2 = await fetch(`${apiUrl}/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData2),
+      });
+  
+      expect(response2.status).toBe(200);
+      const userDataResponse2 = await response.json();
+  
+      const accountData2 = {
+        id: userDataResponse2.id,
+      };
+  
+      response = await fetch(`${apiUrl}/accounts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(accountData2),
+      });
   });
 });
 
 test.describe('E2E Book Page', () => {
-  test('Should be able to enter as a guest and get the books', async ({ page }) => {
-    await page.goto('http://localhost:8080');
+  test('Should be redirected if user is not logged', async ({ page }) => {
+    await page.goto('http://localhost:8080/mainPage_user');
 
-    await page.click('text=Guest access');
-    await expect(page).toHaveURL('http://localhost:8080/mainpage_guest'); 
+    await expect(page).toHaveURL('http://localhost:8080/login'); 
+
+  });
+
+  test('Should see the books in the carrousel', async ({ page }) => {
+    await page.goto('http://localhost:8080/login');
+    await expect(page).toHaveURL('http://localhost:8080/login'); 
+
+    await page.fill('input[placeholder="Email"]', 'testuser2@example.com');
+    await page.fill('input[placeholder="Password"]', 'testpassword');
+
+    await page.click('button.login-button');
+
+    await expect(page).toHaveURL(new RegExp('/mainPage_user'));
+
   
     const firstImage = await page.locator('.carousel-image').first(); 
     const imageUrl = await firstImage.getAttribute('src');
     expect(imageUrl).toBe('path/to/book/image.jpg');
   });
-  test('Should have a visible Sign In button', async ({ page }) => {
-    await page.goto('http://localhost:8080/mainpage_guest');
-    const signInButton = await page.locator('.sign-in-btn');
-    expect(await signInButton.isVisible()).toBeTruthy()
+  test('Should have a profile symbol', async ({ page }) => {
+    await page.goto('http://localhost:8080/login');
+    await expect(page).toHaveURL('http://localhost:8080/login'); 
+
+    await page.fill('input[placeholder="Email"]', 'testuser2@example.com');
+    await page.fill('input[placeholder="Password"]', 'testpassword');
+
+    await page.click('button.login-button');
+
+    await expect(page).toHaveURL(new RegExp('/mainPage_user'));
+
+    const profileIcon = page.locator('.user-icon');
+    await expect(profileIcon).toBeVisible();
+
+    await profileIcon.click();
+
+    await expect(page).toHaveURL(new RegExp('/user_profile'));
   });
 });

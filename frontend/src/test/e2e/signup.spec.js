@@ -40,7 +40,7 @@ test.describe('Signup Page Tests', () => {
   test('should successfully create a new user account', async ({ page }) => {
 
     await clearUserDatabase();
-    await page.goto('http://localhost:8080/#/');
+    await page.goto('http://localhost:8080');
     await page.click('text=Sign up as user');
     await page.fill('input[placeholder="Name"]', 'John');
     await page.fill('input[placeholder="Surname"]', 'Doe');
@@ -60,12 +60,12 @@ test.describe('Signup Page Tests', () => {
 
     const confirmButton = swal.locator('.swal2-confirm');
     await confirmButton.click();
-    await expect(page).toHaveURL('http://localhost:8080/#/login');
+    await expect(page).toHaveURL('http://localhost:8080/login');
     
   });
 
   test('should show error for missing terms acceptance', async ({ page }) => {
-    await page.goto('http://localhost:8080/#/');
+    await page.goto('http://localhost:8080');
     await page.click('text=Sign up as user');
     await page.fill('input[placeholder="Name"]', 'John');
     await page.fill('input[placeholder="Surname"]', 'Doe');
@@ -85,7 +85,7 @@ test.describe('Signup Page Tests', () => {
     await confirmButton.click();
   });
   test('should show error for email already registered', async ({ page }) => {
-    await page.goto('http://localhost:8080/#/');
+    await page.goto('http://localhost:8080');
     await page.click('text=Sign up as user');
     await page.fill('input[placeholder="Name"]', 'John');
     await page.fill('input[placeholder="Surname"]', 'Doe');
