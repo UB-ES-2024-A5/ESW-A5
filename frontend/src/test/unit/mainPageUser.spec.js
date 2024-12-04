@@ -5,17 +5,21 @@ import Login from '../../components/login.vue';
 import Swal from 'sweetalert2';
 import BookServices from '../../services/BookServices';
 import WelcomePage from '../../components/welcomePage.vue';
+import UserServices from '../../services/UserServices';
 
 jest.mock('../../services/BookServices', () => ({
   getAllBooks: jest.fn(),
 }));
-
+jest.mock('../../services/UserServices', () => ({
+  getActualUser: jest.fn(),
+}));
 describe('Navigation from Welcome Page to MainPageGuest', () => {
   let router;
   const localVue = createLocalVue();
   localVue.use(VueRouter);
 
   beforeEach(() => {
+    UserServices.getActualUser.mockResolvedValue({ data: { id: 1, name: 'Test User' } });
     BookServices.getAllBooks.mockResolvedValue([
       { id: 1, img: 'book1.png' },
       { id: 2, img: 'book2.png' },
@@ -37,6 +41,8 @@ describe('Navigation from Welcome Page to MainPageGuest', () => {
       router,
     });
 
+    await wrapper.vm.$nextTick();
+
     wrapper.setData({
       books: [
         { id: 1, img: 'book1.png' },
@@ -52,12 +58,14 @@ describe('Navigation from Welcome Page to MainPageGuest', () => {
   });
 
 
-  it('should display the user icon', () => {
+  it('should display the user icon', async() => {
 
     const wrapper = mount(MainPageUser, {
       localVue,
       router,
     });
+
+    await wrapper.vm.$nextTick();
 
     const userIcon = wrapper.find('.user-icon')
     expect(userIcon.exists()).toBe(true)
