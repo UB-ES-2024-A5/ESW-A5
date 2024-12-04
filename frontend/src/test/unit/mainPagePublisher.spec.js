@@ -1,16 +1,14 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import VueRouter from 'vue-router';
-import MainPageUser from '../../components/mainPageUser.vue'; // Asegúrate de importar el componente correcto
-import Login from '../../components/login.vue';
-import Swal from 'sweetalert2';
-import BookServices from '../../services/BookServices';
 import WelcomePage from '../../components/welcomePage.vue';
+import MainPagePublisher from '../../components/mainPagePublisher.vue';
+import BookServices from '../../services/BookServices';
 
 jest.mock('../../services/BookServices', () => ({
   getAllBooks: jest.fn(),
 }));
 
-describe('Navigation from Welcome Page to MainPageGuest', () => {
+describe('Check info in MainPagePublisher', () => {
   let router;
   const localVue = createLocalVue();
   localVue.use(VueRouter);
@@ -22,7 +20,7 @@ describe('Navigation from Welcome Page to MainPageGuest', () => {
     ]);
     const routes = [
       { path: '/', component: WelcomePage },
-      { path: '/mainPage_user', component: MainPageUser },
+      { path: '/guest', component: MainPagePublisher },
     ];
 
     router = new VueRouter({
@@ -32,7 +30,7 @@ describe('Navigation from Welcome Page to MainPageGuest', () => {
   });
 
   it('should display a list of books in the carousel', async () => {
-    const wrapper = mount(MainPageUser, {
+    const wrapper = mount(MainPagePublisher, {
       localVue,
       router,
     });
@@ -54,7 +52,7 @@ describe('Navigation from Welcome Page to MainPageGuest', () => {
 
   it('should display the user icon', () => {
 
-    const wrapper = mount(MainPageUser, {
+    const wrapper = mount(MainPagePublisher, {
       localVue,
       router,
     });
@@ -64,5 +62,18 @@ describe('Navigation from Welcome Page to MainPageGuest', () => {
 
   });
 
-  
+  it('should check for + button', () => {
+
+    const wrapper = mount(MainPagePublisher, {
+      localVue,
+      router,
+    });
+
+    const addButton = wrapper.find('.add-button')
+    expect(addButton.exists()).toBe(true);
+  });
+
 });
+
+
+

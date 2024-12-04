@@ -333,7 +333,6 @@ describe('Create publication tests', () => {
             wrapper.setData({priceValid: true});
             wrapper.setData({synopsisValid: true});
             wrapper.setData({ selectedGenres: ['Fiction', 'Non-fiction'] });
-            console.log(wrapper.vm.canSubmit)
             wrapper.setData({ image: new File(['dummy content'], 'test.jpg', { type: 'image/jpeg' }) });
             expect(wrapper.vm.canSubmit).toBe(true);
           });
@@ -349,7 +348,6 @@ describe('Create publication tests', () => {
             wrapper.setData({priceValid: true});
             wrapper.setData({synopsisValid: true});
             wrapper.setData({ selectedGenres: ['Fiction', 'Non-fiction'] });
-            console.log(wrapper.vm.canSubmit)
             wrapper.setData({ image: new File(['dummy content'], 'test.jpg', { type: 'image/jpeg' }) });
             expect(wrapper.vm.canSubmit).toBe(false);
           });
