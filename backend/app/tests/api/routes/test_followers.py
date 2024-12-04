@@ -125,3 +125,43 @@ def test_add_followed_duplicate(authenticate):
     result = response.json()
     assert result["detail"] == "Follower exist."
 
+def test_unfollow(authenticate):
+    account2 = client.get("/api/v1/users/by_email/userexample2@example.com")
+    account_id2 = account2.json()['id']
+
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.delete(f"/api/v1/followers/{account_id2}", headers=headers)
+    assert response.status_code == 200
+
+    result = response.json()
+    assert result["message"] == "Unfollow successfully"
+
+def test_unfollow_not_found(authenticate):
+    random_id = uuid4()
+
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.delete(f"/api/v1/followers/{random_id}", headers=headers)
+    assert response.status_code == 404
+
+    result = response.json()
+    assert result["detail"] == "Account not found."
+
+def test_unfollow_not_exist(authenticate_2):
+    account = client.get("/api/v1/users/by_email/userexample1@example.com")
+    account_id = account.json()['id']
+
+    headers = {
+        "Authorization": f"Bearer {authenticate_2}"
+    }
+
+    response = client.delete(f"/api/v1/followers/{account_id}", headers=headers)
+    assert response.status_code == 404
+
+    result = response.json()
+    assert result["detail"] == "Follower not found."
