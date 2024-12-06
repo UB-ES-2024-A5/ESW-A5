@@ -18,6 +18,9 @@
       <button @click="logout" class="sign-in-btn">Log out</button>
 
       <!-- Enlace al perfil de usuario con icono de imagen -->
+      <router-link to="/forum" class="profile-link">
+        <img src="@/assets/forum_icon.png" alt="Forum" class="user-icon" />
+      </router-link>
       <router-link to="/publisher_profile" class="profile-link">
         <img src="@/assets/user_icon.png" alt="User Profile" class="user-icon" />
       </router-link>

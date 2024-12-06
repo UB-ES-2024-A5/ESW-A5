@@ -13,6 +13,7 @@ import Book from '../components/book.vue'
 import CreatePublication from '../components/createPublication.vue'
 import searchUserProfile from '../components/searchUserProfile.vue'
 import searchPublisherProfile from '../components/searchPublisherProfile.vue'
+import forum from '../components/forum.vue'
 import axios from 'axios'
 import userServices from '../services/UserServices.js'
 
@@ -95,6 +96,12 @@ const router = new Router({
       path: '/search_publisher_profile',
       name: 'search_publisher_profile',
       component: searchPublisherProfile
+    },
+    {
+      path: '/forum',
+      name: 'forum',
+      component: forum,
+      meta: { requiresAuth: true } // Requiere autenticación
     }
   ]
 })

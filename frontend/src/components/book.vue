@@ -3,7 +3,7 @@
     <div class="book-details">
       <!-- Back Button -->
       <div class="back-button">
-        <button @click="$router.go(-1)" class="back-button-style">← Back</button>
+        <button @click="$router.go(-1)" class="back-button-style">Back</button>
       </div>
 
       <!-- Main Content -->
@@ -277,14 +277,17 @@ export default {
 }
 
 .back-button button {
-  background-color: transparent;
-  border: 2px solid #333;
-  color: #333;
-  font-size: 1.2rem;
-  padding: 10px 20px;
-  border-radius: 8px;
+  top: 1rem;
+  left: 1rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
   cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
 }
 
 .back-button button:hover {
