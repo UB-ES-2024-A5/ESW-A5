@@ -50,7 +50,7 @@ let bookId;
 test.describe('Set up book', () => {
   test('Create a book with user, account, and login', async () => {
     await clearUserDatabase();
-    const apiUrl = 'http://localhost:8000/api/v1';
+    const apiUrl = 'http://127.0.0.1:8000/api/v1';
 
     const userData = {
       email: 'testuser@example.com',
@@ -136,7 +136,7 @@ test.describe('E2E Book Page', () => {
   await expect(page).toHaveURL('http://localhost:8080/login');
   });
   test('Create a normal user', async () => {
-    const apiUrl = 'http://localhost:8000/api/v1';
+    const apiUrl = 'http://127.0.0.1:8000/api/v1';
 
     const userData = {
       email: 'testuser2@example.com',

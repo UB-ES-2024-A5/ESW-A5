@@ -50,7 +50,7 @@ async function clearUserDatabase() {
 test.describe('Set up book', () => {
   test('Create a book with user, account, and login', async () => {
     await clearUserDatabase();
-    const apiUrl = 'http://localhost:8000/api/v1';
+    const apiUrl = 'http://127.0.0.1:8000/api/v1';
 
     const userData = {
       email: 'testuser@example.com',
