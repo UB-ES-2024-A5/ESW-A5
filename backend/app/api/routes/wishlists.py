@@ -75,8 +75,7 @@ def read_wishlists_me(session: SessionDep, current_user: CurrentUser, skip: int 
 
     return WishListsOut(data=wishlists, count=count)
 
-@router.get("/{wishlist_id}",
-            dependencies=[Depends(get_current_active_superuser)],
+@router.get("/by_id/{wishlist_id}",
             response_model=WishListOut)
 def read_wishlist_by_id(session: SessionDep, wishlist_id: uuid.UUID):
     """
