@@ -91,6 +91,22 @@ def read_wishlist_by_id(session: SessionDep, wishlist_id: uuid.UUID):
 
     return wishlist
 
+@router.get("/by_account/{account_id}",
+            response_model=WishListOut)
+def read_wishlist_by_id(session: SessionDep, account_id: uuid.UUID):
+    """
+    Get a specific wishlist by account ID.
+    """
+    statement = select(WishList).where(WishList.account_id == account_id)
+    wishlist = session.exec(statement).first()
+
+    if not wishlist:
+        raise HTTPException(
+            status_code=404, detail="WishList not found."
+        )
+
+    return wishlist
+
 @router.get("/{wishlist_id}/books", response_model=BooksOut)
 def read_books_from_wishlist(session: SessionDep, wishlist_id: uuid.UUID) -> Any:
     """
