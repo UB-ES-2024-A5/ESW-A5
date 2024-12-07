@@ -37,7 +37,7 @@ def create_account(create_user):
 
     response = client.post("/api/v1/accounts/", json=account_data)
 
-    created_account_data["account1"] = response
+    created_account_data["account1"] = response.json()
 
     return response
 
@@ -71,7 +71,7 @@ def create_account2(create_user2):
 
     response = client.post("/api/v1/accounts/", json=account_data)
 
-    created_account_data["account2"] = response
+    created_account_data["account2"] = response.json()
 
     return response
 @pytest.fixture
@@ -104,7 +104,7 @@ def create_account_editor(create_user_editor):
 
     response = client.post("/api/v1/accounts/", json=account_data)
 
-    created_account_data["account_editor"] = response
+    created_account_data["account_editor"] = response.json()
 
     return response
 @pytest.fixture
@@ -137,7 +137,7 @@ def create_account_editor2(create_user_editor2):
 
     response = client.post("/api/v1/accounts/", json=account_data)
 
-    created_account_data["account_editor2"] = response
+    created_account_data["account_editor2"] = response.json()
 
     return response
 @pytest.fixture
@@ -170,7 +170,7 @@ def create_book1(authenticate_editor):
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
 
-    created_account_data["book1"] = response
+    created_account_data["book1"] = response.json()
 
     return response
 
@@ -196,7 +196,7 @@ def create_book2(authenticate_editor):
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
 
-    created_account_data["book2"] = response
+    created_account_data["book2"] = response.json()
 
     return response
 
@@ -222,7 +222,7 @@ def create_book3(authenticate_editor):
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
 
-    created_account_data["book3"] = response
+    created_account_data["book3"] = response.json()
 
     return response
 
@@ -248,7 +248,7 @@ def create_book4(authenticate_editor2):
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
 
-    created_account_data["book4"] = response
+    created_account_data["book4"] = response.json()
 
     return response
 
@@ -274,7 +274,7 @@ def create_book5(authenticate_editor2):
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
 
-    created_account_data["book5"] = response
+    created_account_data["book5"] = response.json()
 
     return response
 
@@ -300,7 +300,7 @@ def create_book6(authenticate_editor2):
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
 
-    created_account_data["book6"] = response
+    created_account_data["book6"] = response.json()
 
     return response
 
@@ -309,7 +309,7 @@ def test_create_review_point_book(create_account, create_account2, create_accoun
                                   create_book1, create_book2, create_book3, create_book4, create_book5, create_book6,
                                   authenticate):
 
-    book_id = created_account_data["book1"].id
+    book_id = created_account_data["book1"]["id"]
 
     review_data = {
         "point_book": 3
