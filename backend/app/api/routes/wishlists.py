@@ -93,7 +93,7 @@ def read_wishlist_by_id(session: SessionDep, wishlist_id: uuid.UUID):
 
 @router.get("/by_account/{account_id}",
             response_model=WishListOut)
-def read_wishlist_by_id(session: SessionDep, account_id: uuid.UUID):
+def read_wishlist_by_account(session: SessionDep, account_id: uuid.UUID):
     """
     Get a specific wishlist by account ID.
     """
