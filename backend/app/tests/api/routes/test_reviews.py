@@ -12,6 +12,9 @@ from app.tests.utils.utils import random_email, random_lower_string
 
 client = TestClient(app)
 
+# Variable para almacenar datos entre pruebas
+created_account_data = {}
+
 @pytest.fixture
 def create_user():
     user_data = {
@@ -33,7 +36,11 @@ def create_account(create_user):
     }
 
     response = client.post("/api/v1/accounts/", json=account_data)
+
+    created_account_data["account1"] = response
+
     return response
+
 @pytest.fixture
 def authenticate():
     email = "userreview1@example.com"
@@ -63,6 +70,9 @@ def create_account2(create_user2):
     }
 
     response = client.post("/api/v1/accounts/", json=account_data)
+
+    created_account_data["account2"] = response
+
     return response
 @pytest.fixture
 def authenticate2():
@@ -93,6 +103,9 @@ def create_account_editor(create_user_editor):
     }
 
     response = client.post("/api/v1/accounts/", json=account_data)
+
+    created_account_data["account_editor"] = response
+
     return response
 @pytest.fixture
 def authenticate_editor():
@@ -108,7 +121,7 @@ def create_user_editor2():
         "email": "editorreview2@example.com",
         "password": "password123",
         "name": "Editor2",
-        "cif" :"g66666666",
+        "cif" :"g77777777",
         "is_editor": True
     }
     response = client.post("/api/v1/users/", json=user_data)
@@ -123,6 +136,9 @@ def create_account_editor2(create_user_editor2):
     }
 
     response = client.post("/api/v1/accounts/", json=account_data)
+
+    created_account_data["account_editor2"] = response
+
     return response
 @pytest.fixture
 def authenticate_editor2():
@@ -153,6 +169,9 @@ def create_book1(authenticate_editor):
     }
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
+
+    created_account_data["book1"] = response
+
     return response
 
 @pytest.fixture
@@ -176,6 +195,9 @@ def create_book2(authenticate_editor):
     }
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
+
+    created_account_data["book2"] = response
+
     return response
 
 @pytest.fixture
@@ -199,6 +221,9 @@ def create_book3(authenticate_editor):
     }
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
+
+    created_account_data["book3"] = response
+
     return response
 
 @pytest.fixture
@@ -222,6 +247,9 @@ def create_book4(authenticate_editor2):
     }
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
+
+    created_account_data["book4"] = response
+
     return response
 
 @pytest.fixture
@@ -245,6 +273,9 @@ def create_book5(authenticate_editor2):
     }
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
+
+    created_account_data["book5"] = response
+
     return response
 
 @pytest.fixture
@@ -268,12 +299,28 @@ def create_book6(authenticate_editor2):
     }
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
+
+    created_account_data["book6"] = response
+
     return response
 
-# Variable para almacenar datos entre pruebas
-created_account_data = {}
 
 def test_create_review_point_book(create_account, create_account2, create_account_editor, create_account_editor2,
-                                  create_book, create_book2, create_book3, create_book4, create_book5, create_book6,
+                                  create_book1, create_book2, create_book3, create_book4, create_book5, create_book6,
                                   authenticate):
-    pass
+
+    book_id = created_account_data["book1"].id
+
+    review_data = {
+        "point_book": 3
+    }
+
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.post(f"/api/v1/reviews/point_book/{book_id}", json=review_data, headers=headers)
+    assert response.status_code == 200
+    results = response.json()
+
+
