@@ -72,6 +72,8 @@
 import WishlistService from '../services/WishlistServices'
 import axios from 'axios'
 import UserServices from '../services/UserServices'
+import BookServices from '../services/BookServices'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'BookDetails',
@@ -180,8 +182,28 @@ export default {
       console.warn(`Puntuación seleccionada: ${this.rating}`)
     },
     submitReview () {
-      if (this.comment.trim() !== '') {
-
+      if (this.rating !== 0) {
+        if (this.comment.trim() !== '') {
+          const data = {
+            text: this.comment
+          }
+          BookServices.createReviewComments(data, this.bookid2)
+        }
+        const data2 = {
+          point_book: this.rating
+        }
+        BookServices.createReviewPoints(data2, this.bookid2)
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: 'Grácies per la teva valoració!'
+        })
+      } else {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Valoració Incompleta',
+          text: 'No es pot crear la valoració sense indicar el nombre de estrelles.'
+        })
       }
     }
   },
