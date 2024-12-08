@@ -21,7 +21,10 @@ class Forum(ForumBase, table=True):
     account: "Account" = Relationship(back_populates="posts_forum")
 
     parent_forum_id: uuid.UUID | None = Field(foreign_key="forum.id")  # Respuesta a otro post
-    parent_forum: Optional["Forum"] = Relationship(back_populates="responses")
+    parent_forum: Optional["Forum"] = Relationship(
+        back_populates="responses",
+        sa_relationship_kwargs={"remote_side": "Forum.id"}  # Especifica el lado remoto
+    )
     responses: List["Forum"] = Relationship(back_populates="parent_forum")
 
     date: datetime = Field(default_factory=current_time)
