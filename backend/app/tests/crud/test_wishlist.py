@@ -8,7 +8,6 @@ from app.tests.utils.utils import random_email, random_lower_string
 import pytest
 
 @pytest.fixture
-
 def create_user(db: Session):
     email ="john.doe3@example.com"
     password = "asdfasdf"

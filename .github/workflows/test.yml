@@ -111,7 +111,7 @@ jobs:
           # Iniciar el backend
           echo "API_V1_STR: ${API_V1_STR}"
           cd backend
-          nohup poetry run uvicorn app.main:app --reload &
+          nohup poetry run uvicorn app.main:app --reload --host 0.0.0.0 &
           # Esperar a que el backend inicie
           sleep 5
           # Iniciar el frontend

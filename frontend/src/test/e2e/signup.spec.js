@@ -17,6 +17,12 @@ async function clearUserDatabase() {
 
     try {
       await client.connect();
+      const res5 = await client.query('DELETE FROM "wishlistbooklink"')
+      const res4 = await client.query('DELETE FROM "wishlist"')
+      const res3 = await client.query('DELETE FROM "link"')
+      const res2 = await client.query('DELETE FROM "book"')
+      const res6 = await client.query('DELETE FROM "follower"')
+      const res1 = await client.query('DELETE FROM  "account"')
       const res = await client.query('DELETE FROM "user"');
     } catch (err) {
       console.error('Error al conectar o limpiar la base de datos PostgreSQL', err.stack);
@@ -40,7 +46,7 @@ test.describe('Signup Page Tests', () => {
   test('should successfully create a new user account', async ({ page }) => {
 
     await clearUserDatabase();
-    await page.goto('http://localhost:8080/#/');
+    await page.goto('http://localhost:8080');
     await page.click('text=Sign up as user');
     await page.fill('input[placeholder="Name"]', 'John');
     await page.fill('input[placeholder="Surname"]', 'Doe');
@@ -60,12 +66,12 @@ test.describe('Signup Page Tests', () => {
 
     const confirmButton = swal.locator('.swal2-confirm');
     await confirmButton.click();
-    await expect(page).toHaveURL('http://localhost:8080/#/login');
+    await expect(page).toHaveURL('http://localhost:8080/login');
     
   });
 
   test('should show error for missing terms acceptance', async ({ page }) => {
-    await page.goto('http://localhost:8080/#/');
+    await page.goto('http://localhost:8080');
     await page.click('text=Sign up as user');
     await page.fill('input[placeholder="Name"]', 'John');
     await page.fill('input[placeholder="Surname"]', 'Doe');
@@ -85,7 +91,7 @@ test.describe('Signup Page Tests', () => {
     await confirmButton.click();
   });
   test('should show error for email already registered', async ({ page }) => {
-    await page.goto('http://localhost:8080/#/');
+    await page.goto('http://localhost:8080');
     await page.click('text=Sign up as user');
     await page.fill('input[placeholder="Name"]', 'John');
     await page.fill('input[placeholder="Surname"]', 'Doe');

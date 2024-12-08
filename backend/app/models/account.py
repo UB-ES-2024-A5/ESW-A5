@@ -24,6 +24,9 @@ class Account(AccountBase, table=True):
         sa_relationship_kwargs={"cascade": "all, delete", "foreign_keys": "Follower.follower_id"})
     num_followers: int = 0
     num_following: int = 0
+    # Lista de post en Forum, de likes y dislikes
+    posts_forum: List["Forum"] = Relationship(back_populates="account")
+    reactions: List["ForumReaction"] = Relationship(back_populates="account")
 
 class AccountUpdate(SQLModel):
     photo: str | None = None

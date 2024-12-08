@@ -46,7 +46,7 @@ async function clearUserDatabase() {
     db.close();
   }
 }
-let bookId;
+
 test.describe('Set up book', () => {
   test('Create a book with user, account, and login', async () => {
     await clearUserDatabase();
@@ -123,121 +123,70 @@ test.describe('Set up book', () => {
     const bookDataResponse = await response.json();
 
     expect(bookDataResponse).toHaveProperty('id');
-    bookId = bookDataResponse.id;
     expect(bookDataResponse.title).toBe(bookData.title);
   });
 });
 
 test.describe('E2E Book Page', () => {
-  test('Should redirect to login if not authenticated and trying to access /mainPage_user', async ({ page }) => {
-  await page.goto('http://localhost:8080')
-  await page.goto('http://localhost:8080/mainPage_user');
+  test('Should be redirected if user is not logged', async ({ page }) => {
+    await page.goto('http://localhost:8080/mainPage_publisher');
 
-  await expect(page).toHaveURL('http://localhost:8080/login');
-  });
-  test('Create a normal user', async () => {
-    const apiUrl = 'http://127.0.0.1:8000/api/v1';
-
-    const userData = {
-      email: 'testuser2@example.com',
-      name: 'John',
-      password: 'testpassword',
-      is_editor: false,
-      surname: 'Doe',
-    };
-
-    let response = await fetch(`${apiUrl}/users`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userData),
-    });
-
-    expect(response.status).toBe(200);
-    const userDataResponse = await response.json();
-
-    const accountData = {
-      id: userDataResponse.id,
-    };
-
-    response = await fetch(`${apiUrl}/accounts`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(accountData),
-    });
-
-    expect(response.status).toBe(200);
-    const accountDataResponse = await response.json();
-
+    await expect(page).toHaveURL('http://localhost:8080/login'); 
 
   });
-  test('Should display the specific book image in the carousel', async ({ page }) => {
+
+  test('Should see the books in the carrousel', async ({ page }) => {
     await page.goto('http://localhost:8080/login');
+    await expect(page).toHaveURL('http://localhost:8080/login'); 
 
-    await page.fill('input[placeholder="Email"]', 'testuser2@example.com');
+    await page.fill('input[placeholder="Email"]', 'testuser@example.com');
     await page.fill('input[placeholder="Password"]', 'testpassword');
+
     await page.click('button.login-button');
 
-    await expect(page).toHaveURL('http://localhost:8080/mainPage_user');
+    await expect(page).toHaveURL(new RegExp('/mainPage_publisher'));
 
-    const firstImage = await page.locator('.carousel-image').first();
-
-    const src = await firstImage.getAttribute('src');
-
-    expect(src).toBe('path/to/book/image.jpg');
-
-
+  
+    const firstImage = await page.locator('.carousel-image').first(); 
+    const imageUrl = await firstImage.getAttribute('src');
+    expect(imageUrl).toBe('path/to/book/image.jpg');
   });
-  test('Should display the book information', async ({ page }) => {
+  test('Should have a profile symbol', async ({ page }) => {
     await page.goto('http://localhost:8080/login');
+    await expect(page).toHaveURL('http://localhost:8080/login'); 
 
-    await page.fill('input[placeholder="Email"]', 'testuser2@example.com');
+    await page.fill('input[placeholder="Email"]', 'testuser@example.com');
     await page.fill('input[placeholder="Password"]', 'testpassword');
+
     await page.click('button.login-button');
 
-    await expect(page).toHaveURL('http://localhost:8080/mainPage_user');
+    await expect(page).toHaveURL(new RegExp('/mainPage_publisher'));
 
-    const firstImage = await page.locator('.carousel-image').first();
+    const profileIcon = page.locator('.user-icon');
+    await expect(profileIcon).toBeVisible();
 
-    const src = await firstImage.getAttribute('src');
+    await profileIcon.click();
 
-    expect(src).toBe('path/to/book/image.jpg');
+    await expect(page).toHaveURL(new RegExp('/publisher_profile'));
+  });
 
-    await firstImage.click();
+  test('Should have a + button and navigate to create_publication', async ({ page }) => {
+    await page.goto('http://localhost:8080/login');
+    await expect(page).toHaveURL('http://localhost:8080/login'); 
 
-    await expect(page).toHaveURL(`http://localhost:8080/book?bookId=${bookId}`);
+    await page.fill('input[placeholder="Email"]', 'testuser@example.com');
+    await page.fill('input[placeholder="Password"]', 'testpassword');
 
-    const expectedBookData = {
-        title: 'The Great Book',
-        author: 'Jane Author',
-        gender_main: 'Fiction',
-        publication_year: 2024,
-        isbn: '9781234567890',
-        price: 19.99,
-        synopsis: 'A gripping novel about...',
-        img: 'path/to/book/image.jpg',
-        links: ['http://example.com'],
-      };
+    await page.click('button.login-button');
 
-    await expect(page.locator('.title')).toHaveText(expectedBookData.title);
-    await expect(page.locator('text=Author:').locator('xpath=..')).toHaveText(`Author: ${expectedBookData.author}`);
-    await expect(page.locator('.info p:has-text("Genre:")')).toHaveText(`Genre: ${expectedBookData.gender_main}`);
-    await expect(page.locator('.info p:has-text("Year of the publication:")')).toHaveText(`Year of the publication: ${expectedBookData.publication_year}`);
-    await expect(page.locator('.info p:has-text("ISBN:")')).toHaveText(`ISBN: ${expectedBookData.isbn}`);
-    await expect(page.locator('.info p:has-text("Minimum Price:")')).toHaveText(`Minimum Price: ${expectedBookData.price.toFixed(2)}`);
-    await expect(page.locator('.info p:has-text("Synopsis:")')).toHaveText(`Synopsis: ${expectedBookData.synopsis}`);
-    const links = expectedBookData.links;
+    await expect(page).toHaveURL(new RegExp('/mainPage_publisher'));
 
-    for (let i = 0; i < links.length; i++) {
-        const linkText = `Link ${i + 1}`;
+    const addButton = page.locator('.add-button');
+    await expect(addButton).toBeVisible();
 
-        await expect(page.locator(`.link-item:nth-child(${i + 1}) .link-button`)).toHaveText(linkText);
+    await addButton.click();
 
-        const linkElement = await page.locator(`.link-item:nth-child(${i + 1}) a`);
-        await expect(linkElement).toHaveAttribute('href', links[i]);
-    }
-
-    });
-
-
+    await expect(page).toHaveURL(new RegExp('/create_publication'));
+});
 
 });

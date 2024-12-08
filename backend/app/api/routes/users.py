@@ -71,6 +71,7 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
             )
 
     user = crud.user.create_user(session=session, user_create=user_in)
+    """
     if settings.emails_enabled and user_in.email:
         email_data = generate_new_account_email(
             email_to=user_in.email, username=user_in.email, password=user_in.password
@@ -80,6 +81,8 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
             subject=email_data.subject,
             html_content=email_data.html_content,
         )
+
+    """
     return user
 
 

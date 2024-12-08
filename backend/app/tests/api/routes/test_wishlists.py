@@ -140,7 +140,7 @@ def test_get_wishlist_by_id(create_account_super, authenticate_2):
         "Authorization": f"Bearer {authenticate_2}"
     }
 
-    response = client.get(f"/api/v1/wishlists/{id_wishlist}", headers=headers)
+    response = client.get(f"/api/v1/wishlists/by_id/{id_wishlist}", headers=headers)
     assert response.status_code == 200
     assert response.json()["name"] == "Wishlist 1"
 
