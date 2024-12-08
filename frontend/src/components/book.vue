@@ -188,6 +188,7 @@ export default {
             text: this.comment
           }
           BookServices.createReviewComments(data, this.bookid2)
+          this.comment = ''
         }
         const data2 = {
           point_book: this.rating
@@ -198,6 +199,7 @@ export default {
           title: 'Success!',
           text: 'Grácies per la teva valoració!'
         })
+        this.rating = 0
       } else {
         Swal.fire({
           icon: 'warning',
