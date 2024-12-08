@@ -79,6 +79,64 @@ class BookService {
         throw error
       })
   }
+  createReviewPoints (data, bookid) {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      console.error('No token found in localStorage')
+      throw new Error('User not authenticated')
+    }
+
+    // Log para verificar la estructura de datos
+    console.log('Data being sent to the backend:', JSON.stringify(data, null, 2))
+
+    return http.put(
+      `/api/v1/reviews/point_book/${bookid}`,
+      data,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+      .then(res => {
+        console.log('Book reviewed successfully:', res.data)
+        return res.data
+      })
+      .catch(error => {
+        console.error('Error al valorar el libro:', error.response ? error.response.data : error.message)
+        throw error
+      })
+  }
+  createReviewComments (data, bookid) {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      console.error('No token found in localStorage')
+      throw new Error('User not authenticated')
+    }
+
+    // Log para verificar la estructura de datos
+    console.log('Data being sent to the backend:', JSON.stringify(data, null, 2))
+
+    return http.put(
+      `/api/v1/reviews/comment/${bookid}`,
+      data,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+      .then(res => {
+        console.log('Book reviewed successfully:', res.data)
+        return res.data
+      })
+      .catch(error => {
+        console.error('Error al valorar el libro:', error.response ? error.response.data : error.message)
+        throw error
+      })
+  }
 }
 
 export default new BookService()

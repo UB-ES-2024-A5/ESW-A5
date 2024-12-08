@@ -14,7 +14,7 @@
             <img :src="book.img || '/default-image.png'" alt="Book Cover" />
           </div>
           <div class="star-rating">
-            <span v-for="star in 5" :key="star" class="star">★</span>
+            <span v-for="star in 5" :key="star" class="star" :class="{ active: star <= rating }" @click="rate_stars(star)">★</span>
           </div>
         </div>
 
@@ -58,10 +58,11 @@
       <div class="rating-section">
         <h2 class="comment-title">Leave a comment</h2>
         <textarea
+          v-model="comment"
           placeholder="Share your thoughts about this book..."
           class="comment-box"
         ></textarea>
-        <button class="submit-button">Submit Review</button>
+        <button class="submit-button" @click="submitReview()">Submit Review</button>
       </div>
     </div>
   </div>
@@ -79,13 +80,14 @@ export default {
       book: {},
       userRating: 4,
       averageRating: 3,
-      comments: [],
+      comment: '',
       starSelected: false,
       wishlistId: null,
       bookid2: '',
       user: {},
       user_id: '',
-      user_me: {}
+      user_me: {},
+      rating: 0
     }
   },
   methods: {
@@ -171,6 +173,15 @@ export default {
       } catch (error) {
         console.error('Error al modificar la wishlist', error)
         this.starSelected = !this.starSelected
+      }
+    },
+    rate_stars (star) {
+      this.rating = star
+      console.warn(`Puntuación seleccionada: ${this.rating}`)
+    },
+    submitReview () {
+      if (this.comment.trim() !== '') {
+
       }
     }
   },
@@ -349,6 +360,10 @@ export default {
   display: flex;
   justify-content: center;
   margin-top: 10px;
+}
+
+.star.active {
+  color: gold;
 }
 
 .rating-section {
