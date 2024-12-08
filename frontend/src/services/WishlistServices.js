@@ -84,5 +84,10 @@ class WishlistService {
     const response = await http.get(`/wishlists/user/${userId}`)
     return response.data
   }
+
+  async getWishlistByUserId (userId) {
+    const response = await http.get(`/api/v1/wishlists/by_account/${userId}`)
+    return response.data
+  }
 }
 export default new WishlistService()

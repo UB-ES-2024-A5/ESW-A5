@@ -48,7 +48,7 @@
       <div v-if="isLoggedIn && isFollowing" class="carousel-container">
         <button class="carousel-btn left-btn" @click="previousSlide">‹</button>
         <div class="carousel">
-          <div class="carousel-track" :style="{ transform: `translateX(-${currentIndex * 100}%)` }">
+         <div class="carousel-track" :style="{ transform: `translateX(-${currentIndex * 100}%)` }">
             <img
               v-for="(book, index) in books"
               :key="index"
@@ -90,7 +90,7 @@ export default {
         bio: ''
       },
       currentIndex: 0,
-      imagesPerSlide: 5,
+      imagesPerSlide: 3,
       books: [],
       isFollowing: false, // Estado de seguimiento
       isLoggedIn: false // Estado de inicio de sesión
@@ -98,7 +98,7 @@ export default {
   },
   computed: {
     maxIndex () {
-      return Math.ceil(this.images.length / this.imagesPerSlide) - 1
+      return Math.ceil(this.books.length / 3) - 1 // 3 imágenes por página
     }
   },
   methods: {
@@ -160,11 +160,15 @@ export default {
     nextSlide () {
       if (this.currentIndex < this.maxIndex) {
         this.currentIndex++
+      } else {
+        console.log('Estás en el último slide')
       }
     },
     previousSlide () {
       if (this.currentIndex > 0) {
         this.currentIndex--
+      } else {
+        console.log('Estás en el primer slide')
       }
     },
     goToBook (index) {
@@ -385,6 +389,7 @@ input[type="file"] {
 
 .carousel {
   display: flex;
+  width: 100%;
   overflow: hidden;
 }
 
@@ -394,7 +399,7 @@ input[type="file"] {
 }
 
 .carousel-image {
-  width: 100px;
+  width: calc((100% - 40px) / 4); /* Tres imágenes con espacio entre ellas */
   height: 150px;
   margin: 0 5px;
   cursor: pointer;
