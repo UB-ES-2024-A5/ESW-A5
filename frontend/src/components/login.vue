@@ -45,7 +45,7 @@ export default {
   methods: {
     async login_user (event) {
       const data = `username=${this.email}&password=${this.password}`
-      const path = 'https://esa05-cyc9agehcmd3gudg.francecentral-01.azurewebsites.net/api/v1/login/access-token'
+      const path = process.env.API_URL + '/api/v1/login/access-token'
 
       try {
         const res = await axios.post(path, data, {

@@ -75,8 +75,7 @@ def read_wishlists_me(session: SessionDep, current_user: CurrentUser, skip: int 
 
     return WishListsOut(data=wishlists, count=count)
 
-@router.get("/{wishlist_id}",
-            dependencies=[Depends(get_current_active_superuser)],
+@router.get("/by_id/{wishlist_id}",
             response_model=WishListOut)
 def read_wishlist_by_id(session: SessionDep, wishlist_id: uuid.UUID):
     """
@@ -88,6 +87,22 @@ def read_wishlist_by_id(session: SessionDep, wishlist_id: uuid.UUID):
     if not wishlist:
         raise HTTPException(
             status_code=404, detail="WishList not found."  # Cambié el código de error a 404, ya que no se encuentra el libro.
+        )
+
+    return wishlist
+
+@router.get("/by_account/{account_id}",
+            response_model=WishListOut)
+def read_wishlist_by_account(session: SessionDep, account_id: uuid.UUID):
+    """
+    Get a specific wishlist by account ID.
+    """
+    statement = select(WishList).where(WishList.account_id == account_id)
+    wishlist = session.exec(statement).first()
+
+    if not wishlist:
+        raise HTTPException(
+            status_code=404, detail="WishList not found."
         )
 
     return wishlist

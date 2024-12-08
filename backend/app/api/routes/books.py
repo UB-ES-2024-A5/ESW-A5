@@ -35,6 +35,106 @@ def read_all_books(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
 
     return BooksOut(data=books_out, count=count)
 
+@router.get("/by_genre/{genre}", response_model=BooksOut)
+def read_all_books_genre(session: SessionDep, genre: str, skip: int = 0, limit: int = 100) -> Any:
+    """
+    Get all books by genre
+    """
+    count_statement = select(func.count()).select_from(Book).where(Book.gender_main == genre)
+    count = session.exec(count_statement).one()
+
+    statement = (
+        select(Book)
+        .where(Book.gender_main == genre)
+        .offset(skip)
+        .limit(limit))
+    books = session.exec(statement).all()
+
+    # Esto es necessario para cnvertir los Book, en BookOut donde contiene una lista de strings con url de los links
+    books_out = [crud.book.convert_book_bookOut(book=book) for book in books]
+
+    return BooksOut(data=books_out, count=count)
+
+@router.get("/by_price_min/{price}", response_model=BooksOut)
+def read_all_books_price_min(session: SessionDep, price: float, skip: int = 0, limit: int = 100) -> Any:
+    """
+    Get all books by price, giving min price
+    """
+    count_statement = select(func.count()).select_from(Book).where(Book.price >= price)
+    count = session.exec(count_statement).one()
+
+    statement = (
+        select(Book)
+        .where(Book.price >= price)
+        .offset(skip)
+        .limit(limit))
+    books = session.exec(statement).all()
+
+    # Esto es necessario para cnvertir los Book, en BookOut donde contiene una lista de strings con url de los links
+    books_out = [crud.book.convert_book_bookOut(book=book) for book in books]
+
+    return BooksOut(data=books_out, count=count)
+
+@router.get("/by_price_max/{price}", response_model=BooksOut)
+def read_all_books_price_max(session: SessionDep, price: float, skip: int = 0, limit: int = 100) -> Any:
+    """
+    Get all books by price, giving max price
+    """
+    count_statement = select(func.count()).select_from(Book).where(Book.price <= price)
+    count = session.exec(count_statement).one()
+
+    statement = (
+        select(Book)
+        .where(Book.price <= price)
+        .offset(skip)
+        .limit(limit))
+    books = session.exec(statement).all()
+
+    # Esto es necessario para cnvertir los Book, en BookOut donde contiene una lista de strings con url de los links
+    books_out = [crud.book.convert_book_bookOut(book=book) for book in books]
+
+    return BooksOut(data=books_out, count=count)
+
+@router.get("/by_date_min/{date}", response_model=BooksOut)
+def read_all_books_date_min(session: SessionDep, date: int, skip: int = 0, limit: int = 100) -> Any:
+    """
+    Get all books by date, giving minimum date
+    """
+    count_statement = select(func.count()).select_from(Book).where(Book.publication_year >= date)
+    count = session.exec(count_statement).one()
+
+    statement = (
+        select(Book)
+        .where(Book.publication_year >= date)
+        .offset(skip)
+        .limit(limit))
+    books = session.exec(statement).all()
+
+    # Esto es necessario para cnvertir los Book, en BookOut donde contiene una lista de strings con url de los links
+    books_out = [crud.book.convert_book_bookOut(book=book) for book in books]
+
+    return BooksOut(data=books_out, count=count)
+
+@router.get("/by_date_max/{date}", response_model=BooksOut)
+def read_all_books_date_max(session: SessionDep, date: int, skip: int = 0, limit: int = 100) -> Any:
+    """
+    Get all books by date, giving minimum date
+    """
+    count_statement = select(func.count()).select_from(Book).where(Book.publication_year <= date)
+    count = session.exec(count_statement).one()
+
+    statement = (
+        select(Book)
+        .where(Book.publication_year <= date)
+        .offset(skip)
+        .limit(limit))
+    books = session.exec(statement).all()
+
+    # Esto es necessario para cnvertir los Book, en BookOut donde contiene una lista de strings con url de los links
+    books_out = [crud.book.convert_book_bookOut(book=book) for book in books]
+
+    return BooksOut(data=books_out, count=count)
+
 
 @router.get("/search_id/{book_id}", response_model=BookOut)
 def read_book_by_id(session: SessionDep, book_id: uuid.UUID):

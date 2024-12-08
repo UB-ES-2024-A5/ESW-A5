@@ -10,3 +10,5 @@ from .wishlist import *
 from .review import *
 from .comment import *
 from .follower import *
+from .forum import *
+from .forum_reaccions_link import *

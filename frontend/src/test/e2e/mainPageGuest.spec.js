@@ -18,6 +18,11 @@ async function clearUserDatabase() {
 
     try {
       await client.connect();
+      const res5 = await client.query('DELETE FROM "wishlistbooklink"')
+      const res4 = await client.query('DELETE FROM "wishlist"')
+      const res3 = await client.query('DELETE FROM "link"')
+      const res2 = await client.query('DELETE FROM "book"')
+      const res6 = await client.query('DELETE FROM "follower"')
       const res1 = await client.query('DELETE FROM  "account"')
       const res = await client.query('DELETE FROM "user"');
     } catch (err) {
@@ -45,7 +50,7 @@ async function clearUserDatabase() {
 test.describe('Set up book', () => {
   test('Create a book with user, account, and login', async () => {
     await clearUserDatabase();
-    const apiUrl = 'http://localhost:8000/api/v1';
+    const apiUrl = 'http://127.0.0.1:8000/api/v1';
 
     const userData = {
       email: 'testuser@example.com',
@@ -124,10 +129,10 @@ test.describe('Set up book', () => {
 
 test.describe('E2E Book Page', () => {
   test('Should be able to enter as a guest and get the books', async ({ page }) => {
-    await page.goto('http://localhost:8080/#/');
+    await page.goto('http://localhost:8080');
 
     await page.click('text=Guest access');
-    await expect(page).toHaveURL('http://localhost:8080/#/mainpage_guest'); 
+    await expect(page).toHaveURL('http://localhost:8080/mainpage_guest'); 
   
     const firstImage = await page.locator('.carousel-image').first(); 
     const imageUrl = await firstImage.getAttribute('src');

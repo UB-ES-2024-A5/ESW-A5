@@ -17,6 +17,12 @@ async function clearUserDatabase() {
 
     try {
       await client.connect();
+      const res5 = await client.query('DELETE FROM "wishlistbooklink"')
+      const res4 = await client.query('DELETE FROM "wishlist"')
+      const res3 = await client.query('DELETE FROM "link"')
+      const res2 = await client.query('DELETE FROM "book"')
+      const res6 = await client.query('DELETE FROM "follower"')
+      const res1 = await client.query('DELETE FROM  "account"')
       const res = await client.query('DELETE FROM "user"');
     } catch (err) {
       console.error('Error al conectar o limpiar la base de datos PostgreSQL', err.stack);
@@ -43,7 +49,7 @@ async function clearUserDatabase() {
     test('should successfully log in with the created user', async ({ page }) => {
 
       await clearUserDatabase();
-      await page.goto('http://localhost:8080/#/');
+      await page.goto('http://localhost:8080');
 
       await page.click('text=Sign up as user');
       await page.fill('input[placeholder="Name"]', 'John');
@@ -65,10 +71,10 @@ async function clearUserDatabase() {
       const confirmButton = swal.locator('.swal2-confirm');
       await confirmButton.click();
 
-      await expect(page).toHaveURL('http://localhost:8080/#/login');
+      await expect(page).toHaveURL('http://localhost:8080/login');
       
 
-      await page.goto('http://localhost:8080/#/login');  
+      await page.goto('http://localhost:8080/login');  
       await page.fill('input[placeholder="Email"]', 'john.doe2@example.com');
       await page.fill('input[placeholder="Password"]', 'Password!123');
   
@@ -80,7 +86,7 @@ async function clearUserDatabase() {
 
     test('should display an error message for invalid credentials', async ({ page }) => {
   
-      await page.goto('http://localhost:8080/#/login');
+      await page.goto('http://localhost:8080/login');
   
       await page.fill('input[placeholder="Email"]', 'wrong.email@example.com');
       await page.fill('input[placeholder="Password"]', 'wrongPassword!');
@@ -97,14 +103,14 @@ async function clearUserDatabase() {
       const confirmButton = swal.locator('.swal2-confirm');
       await confirmButton.click();
       
-      await expect(page).toHaveURL('http://localhost:8080/#/login');
+      await expect(page).toHaveURL('http://localhost:8080/login');
     });
     test('should navigate to the signup page when "Sign Up" link is clicked', async ({ page }) => {
 
-      await page.goto('http://localhost:8080/#/login');
+      await page.goto('http://localhost:8080/login');
   
       await page.click('text=Sign Up');      
   
-      await expect(page).toHaveURL('http://localhost:8080/#/signup');
+      await expect(page).toHaveURL('http://localhost:8080/signup');
     });
   });

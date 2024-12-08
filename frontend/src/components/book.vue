@@ -1,25 +1,37 @@
 <template>
   <div class="background-container">
     <div class="book-details">
+      <!-- Back Button -->
       <div class="back-button">
+        <button @click="$router.go(-1)" class="back-button-style">Back</button>
       </div>
 
+      <!-- Main Content -->
       <div class="content">
+        <!-- Left Section -->
         <div class="left-section">
-          <div class="title-container">
-            <h1 class="title">{{ book.title || 'Title of the publication' }}</h1>
-
-             <!-- Mostrar la estrella solo si el usuario no es editor -->
-            <div
-              v-if="!user_me.is_editor" class="star" @click="toggleStar(wishlistId, bookid2)" :class="{ selected: starSelected }"> ★
-            </div>
-          </div>
           <div class="image-container">
             <img :src="book.img || '/default-image.png'" alt="Book Cover" />
           </div>
+          <div class="star-rating">
+            <span v-for="star in 5" :key="star" class="star">★</span>
+          </div>
         </div>
 
+        <!-- Right Section (Info) -->
         <div class="info">
+          <div class="title-container">
+            <h1 class="title">{{ book.title || 'Title of the publication' }}</h1>
+            <!-- Wishlist Star -->
+            <div
+              v-if="!user_me.is_editor"
+              class="star"
+              @click="toggleStar(wishlistId, bookid2)"
+              :class="{ selected: starSelected }"
+            >
+              ★
+            </div>
+          </div>
           <p><strong>Author:</strong> {{ book.author || 'Author example' }}</p>
           <p><strong>Genre:</strong> {{ book.gender_main || 'Genre1, Genre2' }}</p>
           <p><strong>Publisher:</strong> {{ user.name || 'Publisher' }}</p>
@@ -27,14 +39,29 @@
           <p><strong>ISBN:</strong> {{ book.isbn || 'ISBN example' }}</p>
           <p><strong>Minimum Price:</strong> {{ book.price || 'Price example' }}</p>
           <p><strong>Synopsis:</strong> {{ book.synopsis || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate.' }}</p>
-          <strong>Links de compra:</strong> <ul>
-          <li v-for="(link,index) in book.list_links" :key="link" class="link-item">
-                <a :href="link" target="_blank" rel="noopener noreferrer">
-                  <button class="link-button">Link {{ index + 1}}</button>
-                </a>
-              </li>
-        </ul>
+          <strong>Purchase Links:</strong>
+          <ul>
+            <li
+              v-for="(link, index) in book.list_links"
+              :key="link"
+              class="link-item"
+            >
+              <a :href="link" target="_blank" rel="noopener noreferrer">
+                <button class="link-button">Link {{ index + 1 }}</button>
+              </a>
+            </li>
+          </ul>
         </div>
+      </div>
+
+      <!-- Comments Section -->
+      <div class="rating-section">
+        <h2 class="comment-title">Leave a comment</h2>
+        <textarea
+          placeholder="Share your thoughts about this book..."
+          class="comment-box"
+        ></textarea>
+        <button class="submit-button">Submit Review</button>
       </div>
     </div>
   </div>
@@ -65,10 +92,10 @@ export default {
     fetchBookDetails () {
       const bookId = this.$route.query.bookId
       this.bookid2 = bookId
-      const path = 'https://esa05-cyc9agehcmd3gudg.francecentral-01.azurewebsites.net' + '/api/v1/books/search_id/' + bookId
+      const path = process.env.API_URL + '/api/v1/books/search_id/' + bookId
 
       axios.get(path)
-        .then((res) => {
+        .then(res => {
           this.book = {
             title: res.data.title,
             author: res.data.author,
@@ -85,38 +112,32 @@ export default {
           this.comments = res.data.comments || []
           this.fetchBookPublisher()
         })
-        .catch((error) => {
+        .catch(error => {
           console.error(error)
         })
     },
     fetchBookPublisher () {
-      const path = 'https://esa05-cyc9agehcmd3gudg.francecentral-01.azurewebsites.net' + '/api/v1/users/by_id/' + this.user_id
+      const path = process.env.API_URL + '/api/v1/users/by_id/' + this.user_id
       axios.get(path)
-        .then((res) => {
+        .then(res => {
           this.user = {
             name: res.data.name
           }
         })
-        .catch((error) => {
+        .catch(error => {
           console.error(error)
         })
     },
     async getUser () {
       try {
-        this.user_me = await UserServices.getActualUser() // Guardar el objeto en user_me
+        this.user_me = await UserServices.getActualUser()
       } catch (error) {
         console.error('Error al obtener el usuario:', error)
       }
     },
-    loadMoreComments () {
-      console.log('Load more comments')
-    },
     async getWishlistId () {
       try {
         const wishlistResponse = await WishlistService.getMyWishlists()
-        console.log(wishlistResponse)
-
-        // Si se crea una nueva wishlist, asignamos su ID
         if (wishlistResponse && wishlistResponse.data.length > 0) {
           this.wishlistId = wishlistResponse.data[0].id
           await this.checkifBookinWishlist(this.wishlistId)
@@ -129,35 +150,26 @@ export default {
     async checkifBookinWishlist (id) {
       try {
         const wishlistResponse = await WishlistService.getWishlistsBooks(id)
-        if (wishlistResponse.data.length > 0) {
-          console.log(wishlistResponse.data.length)
-        }
-        for (let i = 0; i < wishlistResponse.data.length; i++) {
-          if (wishlistResponse.data[i].isbn === this.book.isbn) {
+        wishlistResponse.data.forEach(book => {
+          if (book.isbn === this.book.isbn) {
             this.starSelected = true
           }
-        }
+        })
       } catch (error) {
-        console.error('Error al saber si el libro esta en la wishlist', error)
+        console.error('Error al saber si el libro está en la wishlist', error)
       }
     },
     async toggleStar (wishlistId, bookid) {
       this.starSelected = !this.starSelected
-      if (this.starSelected) {
-        try {
-          // Agregar el libro a la wishlist
+      try {
+        if (this.starSelected) {
           await WishlistService.addBookWishlist(wishlistId, bookid)
-        } catch (error) {
-          console.error('Error al agregar libro a la wishlist', error)
-        }
-      } else {
-        try {
-          // Eliminar el libro de la wishlist
+        } else {
           await WishlistService.deleteBookWishlist(wishlistId, bookid)
-        } catch (error) {
-          console.error('Error al eliminar libro de la wishlist', error)
-          this.starSelected = !this.starSelected // se revierte en caso de error mi compadre
         }
+      } catch (error) {
+        console.error('Error al modificar la wishlist', error)
+        this.starSelected = !this.starSelected
       }
     }
   },
@@ -177,40 +189,44 @@ export default {
   justify-content: flex-start;
   height: 100vh;
   background: url('../assets/fondo_carrousel2.png') no-repeat center center fixed;
-  background-size: cover; /* Ensures the image fits within the container */
+  background-size: cover;
   font-family: 'Georgia', serif;
-  background-position: center bottom; /* Align the image to the top, showing more of the top part */
+  background-position: center bottom;
   color: #333;
   position: relative;
   padding-top: 20px;
 }
+
 .book-details {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center; /* Asegura que el título y la estrella estén alineados verticalmente */
+  justify-content: flex-start; /* Evita espacio innecesario */
   background-color: rgba(255, 255, 255, 0.8);
   border-radius: 15px;
   padding: 20px;
-  max-width: 800px;
+  max-width: 3000px;
+  width: 700px;
   margin: 0 auto;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 
 .content {
   display: grid;
-  grid-template-columns: 150px auto; /* Columna de la imagen y columna del texto */
-  gap: 20px; /* Espaciado entre la imagen y el texto */
+  grid-template-columns: auto 1fr;
+  gap: 20px;
   align-items: flex-start;
   width: 100%;
 }
 
 .image-container img {
-  width: 175px;
-  height: 250px;
+  width: 275px;
+  height: 350px;
   object-fit: fill;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   margin-right: 0px;
+  margin-top: 20px;
 }
 
 .info {
@@ -219,7 +235,6 @@ export default {
   justify-content: flex-start;
   margin-left: 0;
   padding-left: 10px;
-  margin-top: 50px;
 }
 
 .info p {
@@ -234,17 +249,17 @@ export default {
 
 .title-container {
   display: flex;
-  align-items: center; /* Alinea el título y la estrella en una fila */
-  flex-direction: row;
-  justify-content: space-between; /* Espacia el título y la estrella */
+  align-items: center; /* Asegura que el título y la estrella estén alineados verticalmente */
+  justify-content: center; /* Evita espacio innecesario */
   width: 100%;
+  margin-bottom: 15px;
 }
 
 .left-section {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: flex-start;
   width: 100%;
 }
 
@@ -256,19 +271,22 @@ export default {
 .back-button {
   display: flex;
   justify-content: flex-start;
-  width: 100%; /* Ocupa todo el ancho para alineación */
-  margin-bottom: 15px; /* Espaciado debajo del botón */
+  width: 100%;
+  margin-bottom: 15px;
 }
 
 .back-button button {
-  background-color: transparent;
-  border: 2px solid #333;
-  color: #333;
-  font-size: 1.2rem;
-  padding: 10px 20px;
-  border-radius: 8px;
+  top: 1rem;
+  left: 1rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
   cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
 }
 
 .back-button button:hover {
@@ -277,54 +295,96 @@ export default {
 }
 
 .star {
-  margin-left: auto;
-  font-size: 2rem; /* Tamaño de la estrella */
-  color: #9f9f9f; /* Color dorado para la estrella */
+  font-size: 2.5rem;
+  color: #9f9f9f;
   cursor: pointer;
-  transition: transform 0.2s, color 0.2s; /* Animaciones */
+  transition: transform 0.2s, color 0.2s;
 }
 
 .star:hover {
-  transform: scale(1.2); /* Efecto de agrandamiento al pasar el ratón */
-  color: #8a8a8a; /* Color más brillante al pasar el ratón */
+  transform: scale(1.2);
+  color: #8a8a8a;
 }
 
 .star.selected {
   color: goldenrod;
 }
-.link-item{
-  color: #0073e6; /* Un azul profesional */
-  text-decoration: none; /* Elimina el subrayado por defecto */
-  font-weight: bold; /* Da énfasis al texto */
-  padding: 5px; /* Espaciado alrededor del texto */
-  border-radius: 5px; /* Bordes redondeados */
-  transition: all 0.4s ease; /* Suaviza las animaciones */
-  display: inline-block; /* Asegura que respeta el padding */
-  text-align: left;
 
+.link-item {
+  color: #0073e6;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 5px;
+  border-radius: 5px;
+  transition: all 0.4s ease;
+  display: inline-block;
+  text-align: left;
 }
 
 .link-button {
-  background-color: #007bff; /* Fondo azul */
-  color: white; /* Texto blanco */
-  border: none; /* Sin bordes */
-  border-radius: 10px; /* Bordes redondeados */
-  padding: 10px 15px; /* Espaciado interno */
-  font-size: 16px; /* Tamaño de la fuente */
-  font-weight: bold; /* Texto en negrita */
-  cursor: pointer; /* Mostrar el cursor de mano */
-  transition: background-color 0.3s, transform 0.2s; /* Animación suave */
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 15px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
   text-align: left;
-
 }
+
 .link-button:hover {
-  background-color: #0056b3; /* Azul más oscuro al pasar el ratón */
-  transform: scale(1.10); /* Efecto de zoom */
+  background-color: #0056b3;
+  transform: scale(1.10);
 }
 
 .link-button:active {
-  transform: scale(1); /* Reducir zoom al hacer clic */
-  background-color: #004494; /* Fondo aún más oscuro */
+  transform: scale(1);
+  background-color: #004494;
+}
+
+.star-rating {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.rating-section {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.comment-title {
+  font-size: 1.2em;
+  margin-bottom: 10px;
+}
+
+.comment-box {
+  width: 98%;
+  height: 100px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  resize: vertical;
+  margin-bottom: 10px;
+}
+
+.submit-button {
+  font-family: 'Roboto', sans-serif; /* Nueva fuente */
+  font-weight: bold; /* Negrita */
+  font-size: 16px;
+  padding: 12px;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
 }
 
 </style>

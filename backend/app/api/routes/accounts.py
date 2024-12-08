@@ -46,6 +46,9 @@ def read_account_by_id(
     """
     account = session.get(Account, account_id)
 
+    if not account:
+        raise HTTPException(status_code=404, detail="Account not found")
+
     return account
 
 @router.get(
@@ -134,7 +137,7 @@ def update_account(
 
 @router.delete(
     "/me",
-    dependencies=[Depends(get_current_active_superuser)],)
+)
 def delete_account_me(
         session: SessionDep, current_user: CurrentUser
 ) -> Message:

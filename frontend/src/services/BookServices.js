@@ -79,6 +79,86 @@ class BookService {
         throw error
       })
   }
+
+  getBooksByGenre (genre) {
+    const token = localStorage.getItem('token')
+    return http.get(`/api/v1/books/by_genre/${genre}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => {
+        console.log(res.data)
+        return res.data
+      })
+      .catch(error => {
+        console.error('Error al obtener los libros', error)
+      })
+  }
+
+  getBooksByPriceMax (price) {
+    const token = localStorage.getItem('token')
+    return http.get(`/api/v1/books/by_price_max/${price}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => {
+        console.log(res.data)
+        return res.data
+      })
+      .catch(error => {
+        console.error('Error al obtener los libros', error)
+      })
+  }
+
+  getBooksByPriceMin (price) {
+    const token = localStorage.getItem('token')
+    return http.get(`/api/v1/books/by_price_min/${price}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => {
+        console.log(res.data)
+        return res.data
+      })
+      .catch(error => {
+        console.error('Error al obtener los libros', error)
+      })
+  }
+
+  getBooksByDateMax (date) {
+    const token = localStorage.getItem('token')
+    return http.get(`/api/v1/books/by_date_max/${date}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => {
+        console.log(res.data)
+        return res.data
+      })
+      .catch(error => {
+        console.error('Error al obtener los libros', error)
+      })
+  }
+
+  getBooksByDateMin (date) {
+    const token = localStorage.getItem('token')
+    return http.get(`/api/v1/books/by_date_min/${date}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => {
+        console.log(res.data)
+        return res.data
+      })
+      .catch(error => {
+        console.error('Error al obtener los libros', error)
+      })
+  }
 }
 
 export default new BookService()
