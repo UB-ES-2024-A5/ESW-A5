@@ -108,7 +108,6 @@
 
 <script>
 import WishlistService from '../services/WishlistServices'
-import axios from 'axios'
 import UserServices from '../services/UserServices'
 import BookServices from '../services/BookServices'
 import Swal from 'sweetalert2'
@@ -139,66 +138,38 @@ export default {
       const bookId = this.$route.query.bookId
       this.loading = true
       this.bookid2 = bookId
-      const path = process.env.API_URL + '/api/v1/books/search_id/' + bookId
-
-      axios.get(path)
-        .then(res => {
-          this.book = {
-            title: res.data.title,
-            author: res.data.author,
-            gender_main: res.data.gender_main,
-            publication_year: res.data.publication_year,
-            isbn: res.data.isbn,
-            price: res.data.price,
-            synopsis: res.data.synopsis,
-            img: res.data.img,
-            list_links: res.data.list_links || [],
-            account_id: res.data.account_id
-          }
-          this.user_id = this.book.account_id
-          this.fetchBookPublisher()
-        })
+      BookServices.getBookById(bookId).then((res) => {
+        this.book = {
+          title: res.data.title,
+          author: res.data.author,
+          gender_main: res.data.gender_main,
+          publication_year: res.data.publication_year,
+          isbn: res.data.isbn,
+          price: res.data.price,
+          synopsis: res.data.synopsis,
+          img: res.data.img,
+          list_links: res.data.list_links || [],
+          account_id: res.data.account_id
+        }
+        this.user_id = this.book.account_id
+        this.fetchBookPublisher()
+      })
         .catch(error => {
           console.error(error)
         })
     },
     fetchBookPublisher () {
-      const path = process.env.API_URL + '/api/v1/users/by_id/' + this.user_id
-      axios.get(path)
-        .then(res => {
-          this.user = {
-            name: res.data.name
-          }
-        })
+      BookServices.getBookPublisher(this.user_id).then((res) => {
+        this.user = {
+          name: res.data.name
+        }
+      })
         .catch(error => {
           console.error(error)
           alert('Failed to load book details')
         })
     },
-    fetchComments (BookId) {
-      try {
-        const reviewsResponse = BookServices.getReviews(BookId)
-        console.warn(reviewsResponse)
-        this.comments = {}
-        for (const review of reviewsResponse.data) {
-          try {
-            const user = UserServices.getUserById2(review.account_id)
-            const nameEntero = user.name + ' ' + user.surname
-            console.warn(nameEntero)
-            this.comments[nameEntero] = {
-              rating: review.point_book,
-              list_comments: review.list_comments
-            }
-          } catch (error) {
-            console.error(`Error al obtener el usuario con ID ${review.account_id}: `, error)
-          }
-        }
-        console.warn(this.comments)
-      } catch (error) {
-        console.error('Error al obtener los comentarios', error)
-        throw error
-      }
-    },
+
     fetchComments2 (BookId) {
       BookServices.getReviews(BookId).then((reviewsResponse) => {
         this.comments = {}

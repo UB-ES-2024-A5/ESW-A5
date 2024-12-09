@@ -17,6 +17,36 @@ class BookService {
         console.error('Error al obtener los libros', error)
       })
   }
+  getBookById (BookId) {
+    const token = localStorage.getItem('token')
+    return http.get(`/api/v1/books/search_id/` + BookId, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => {
+        console.log(res.data)
+        return res
+      })
+      .catch(error => {
+        console.error('Error al obtener los libros', error)
+      })
+  }
+  getBookPublisher (userId) {
+    const token = localStorage.getItem('token')
+    return http.get('/api/v1/users/by_id/' + userId, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => {
+        console.log(res.data)
+        return res
+      })
+      .catch(error => {
+        console.error('Error al obtener el publisher tt', error)
+      })
+  }
 
   getBooksByEditorialId (accountId) {
     const token = localStorage.getItem('token')
