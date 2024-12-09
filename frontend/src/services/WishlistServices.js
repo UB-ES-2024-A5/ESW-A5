@@ -25,7 +25,6 @@ class WishlistService {
     })
       .then(res => {
         console.log(res.data)
-        console.log('AQUI VA LA VUELTA')
         return res.data
       })
       .catch(error => {

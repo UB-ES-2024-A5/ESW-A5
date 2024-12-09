@@ -137,6 +137,21 @@ class BookService {
         throw error
       })
   }
+  getReviews (bookid) {
+    const token = localStorage.getItem('token')
+    return http.get(`/api/v1/reviews/all_review/${bookid}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => {
+        console.log(res.data)
+        return res.data
+      })
+      .catch(error => {
+        console.error('Error al obtener las Reviews', error)
+      })
+  }
 }
 
 export default new BookService()

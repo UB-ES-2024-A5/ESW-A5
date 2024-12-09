@@ -1,6 +1,9 @@
 <template>
   <div class="background-container">
-    <div class="book-details">
+    <div v-if="loading" class="loading-container">
+      <p>Loading data, please wait...</p>
+    </div>
+    <div v-else class="book-details">
       <!-- Back Button -->
       <div class="back-button">
         <button @click="$router.go(-1)" class="back-button-style">Back</button>
@@ -64,6 +67,40 @@
         ></textarea>
         <button class="submit-button" @click="submitReview()">Submit Review</button>
       </div>
+      <div class="comments-section">
+  <h2 class="comments-title">Comments</h2>
+  <div v-if="Object.keys(comments).length" class="comments-list">
+    <!-- Iteramos sobre los comentarios por su ID -->
+    <div v-for="(commentData, username) in comments" :key="username">
+      <!-- Iteramos sobre cada comentario dentro de list_comments -->
+      <div
+        v-for="(text, index) in commentData.list_comments"
+        :key="index"
+        class="comment-box"
+      >
+        <div class="comment-header">
+          <p class="comment-author">{{ username }}</p>
+          <div class="comment-rating">
+            <!-- Mostramos la valoración en estrellas -->
+            <span
+              v-for="star in 5"
+              :key="star"
+              class="star"
+              :class="{ active: star <= commentData.rating }"
+            >
+              ★
+            </span>
+          </div>
+        </div>
+        <div class="comment-content">
+          <p>{{ text }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div v-else class="no-comments">No comments yet. Be the first to comment!</div>
+</div>
+
     </div>
   </div>
 </template>
@@ -89,7 +126,9 @@ export default {
       user: {},
       user_id: '',
       user_me: {},
-      rating: 0
+      rating: 0,
+      comments: {},
+      loading: true
     }
   },
   methods: {
@@ -113,8 +152,8 @@ export default {
             account_id: res.data.account_id
           }
           this.user_id = this.book.account_id
-          this.comments = res.data.comments || []
           this.fetchBookPublisher()
+          this.fetchComments2(bookId)
         })
         .catch(error => {
           console.error(error)
@@ -133,6 +172,52 @@ export default {
           alert('Failed to load book details')
         })
     },
+    fetchComments (BookId) {
+      try {
+        const reviewsResponse = BookServices.getReviews(BookId)
+        console.warn(reviewsResponse)
+        this.comments = {}
+        for (const review of reviewsResponse.data) {
+          try {
+            const user = UserServices.getUserById2(review.account_id)
+            const nameEntero = user.name + ' ' + user.surname
+            console.warn(nameEntero)
+            this.comments[nameEntero] = {
+              rating: review.point_book,
+              list_comments: review.list_comments
+            }
+          } catch (error) {
+            console.error(`Error al obtener el usuario con ID ${review.account_id}: `, error)
+          }
+        }
+        console.warn(this.comments)
+      } catch (error) {
+        console.error('Error al obtener los comentarios', error)
+        throw error
+      }
+    },
+    fetchComments2 (BookId) {
+      BookServices.getReviews(BookId).then((reviewsResponse) => {
+        this.comments = {}
+        reviewsResponse.data.forEach((review) => {
+          UserServices.getUserById2(review.account_id).then((user) => {
+            const nameEntero = user.name + ' ' + user.surname
+            this.comments[nameEntero] = {
+              rating: review.point_book,
+              list_comments: review.list_comments
+            }
+          })
+            .catch((error) => {
+              console.error(`Error al obtener el usuario con ID: ${review.account_id}: `, error)
+            })
+        })
+      })
+        .catch((error) => {
+          console.error('Error al obtener los comentarios', error)
+          throw error
+        })
+    },
+
     async getUser () {
       try {
         this.user_me = await UserServices.getActualUser()
@@ -146,6 +231,7 @@ export default {
         if (wishlistResponse && wishlistResponse.data.length > 0) {
           this.wishlistId = wishlistResponse.data[0].id
           await this.checkifBookinWishlist(this.wishlistId)
+          this.loading = false
         }
       } catch (error) {
         console.error('Error al obtener o crear wishlist', error)
@@ -218,12 +304,21 @@ export default {
 </script>
 
 <style scoped>
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 18px;
+  color: #555;
+}
 .background-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  height: 100vh;
+  height: 100%;
   background: url('../assets/fondo_carrousel2.png') no-repeat center center fixed;
   background-size: cover;
   font-family: 'Georgia', serif;
@@ -402,12 +497,65 @@ export default {
 
 .comment-box {
   width: 98%;
+  max_width: 700px;
   height: 100px;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
   resize: vertical;
   margin-bottom: 10px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+.comments-section {
+  margin-top: 20px;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.comments-title {
+  font-size: 20px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.comment-box {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.comment-author {
+  font-weight: bold;
+  color: #333;
+}
+.comment-rating {
+  display: flex;
+}
+
+.comment-content {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.no-comments {
+  font-size: 14px;
+  color: #999;
+  text-align: center;
 }
 
 .submit-button {

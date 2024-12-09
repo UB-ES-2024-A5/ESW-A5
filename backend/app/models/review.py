@@ -31,6 +31,7 @@ class ReviewUpdateComment(ReviewCreateComment):
     pass
 class ReviewOut(ReviewBase):
     id: uuid.UUID
+    account_id: uuid.UUID
     list_comments: List[str]
 class ReviewsOut(SQLModel):
     data: List[ReviewOut]
