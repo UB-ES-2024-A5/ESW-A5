@@ -18,6 +18,7 @@
           </div>
           <div class="star-rating">
             <span v-for="star in 5" :key="star" class="star" :class="{ active: star <= rating }" @click="rate_stars(star)">★</span>
+            <span class="rating-average">({{ mediaValoracion.toFixed(1) }})</span>
           </div>
         </div>
 
@@ -128,12 +129,15 @@ export default {
       user_me: {},
       rating: 0,
       comments: {},
-      loading: true
+      loading: true,
+      mediaValoracion: 0,
+      valoracioUsuari: false
     }
   },
   methods: {
     fetchBookDetails () {
       const bookId = this.$route.query.bookId
+      this.loading = true
       this.bookid2 = bookId
       const path = process.env.API_URL + '/api/v1/books/search_id/' + bookId
 
@@ -153,7 +157,6 @@ export default {
           }
           this.user_id = this.book.account_id
           this.fetchBookPublisher()
-          this.fetchComments2(bookId)
         })
         .catch(error => {
           console.error(error)
@@ -199,7 +202,14 @@ export default {
     fetchComments2 (BookId) {
       BookServices.getReviews(BookId).then((reviewsResponse) => {
         this.comments = {}
+        let contador = 0
+        let sumaValoracion = 0
         reviewsResponse.data.forEach((review) => {
+          if (review.account_id === this.user_me.id) {
+            this.valoracioUsuari = true
+          }
+          contador += 1
+          sumaValoracion += review.point_book
           UserServices.getUserById2(review.account_id).then((user) => {
             const nameEntero = user.name + ' ' + user.surname
             this.comments[nameEntero] = {
@@ -211,6 +221,8 @@ export default {
               console.error(`Error al obtener el usuario con ID: ${review.account_id}: `, error)
             })
         })
+        sumaValoracion = sumaValoracion / contador
+        this.mediaValoracion = sumaValoracion
       })
         .catch((error) => {
           console.error('Error al obtener los comentarios', error)
@@ -231,7 +243,6 @@ export default {
         if (wishlistResponse && wishlistResponse.data.length > 0) {
           this.wishlistId = wishlistResponse.data[0].id
           await this.checkifBookinWishlist(this.wishlistId)
-          this.loading = false
         }
       } catch (error) {
         console.error('Error al obtener o crear wishlist', error)
@@ -268,7 +279,7 @@ export default {
       console.warn(`Puntuación seleccionada: ${this.rating}`)
     },
     submitReview () {
-      if (this.rating !== 0) {
+      if (this.rating !== 0 && !this.valoracioUsuari) {
         if (this.comment.trim() !== '') {
           const data = {
             text: this.comment
@@ -287,18 +298,30 @@ export default {
         })
         this.rating = 0
       } else {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Valoració Incompleta',
-          text: 'No es pot crear la valoració sense indicar el nombre de estrelles.'
-        })
+        if (this.valoracioUsuari) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Valoració ja registrada',
+            text: 'Aquest usuari ja te una valoració en aquest llibre.'
+          })
+        } else {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Valoració Incompleta',
+            text: 'No es pot crear la valoració sense indicar el nombre de estrelles.'
+          })
+        }
       }
     }
   },
   async mounted () {
-    this.fetchBookDetails()
-    await this.getWishlistId()
     await this.getUser()
+    this.fetchBookDetails()
+    this.fetchComments2(this.bookid2)
+    await this.getWishlistId()
+    if (this.comments) {
+      this.loading = false
+    }
   }
 }
 </script>
@@ -485,6 +508,14 @@ export default {
   color: gold;
 }
 
+.rating-average {
+  margin-left: 10px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: black;
+  margin-top: 18px;
+  font-family: 'serif';
+}
 .rating-section {
   width: 100%;
   margin-top: 20px;
