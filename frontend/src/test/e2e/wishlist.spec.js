@@ -126,7 +126,6 @@ test.describe('Set up books', () => {
       bookId = bookDataResponse.id;
       expect(bookDataResponse.title).toBe(bookData.title);
     });
-  });
   test('Create a normal user', async () => {
     const apiUrl = 'http://127.0.0.1:8000/api/v1';
 
@@ -196,7 +195,7 @@ test.describe('Set up books', () => {
     await expect(star).toHaveClass('star selected');
     });
 
-  test('Should toggle the star, and when we come back it should stay toggled', async ({ page }) => {
+  test('The book marked previously should be in user wishlist', async ({ page }) => {
     await page.goto('http://localhost:8080/login');
 
     await page.fill('input[placeholder="Email"]', 'testuser2@example.com');
@@ -205,9 +204,95 @@ test.describe('Set up books', () => {
 
     await page.waitForURL('http://localhost:8080/mainPage_user');
 
-      
+    const userProfileIcon = page.locator('[data-testid="user-profile-icon"]');
+    await expect(userProfileIcon).toBeVisible();
+
+    await userProfileIcon.click();
+
+    await expect(page).toHaveURL(new RegExp('/user_profile'));
+
+    const wishlistButton = page.locator('.wishlist-btn');
+    await wishlistButton.click();
+
+    await page.waitForSelector('.wishlist-popup');
+
+    const wishlistBook = page.locator('ul li');
+    await expect(wishlistBook).toContainText('The Great Book');
+
+    const closeButton = page.locator('.close-button');
+    await closeButton.click();
+
+    await expect(page.locator('.wishlist-popup')).toBeHidden();
+
 
   });
 
+  test('Unselect a selected book', async ({ page }) => {
+    await page.goto('http://localhost:8080/login');
 
+    await page.fill('input[placeholder="Email"]', 'testuser2@example.com');
+    await page.fill('input[placeholder="Password"]', 'testpassword');
+    await page.click('button.login-button');
 
+    await page.waitForURL('http://localhost:8080/mainPage_user');
+
+    const firstImage = await page.locator('.carousel-image').first();
+
+    const src = await firstImage.getAttribute('src');
+
+    await firstImage.click();
+
+    await page.waitForURL(`http://localhost:8080/book?bookId=${bookId}`);
+
+    const star = await page.locator('.title-container .star');
+
+    await expect(star).toHaveClass('star selected');
+
+    await star.click();
+
+    await expect(star).not.toHaveClass('star selected');
+
+    await page.goBack();
+
+    await expect(page).toHaveURL('http://localhost:8080/mainPage_user');
+
+    await firstImage.click();
+
+    await expect(star).not.toHaveClass('star selected');
+    });
+
+    test('The book unmarked previously shouldnt be in user wishlist', async ({ page }) => {
+      await page.goto('http://localhost:8080/login');
+  
+      await page.fill('input[placeholder="Email"]', 'testuser2@example.com');
+      await page.fill('input[placeholder="Password"]', 'testpassword');
+      await page.click('button.login-button');
+  
+      await page.waitForURL('http://localhost:8080/mainPage_user');
+  
+      const userProfileIcon = page.locator('[data-testid="user-profile-icon"]');
+      await expect(userProfileIcon).toBeVisible();
+  
+      await userProfileIcon.click();
+  
+      await expect(page).toHaveURL(new RegExp('/user_profile'));
+  
+      const wishlistButton = page.locator('.wishlist-btn');
+      await wishlistButton.click();
+  
+      await page.waitForSelector('.wishlist-popup');
+  
+      const wishlistBook = page.locator('ul li');
+      const itemCount = await wishlistBook.count();
+  
+      expect(itemCount).toBe(0);
+  
+      const closeButton = page.locator('.close-button');
+      await closeButton.click();
+  
+      await expect(page.locator('.wishlist-popup')).toBeHidden();
+  
+  
+    });
+
+});
