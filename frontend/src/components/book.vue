@@ -16,8 +16,8 @@
           <div class="image-container">
             <img :src="book.img || '/default-image.png'" alt="Book Cover" />
           </div>
-          <div class="star-rating">
-            <span v-for="star in 5" :key="star" class="star" :class="{ active: star <= rating }" @click="rate_stars(star)">★</span>
+          <div class="star-rating" v-if="!user_me.is_editor">
+            <span  v-for="star in 5" :key="star" class="star" :class="{ active: star <= rating }" @click="rate_stars(star)">★</span>
             <span class="rating-average">({{ mediaValoracion.toFixed(1) }})</span>
           </div>
         </div>
@@ -59,14 +59,14 @@
       </div>
 
       <!-- Comments Section -->
-      <div class="rating-section">
+      <div class="rating-section" v-if="!user_me.is_editor">
         <h2 class="comment-title">Leave a comment</h2>
         <textarea
           v-model="comment"
           placeholder="Share your thoughts about this book..."
           class="comment-box"
         ></textarea>
-        <button class="submit-button" @click="submitReview()">Submit Review</button>
+        <button  class="submit-button" @click="submitReview()">Submit Review</button>
       </div>
       <div class="comments-section">
   <h2 class="comments-title">Comments</h2>
@@ -198,7 +198,6 @@ export default {
           sumaValoracion = sumaValoracion / contador
           this.mediaValoracion = sumaValoracion
         }
-        console.warn('AQUI AL FINAL' + this.comments.list_comments[0])
         this.componentKey += 1
       })
         .catch((error) => {
