@@ -1,6 +1,9 @@
 <template>
   <div class="background-container">
-    <div class="book-details">
+    <div v-if="loading" class="loading-container">
+      <p>Loading data, please wait...</p>
+    </div>
+    <div v-else class="book-details">
       <!-- Back Button -->
       <div class="back-button">
         <button @click="$router.go(-1)" class="back-button-style">Back</button>
@@ -13,8 +16,9 @@
           <div class="image-container">
             <img :src="book.img || '/default-image.png'" alt="Book Cover" />
           </div>
-          <div class="star-rating">
-            <span v-for="star in 5" :key="star" class="star">★</span>
+          <div class="star-rating" v-if="!user_me.is_editor">
+            <span  v-for="star in 5" :key="star" class="star" :class="{ active: star <= rating }" @click="rate_stars(star)">★</span>
+            <span class="rating-average">({{ mediaValoracion.toFixed(1) }})</span>
           </div>
         </div>
 
@@ -55,22 +59,58 @@
       </div>
 
       <!-- Comments Section -->
-      <div class="rating-section">
+      <div class="rating-section" v-if="!user_me.is_editor">
         <h2 class="comment-title">Leave a comment</h2>
         <textarea
+          v-model="comment"
           placeholder="Share your thoughts about this book..."
           class="comment-box"
         ></textarea>
-        <button class="submit-button">Submit Review</button>
+        <button  class="submit-button" @click="submitReview()">Submit Review</button>
       </div>
+      <div class="comments-section">
+  <h2 class="comments-title">Comments</h2>
+  <div v-if="Object.keys(comments).length" class="comments-list" :key="componentKey">
+    <!-- Iteramos sobre los comentarios por su ID -->
+    <div v-for="(commentData, username) in comments" :key="username">
+      <!-- Iteramos sobre cada comentario dentro de list_comments -->
+      <div
+        v-for="(text, index) in commentData.list_comments"
+        :key="index"
+        class="comment-box"
+      >
+        <div class="comment-header">
+          <p class="comment-author">{{ username }}</p>
+          <div class="comment-rating">
+            <!-- Mostramos la valoración en estrellas -->
+            <span
+              v-for="star in 5"
+              :key="star"
+              class="star"
+              :class="{ active: star <= commentData.rating }"
+            >
+              ★
+            </span>
+          </div>
+        </div>
+        <div class="comment-content">
+          <p>{{ text }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div v-else class="no-comments">No comments yet. Be the first to comment!</div>
+</div>
+
     </div>
   </div>
 </template>
 
 <script>
 import WishlistService from '../services/WishlistServices'
-import axios from 'axios'
 import UserServices from '../services/UserServices'
+import BookServices from '../services/BookServices'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'BookDetails',
@@ -79,56 +119,93 @@ export default {
       book: {},
       userRating: 4,
       averageRating: 3,
-      comments: [],
+      comment: '',
       starSelected: false,
       wishlistId: null,
       bookid2: '',
       user: {},
       user_id: '',
-      user_me: {}
+      user_me: {},
+      rating: 0,
+      comments: {},
+      loading: true,
+      mediaValoracion: 0,
+      valoracioUsuari: false,
+      componentKey: 0
     }
   },
   methods: {
-    fetchBookDetails () {
+    async fetchBookDetails () {
       const bookId = this.$route.query.bookId
       this.bookid2 = bookId
-      const path = process.env.API_URL + '/api/v1/books/search_id/' + bookId
-
-      axios.get(path)
-        .then(res => {
-          this.book = {
-            title: res.data.title,
-            author: res.data.author,
-            gender_main: res.data.gender_main,
-            publication_year: res.data.publication_year,
-            isbn: res.data.isbn,
-            price: res.data.price,
-            synopsis: res.data.synopsis,
-            img: res.data.img,
-            list_links: res.data.list_links || [],
-            account_id: res.data.account_id
-          }
-          this.user_id = this.book.account_id
-          this.comments = res.data.comments || []
-          this.fetchBookPublisher()
-        })
+      BookServices.getBookById(bookId).then((res) => {
+        this.book = {
+          title: res.data.title,
+          author: res.data.author,
+          gender_main: res.data.gender_main,
+          publication_year: res.data.publication_year,
+          isbn: res.data.isbn,
+          price: res.data.price,
+          synopsis: res.data.synopsis,
+          img: res.data.img,
+          list_links: res.data.list_links || [],
+          account_id: res.data.account_id
+        }
+        this.user_id = this.book.account_id
+        this.fetchBookPublisher()
+      })
         .catch(error => {
           console.error(error)
         })
     },
     fetchBookPublisher () {
-      const path = process.env.API_URL + '/api/v1/users/by_id/' + this.user_id
-      axios.get(path)
-        .then(res => {
-          this.user = {
-            name: res.data.name
-          }
-        })
+      BookServices.getBookPublisher(this.user_id).then((res) => {
+        this.user = {
+          name: res.data.name
+        }
+      })
         .catch(error => {
           console.error(error)
           alert('Failed to load book details')
         })
     },
+
+    fetchComments2 (BookId) {
+      BookServices.getReviews(BookId).then((reviewsResponse) => {
+        let contador = 0
+        let sumaValoracion = 0
+        reviewsResponse.data.forEach((review) => {
+          if (review.account_id === this.user_me.id) {
+            this.valoracioUsuari = true
+          }
+          contador += 1
+          sumaValoracion += review.point_book
+          UserServices.getUserById2(review.account_id).then((user) => {
+            const nameEntero = user.name + ' ' + user.surname
+            console.warn(review.list_comments)
+            this.comments[nameEntero] = {
+              rating: review.point_book,
+              list_comments: review.list_comments
+            }
+          })
+            .catch((error) => {
+              console.error(`Error al obtener el usuario con ID: ${review.account_id}: `, error)
+            })
+        })
+        if (sumaValoracion === 0 || contador === 0) {
+          this.mediaValoracion = 0
+        } else {
+          sumaValoracion = sumaValoracion / contador
+          this.mediaValoracion = sumaValoracion
+        }
+        this.componentKey += 1
+      })
+        .catch((error) => {
+          console.error('Error al obtener los comentarios', error)
+          throw error
+        })
+    },
+
     async getUser () {
       try {
         this.user_me = await UserServices.getActualUser()
@@ -172,23 +249,82 @@ export default {
         console.error('Error al modificar la wishlist', error)
         this.starSelected = !this.starSelected
       }
+    },
+    rate_stars (star) {
+      this.rating = star
+      console.warn(`Puntuación seleccionada: ${this.rating}`)
+    },
+    submitReview () {
+      if (this.rating !== 0 && !this.valoracioUsuari) {
+        if (this.comment.trim() !== '') {
+          const data = {
+            text: this.comment
+          }
+          BookServices.createReviewComments(data, this.bookid2)
+          this.comment = ''
+        }
+        const data2 = {
+          point_book: this.rating
+        }
+        BookServices.createReviewPoints(data2, this.bookid2)
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: 'Grácies per la teva valoració!'
+        })
+        this.rating = 0
+      } else {
+        if (this.valoracioUsuari) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Valoració ja registrada',
+            text: 'Aquest usuari ja te una valoració en aquest llibre.'
+          })
+        } else {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Valoració Incompleta',
+            text: 'No es pot crear la valoració sense indicar el nombre de estrelles.'
+          })
+        }
+      }
     }
   },
   async mounted () {
-    this.fetchBookDetails()
-    await this.getWishlistId()
-    await this.getUser()
+    try {
+      this.loading = true
+      await this.getUser()
+      await this.fetchBookDetails()
+      this.fetchComments2(this.bookid2)
+      await this.getWishlistId()
+    } catch (error) {
+      console.error('Error al cargar algun componente: ', error)
+    } finally {
+      await new Promise(resolve => setTimeout(resolve, 250))
+      this.componentKey += 1
+      this.loading = false
+      console.log(`Number of comments: ${this.comments.length}`)
+    }
   }
 }
 </script>
 
 <style scoped>
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 18px;
+  color: #555;
+}
 .background-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  height: 100vh;
+  height: 100%;
   background: url('../assets/fondo_carrousel2.png') no-repeat center center fixed;
   background-size: cover;
   font-family: 'Georgia', serif;
@@ -351,6 +487,18 @@ export default {
   margin-top: 10px;
 }
 
+.star.active {
+  color: gold;
+}
+
+.rating-average {
+  margin-left: 10px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: black;
+  margin-top: 18px;
+  font-family: 'serif';
+}
 .rating-section {
   width: 100%;
   margin-top: 20px;
@@ -363,12 +511,65 @@ export default {
 
 .comment-box {
   width: 98%;
+  max_width: 700px;
   height: 100px;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
   resize: vertical;
   margin-bottom: 10px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+.comments-section {
+  margin-top: 20px;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.comments-title {
+  font-size: 20px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.comment-box {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.comment-author {
+  font-weight: bold;
+  color: #333;
+}
+.comment-rating {
+  display: flex;
+}
+
+.comment-content {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.no-comments {
+  font-size: 14px;
+  color: #999;
+  text-align: center;
 }
 
 .submit-button {

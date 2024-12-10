@@ -17,6 +17,36 @@ class BookService {
         console.error('Error al obtener los libros', error)
       })
   }
+  getBookById (BookId) {
+    const token = localStorage.getItem('token')
+    return http.get(`/api/v1/books/search_id/` + BookId, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => {
+        console.log(res.data)
+        return res
+      })
+      .catch(error => {
+        console.error('Error al obtener los libros', error)
+      })
+  }
+  getBookPublisher (userId) {
+    const token = localStorage.getItem('token')
+    return http.get('/api/v1/users/by_id/' + userId, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => {
+        console.log(res.data)
+        return res
+      })
+      .catch(error => {
+        console.error('Error al obtener el publisher tt', error)
+      })
+  }
 
   getBooksByEditorialId (accountId) {
     const token = localStorage.getItem('token')
@@ -79,7 +109,79 @@ class BookService {
         throw error
       })
   }
+  createReviewPoints (data, bookid) {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      console.error('No token found in localStorage')
+      throw new Error('User not authenticated')
+    }
 
+    // Log para verificar la estructura de datos
+    console.log('Data being sent to the backend:', JSON.stringify(data, null, 2))
+
+    return http.put(
+      `/api/v1/reviews/point_book/${bookid}`,
+      data,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+      .then(res => {
+        console.log('Book reviewed successfully:', res.data)
+        return res.data
+      })
+      .catch(error => {
+        console.error('Error al valorar el libro:', error.response ? error.response.data : error.message)
+        throw error
+      })
+  }
+  createReviewComments (data, bookid) {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      console.error('No token found in localStorage')
+      throw new Error('User not authenticated')
+    }
+
+    // Log para verificar la estructura de datos
+    console.log('Data being sent to the backend:', JSON.stringify(data, null, 2))
+
+    return http.put(
+      `/api/v1/reviews/comment/${bookid}`,
+      data,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+      .then(res => {
+        console.log('Book reviewed successfully:', res.data)
+        return res.data
+      })
+      .catch(error => {
+        console.error('Error al valorar el libro:', error.response ? error.response.data : error.message)
+        throw error
+      })
+  }
+  getReviews (bookid) {
+    const token = localStorage.getItem('token')
+    return http.get(`/api/v1/reviews/all_review/${bookid}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => {
+        console.log(res.data)
+        return res.data
+      })
+      .catch(error => {
+        console.error('Error al obtener las Reviews', error)
+      })
+  }
   getBooksByGenre (genre) {
     const token = localStorage.getItem('token')
     return http.get(`/api/v1/books/by_genre/${genre}`, {
@@ -156,7 +258,7 @@ class BookService {
         return res.data
       })
       .catch(error => {
-        console.error('Error al obtener los libros', error)
+        console.error('Error al obtener las Reviews', error)
       })
   }
 }
