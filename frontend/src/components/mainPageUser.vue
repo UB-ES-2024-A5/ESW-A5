@@ -19,10 +19,10 @@
 
       <!-- Enlace al perfil de usuario con icono de imagen -->
       <router-link to="/forum" class="profile-link">
-        <img src="@/assets/forum_icon.png" alt="Forum" class="user-icon" />
+        <img src="@/assets/forum_icon.png" alt="Forum" class="user-icon" data-testid="forum-icon" />
       </router-link>
       <router-link to="/user_profile" class="profile-link">
-        <img src="@/assets/user_icon.png" alt="User Profile" class="user-icon" />
+        <img src="@/assets/user_icon.png" alt="User Profile" class="user-icon" data-testid="user-profile-icon" />
       </router-link>
     </header>
 

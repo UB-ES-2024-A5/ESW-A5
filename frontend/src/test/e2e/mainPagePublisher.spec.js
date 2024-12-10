@@ -162,10 +162,10 @@ test.describe('E2E Book Page', () => {
 
     await expect(page).toHaveURL(new RegExp('/mainPage_publisher'));
 
-    const profileIcon = page.locator('.user-icon');
-    await expect(profileIcon).toBeVisible();
+    const userProfileIcon = page.locator('[data-testid="user-profile-icon"]');
+    await expect(userProfileIcon).toBeVisible();
 
-    await profileIcon.click();
+    await userProfileIcon.click();
 
     await expect(page).toHaveURL(new RegExp('/publisher_profile'));
   });
