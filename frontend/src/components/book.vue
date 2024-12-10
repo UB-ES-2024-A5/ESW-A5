@@ -70,7 +70,7 @@
       </div>
       <div class="comments-section">
   <h2 class="comments-title">Comments</h2>
-  <div v-if="Object.keys(comments).length" class="comments-list">
+  <div v-if="Object.keys(comments).length" class="comments-list" :key="componentKey">
     <!-- Iteramos sobre los comentarios por su ID -->
     <div v-for="(commentData, username) in comments" :key="username">
       <!-- Iteramos sobre cada comentario dentro de list_comments -->
@@ -130,13 +130,13 @@ export default {
       comments: {},
       loading: true,
       mediaValoracion: 0,
-      valoracioUsuari: false
+      valoracioUsuari: false,
+      componentKey: 0
     }
   },
   methods: {
-    fetchBookDetails () {
+    async fetchBookDetails () {
       const bookId = this.$route.query.bookId
-      this.loading = true
       this.bookid2 = bookId
       BookServices.getBookById(bookId).then((res) => {
         this.book = {
@@ -172,7 +172,6 @@ export default {
 
     fetchComments2 (BookId) {
       BookServices.getReviews(BookId).then((reviewsResponse) => {
-        this.comments = {}
         let contador = 0
         let sumaValoracion = 0
         reviewsResponse.data.forEach((review) => {
@@ -183,6 +182,7 @@ export default {
           sumaValoracion += review.point_book
           UserServices.getUserById2(review.account_id).then((user) => {
             const nameEntero = user.name + ' ' + user.surname
+            console.warn(review.list_comments)
             this.comments[nameEntero] = {
               rating: review.point_book,
               list_comments: review.list_comments
@@ -192,8 +192,14 @@ export default {
               console.error(`Error al obtener el usuario con ID: ${review.account_id}: `, error)
             })
         })
-        sumaValoracion = sumaValoracion / contador
-        this.mediaValoracion = sumaValoracion
+        if (sumaValoracion === 0 || contador === 0) {
+          this.mediaValoracion = 0
+        } else {
+          sumaValoracion = sumaValoracion / contador
+          this.mediaValoracion = sumaValoracion
+        }
+        console.warn('AQUI AL FINAL' + this.comments.list_comments[0])
+        this.componentKey += 1
       })
         .catch((error) => {
           console.error('Error al obtener los comentarios', error)
@@ -286,12 +292,19 @@ export default {
     }
   },
   async mounted () {
-    await this.getUser()
-    this.fetchBookDetails()
-    this.fetchComments2(this.bookid2)
-    await this.getWishlistId()
-    if (this.comments) {
+    try {
+      this.loading = true
+      await this.getUser()
+      await this.fetchBookDetails()
+      this.fetchComments2(this.bookid2)
+      await this.getWishlistId()
+    } catch (error) {
+      console.error('Error al cargar algun componente: ', error)
+    } finally {
+      await new Promise(resolve => setTimeout(resolve, 250))
+      this.componentKey += 1
       this.loading = false
+      console.log(`Number of comments: ${this.comments.length}`)
     }
   }
 }
