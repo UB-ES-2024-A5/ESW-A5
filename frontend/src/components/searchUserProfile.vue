@@ -128,7 +128,6 @@ export default {
       this.wishlistVisible = false
     },
     async fetchUserProfile () {
-      console.log('Fetching user profile...')
       const userID = this.$route.query.userID // Obtén el userID desde la query string
       try {
         const userData = await userServices.getUserById(userID)
@@ -152,7 +151,6 @@ export default {
       try {
         const res = await wishlistServices.getWishlistByUserId(userId)
         this.wishlistId = res.id
-        console.log(this.wishlistId)
         await this.fetchBooksInWishlist(this.wishlistId)
       } catch (error) {
         console.error('Error al obtener la wishlist:', error)
@@ -168,7 +166,7 @@ export default {
     async checkIfFollowing () {
       try {
         const userID = this.$route.query.userID // Obtén el userID desde la query string
-        const followingData = await accountServices.getFollowingAccounts() // Obtén la lista de seguidos
+        const followingData = await accountServices.getFollowingAccounts()
         this.isFollowing = followingData.data.some(
           (data) => data.following_id.toString().trim() === userID.toString().trim()
         )
