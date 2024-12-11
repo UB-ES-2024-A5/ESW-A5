@@ -46,6 +46,9 @@ jest.mock('axios', () => ({
 
 jest.mock('../../services/BookServices', () => ({
     getAllBooks: jest.fn(),
+    getBookById: jest.fn(),
+    getBookPublisher: jest.fn(),
+    getReviews: jest.fn().mockResolvedValue({ data: [] })
   }));
 
 const localVue = createLocalVue();
@@ -61,6 +64,16 @@ describe('BookDetails', () => {
       ]);
       UserServices.getActualUser.mockResolvedValue({
         data: { id: 1, name: 'Test User' },
+      });
+
+      BookServices.getBookPublisher.mockResolvedValue({
+        data: {
+          publisher: 'Test Publisher'
+        },
+      });
+
+      BookServices.getReviews.mockResolvedValue({
+        data: [],
       });
     
       // Simula una respuesta exitosa para `getMyWishlists`
@@ -80,12 +93,10 @@ describe('BookDetails', () => {
   });
 
   it('should fetch and display book details when authenticated and accessing /book', async () => {
-    // Simulate authentication token in localStorage
     const mockToken = 'valid-token';
     localStorage.setItem('auth_token', mockToken);
 
-    // Use jest.fn() to mock the axios.get method directly
-    axios.get.mockResolvedValue({
+    BookServices.getBookById.mockResolvedValue({
       data: {
         title: 'Test Book',
         author: 'Author Test',
@@ -97,8 +108,9 @@ describe('BookDetails', () => {
         img: 'test-book.png',
         list_links: ['http://example.com'],
         account_id: 1,
-      },
+      }
     });
+
 
     router.push({ path: '/book', query: { bookId: '47a550e7-679d-4e30-8b78-635530c186ca' } });
 
@@ -110,6 +122,10 @@ describe('BookDetails', () => {
     });
 
     await wrapper.vm.fetchBookDetails();
+
+    await wrapper.vm.$nextTick();
+
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     await wrapper.vm.$nextTick();
 
