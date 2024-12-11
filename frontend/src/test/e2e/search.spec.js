@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const sqlite3 = require('sqlite3').verbose();
 const { Client } = require('pg');
+const { user } = require('pg/lib/defaults');
 const { unescape } = require('querystring');
 
 
@@ -48,6 +49,7 @@ async function clearUserDatabase() {
 }
 let bookId;
 let bookId2;
+let userId;
 test.describe('Set up book', () => {
   test('Create a book with user, account, and login', async () => {
     await clearUserDatabase();
@@ -69,6 +71,7 @@ test.describe('Set up book', () => {
 
     expect(response.status).toBe(200);
     const userDataResponse = await response.json();
+    userId = userDataResponse.id
 
     const accountData = {
       id: userDataResponse.id,
@@ -295,5 +298,70 @@ test.describe('Search bar testing:', () => {
 
     expect(isVisible).toBe(false);
   
+  });
+  test('Should display nothing if we search ourselves', async ({ page }) => {
+    await page.goto('http://localhost:8080/login');
+    await expect(page).toHaveURL('http://localhost:8080/login'); 
+  
+    await page.fill('input[placeholder="Email"]', 'testuser2@example.com');
+    await page.fill('input[placeholder="Password"]', 'testpassword');
+  
+    await page.click('button.login-button');
+  
+    await expect(page).toHaveURL(new RegExp('/mainPage_user'));
+  
+    const searchBar = page.locator('input.search-bar[placeholder="Search for a publication or user"]');
+    await searchBar.fill('testuser2');
+  
+    const dropdownItems = page.locator('.dropdown-item');
+    const isVisible = await dropdownItems.isVisible();
+
+    expect(isVisible).toBe(false);
+  
+  });
+  test('Should navigate to Test Book 2 if we click the result', async ({ page }) => {
+    await page.goto('http://localhost:8080/login');
+    await expect(page).toHaveURL('http://localhost:8080/login'); 
+
+    await page.fill('input[placeholder="Email"]', 'testuser2@example.com');
+    await page.fill('input[placeholder="Password"]', 'testpassword');
+
+    await page.click('button.login-button');
+
+    await expect(page).toHaveURL(new RegExp('/mainPage_user'));
+
+    const searchBar = page.locator('input.search-bar[placeholder="Search for a publication or user"]');
+    await searchBar.fill('Perico');
+
+    await page.waitForSelector('.dropdown-item');
+    const dropdownItems = page.locator('.dropdown-item');
+
+    await dropdownItems.first().click();
+
+    await expect(page).toHaveURL(`http://localhost:8080/book?bookId=${bookId2}`);
+
+ });
+
+ test('Should navigate to user John Doe if we click the result', async ({ page }) => {
+  await page.goto('http://localhost:8080/login');
+  await expect(page).toHaveURL('http://localhost:8080/login'); 
+
+  await page.fill('input[placeholder="Email"]', 'testuser2@example.com');
+  await page.fill('input[placeholder="Password"]', 'testpassword');
+
+  await page.click('button.login-button');
+
+  await expect(page).toHaveURL(new RegExp('/mainPage_user'));
+
+  const searchBar = page.locator('input.search-bar[placeholder="Search for a publication or user"]');
+  await searchBar.fill('testuser');
+
+  await page.waitForSelector('.dropdown-item');
+  const dropdownItems = page.locator('.dropdown-item');
+
+  await dropdownItems.first().click();
+
+  await expect(page).toHaveURL(`http://localhost:8080/search_publisher_profile?userID=${userId}`);
+
   });
 });
