@@ -13,7 +13,7 @@ from app.tests.utils.utils import random_email, random_lower_string
 client = TestClient(app)
 
 # Variable para almacenar datos entre pruebas
-created_account_data = {}
+created_account_data_review = {}
 
 @pytest.fixture
 def create_user():
@@ -37,7 +37,7 @@ def create_account(create_user):
 
     response = client.post("/api/v1/accounts/", json=account_data)
 
-    created_account_data["account1"] = response.json()
+    created_account_data_review["account1"] = response.json()
 
     return response
 
@@ -71,7 +71,7 @@ def create_account2(create_user2):
 
     response = client.post("/api/v1/accounts/", json=account_data)
 
-    created_account_data["account2"] = response.json()
+    created_account_data_review["account2"] = response.json()
 
     return response
 @pytest.fixture
@@ -104,7 +104,7 @@ def create_account_editor(create_user_editor):
 
     response = client.post("/api/v1/accounts/", json=account_data)
 
-    created_account_data["account_editor"] = response.json()
+    created_account_data_review["account_editor"] = response.json()
 
     return response
 @pytest.fixture
@@ -137,7 +137,7 @@ def create_account_editor2(create_user_editor2):
 
     response = client.post("/api/v1/accounts/", json=account_data)
 
-    created_account_data["account_editor2"] = response.json()
+    created_account_data_review["account_editor2"] = response.json()
 
     return response
 @pytest.fixture
@@ -170,7 +170,7 @@ def create_book1(authenticate_editor):
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
 
-    created_account_data["book1"] = response.json()
+    created_account_data_review["book1"] = response.json()
 
     return response
 
@@ -196,7 +196,7 @@ def create_book2(authenticate_editor):
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
 
-    created_account_data["book2"] = response.json()
+    created_account_data_review["book2"] = response.json()
 
     return response
 
@@ -222,7 +222,7 @@ def create_book3(authenticate_editor):
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
 
-    created_account_data["book3"] = response.json()
+    created_account_data_review["book3"] = response.json()
 
     return response
 
@@ -248,7 +248,7 @@ def create_book4(authenticate_editor2):
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
 
-    created_account_data["book4"] = response.json()
+    created_account_data_review["book4"] = response.json()
 
     return response
 
@@ -274,7 +274,7 @@ def create_book5(authenticate_editor2):
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
 
-    created_account_data["book5"] = response.json()
+    created_account_data_review["book5"] = response.json()
 
     return response
 
@@ -300,7 +300,7 @@ def create_book6(authenticate_editor2):
 
     response = client.post("/api/v1/books/", json=book_data, headers=headers)
 
-    created_account_data["book6"] = response.json()
+    created_account_data_review["book6"] = response.json()
 
     return response
 
@@ -308,8 +308,11 @@ def create_book6(authenticate_editor2):
 def test_create_review_point_book(create_account, create_account2, create_account_editor, create_account_editor2,
                                   create_book1, create_book2, create_book3, create_book4, create_book5, create_book6,
                                   authenticate):
+    """
+    Comprobamos la creacion de una review con post
+    """
 
-    book_id = created_account_data["book1"]["id"]
+    book_id = created_account_data_review["book1"]["id"]
 
     review_data = {
         "point_book": 3
@@ -322,5 +325,224 @@ def test_create_review_point_book(create_account, create_account2, create_accoun
     response = client.post(f"/api/v1/reviews/point_book/{book_id}", json=review_data, headers=headers)
     assert response.status_code == 200
     results = response.json()
+    assert review_data['point_book'] == results["point_book"]
+    assert len(results["list_comments"]) == 0
+
+def test_create_review_point_book_duplicate(authenticate):
+    """
+    Comprobamos el error de una review duplicada
+    """
+
+    book_id = created_account_data_review["book1"]["id"]
+
+    review_data = {
+        "point_book": 3
+    }
+
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.post(f"/api/v1/reviews/point_book/{book_id}", json=review_data, headers=headers)
+    assert response.status_code == 400
+    results = response.json()
+    assert results['detail'] == "Review already exists."
+
+def test_create_review_point_book_being_editor(authenticate_editor):
+    """
+    Comprobamos el error de intentar publicar una review siendo editor
+    """
+
+    book_id = created_account_data_review["book1"]["id"]
+
+    review_data = {
+        "point_book": 3
+    }
+
+    headers = {
+        "Authorization": f"Bearer {authenticate_editor}"
+    }
+
+    response = client.post(f"/api/v1/reviews/point_book/{book_id}", json=review_data, headers=headers)
+    assert response.status_code == 400
+    results = response.json()
+
+    assert results['detail'] == "The user cannot be an editorial user."
+
+def test_update_review_point_book_not_found(authenticate):
+    """
+    Comprobamos el error de una review no encontrada
+    """
+
+    book_id = created_account_data_review["book2"]["id"]
+
+    review_data = {
+        "point_book": 3
+    }
+
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.patch(f"/api/v1/reviews/point_book/{book_id}", json=review_data, headers=headers)
+    assert response.status_code == 400
+    results = response.json()
+
+    assert results['detail'] == "Review not found."
+
+def test_update_review_point_book(authenticate):
+    """
+    Comprobamos la actualizacion del pb
+    """
+
+    book_id = created_account_data_review["book1"]["id"]
+
+    review_data = {
+        "point_book": 4
+    }
+
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.patch(f"/api/v1/reviews/point_book/{book_id}", json=review_data, headers=headers)
+    assert response.status_code == 200
+    results = response.json()
+
+    assert review_data['point_book'] == results["point_book"]
+    assert len(results["list_comments"]) == 0
+
+def test_create_review_pb_put(authenticate2):
+    """
+    Comprobamos la creacion de un pb con el metodo put
+    """
+    book_id = created_account_data_review["book1"]["id"]
+
+    review_data = {
+        "point_book": 4
+    }
+
+    headers = {
+        "Authorization": f"Bearer {authenticate2}"
+    }
+
+    response = client.put(f"/api/v1/reviews/point_book/{book_id}", json=review_data, headers=headers)
+    assert response.status_code == 200
+    results = response.json()
+
+    assert review_data['point_book'] == results["point_book"]
+    assert len(results["list_comments"]) == 0
+
+def test_update_review_pb_put(authenticate2):
+    """
+    Comprobamos que se actualiza el pb de un comment con el metodo put
+    """
+    book_id = created_account_data_review["book1"]["id"]
+
+    review_data = {
+        "point_book": 1
+    }
+
+    headers = {
+        "Authorization": f"Bearer {authenticate2}"
+    }
+
+    response = client.put(f"/api/v1/reviews/point_book/{book_id}", json=review_data, headers=headers)
+    assert response.status_code == 200
+    results = response.json()
+
+    assert review_data['point_book'] == results["point_book"]
+    assert len(results["list_comments"]) == 0
+
+def test_create_comment(authenticate2):
+    """
+    Comprobamos la creacion de un comment
+    """
+    book_id = created_account_data_review["book2"]["id"]
+
+    review_data = {
+        "text": "creo un comment"
+    }
+
+    headers = {
+        "Authorization": f"Bearer {authenticate2}"
+    }
+
+    response = client.post(f"/api/v1/reviews/comment/{book_id}", json=review_data, headers=headers)
+    assert response.status_code == 200
+    results = response.json()
+
+    assert len(results["list_comments"]) == 1
+
+    comment_texts = {comment for comment in results["list_comments"]}
+    assert review_data["text"] in comment_texts
+
+def test_create_comment_duplicate(authenticate2):
+    """
+    Comprobamos el mensaje de error si ya existe el comment
+    """
+    book_id = created_account_data_review["book2"]["id"]
+
+    review_data = {
+        "text": "creo un comment 2"
+    }
+
+    headers = {
+        "Authorization": f"Bearer {authenticate2}"
+    }
+
+    response = client.post(f"/api/v1/reviews/comment/{book_id}", json=review_data, headers=headers)
+    assert response.status_code == 400
+    results = response.json()
+
+    assert results["detail"] == "Review already exists."
+
+def test_create_review_pb_put_with_comment(authenticate2):
+    """
+    Comprobamos que se crea bien el pb cuando solamente existe un comentario
+    """
+    book_id = created_account_data_review["book2"]["id"]
+
+    review_data = {
+        "point_book": 2
+    }
+
+    headers = {
+        "Authorization": f"Bearer {authenticate2}"
+    }
+
+    response = client.put(f"/api/v1/reviews/point_book/{book_id}", json=review_data, headers=headers)
+    assert response.status_code == 200
+    results = response.json()
+
+    assert review_data['point_book'] == results["point_book"]
+    assert len(results["list_comments"]) == 1
+    comment_texts = {comment for comment in results["list_comments"]}
+    assert "creo un comment" in comment_texts
+
+def test_update_review_pb_put_with_comment(authenticate2):
+    """
+    Comprobamos que se actualiza correctamente el pb pese ya haber un pb y un comment
+    """
+
+    book_id = created_account_data_review["book2"]["id"]
+
+    review_data = {
+        "point_book": 4
+    }
+
+    headers = {
+        "Authorization": f"Bearer {authenticate2}"
+    }
+
+    response = client.put(f"/api/v1/reviews/point_book/{book_id}", json=review_data, headers=headers)
+    assert response.status_code == 200
+    results = response.json()
+
+    assert review_data['point_book'] == results["point_book"]
+    assert len(results["list_comments"]) == 1
+    comment_texts = {comment for comment in results["list_comments"]}
+    assert "creo un comment" in comment_texts
+
 
 
