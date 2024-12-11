@@ -14,6 +14,8 @@ class ForumBase(SQLModel):
 
 def current_time():
     return datetime.now(timezone.utc)
+
+
 # Tabla principal del post
 class Forum(ForumBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -38,17 +40,12 @@ class Forum(ForumBase, table=True):
 # Modelos para las operaciones CRUD
 # Crear un post
 class ForumCreate(ForumBase):
-    author_id: uuid.UUID  # ID del autor
-    parent_post_id: uuid.UUID | None = None  # ID del post padre (opcional)
-
-
-# Actualizar likes y dislikes
-class ForumReaction(SQLModel):
-    type: bool  # "like" o "dislike"
+    pass
 
 
 class ForumUpdate(ForumBase):
     pass
+
 
 # Modelo de salida de un post
 class ForumOut(ForumBase):
