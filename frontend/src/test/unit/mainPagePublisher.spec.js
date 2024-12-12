@@ -4,6 +4,7 @@ import WelcomePage from '../../components/welcomePage.vue';
 import MainPagePublisher from '../../components/mainPagePublisher.vue';
 import BookServices from '../../services/BookServices';
 import UserServices from '../../services/UserServices';
+import SearchServices from '../../services/SearchServices';
 
 
 jest.mock('../../services/BookServices', () => ({
@@ -12,6 +13,9 @@ jest.mock('../../services/BookServices', () => ({
 
 jest.mock('../../services/UserServices', () => ({
   getActualUser: jest.fn(),
+}));
+jest.mock('../../services/SearchServices', () => ({
+  search: jest.fn(),
 }));
 
 describe('Check info in MainPagePublisher', () => {
@@ -78,6 +82,40 @@ describe('Check info in MainPagePublisher', () => {
 
     const addButton = wrapper.find('.add-button')
     expect(addButton.exists()).toBe(true);
+  });
+  it('updates searchQuery on input and calls search method', async () => {
+    const wrapper = mount(MainPagePublisher, {
+      localVue,
+      router,
+    });
+
+    const searchInput = wrapper.find('.search-bar');
+    await searchInput.setValue('Test query');
+
+    expect(wrapper.vm.searchQuery).toBe('Test query');
+    expect(SearchServices.search).toHaveBeenCalledWith('Test query', 20);
+  });
+
+  it('shows dropdown with search results when populated', async () => {
+    const wrapper = mount(MainPagePublisher, {
+      localVue,
+      router,
+    });
+
+    await wrapper.setData({
+      searchResults: [
+        { id: 3, name: 'User 1' },
+        { id: 4, title: 'Book 1' },
+      ],
+      showDropdown: true,
+    });
+
+    await wrapper.vm.$nextTick();
+
+    const dropdownItems = wrapper.findAll('.dropdown-item');
+    expect(dropdownItems.length).toBe(2);
+    expect(dropdownItems.at(0).text()).toContain('User 1');
+    expect(dropdownItems.at(1).text()).toContain('Book 1');
   });
 
 });

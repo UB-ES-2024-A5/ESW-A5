@@ -25,7 +25,6 @@ class WishlistService {
     })
       .then(res => {
         console.log(res.data)
-        console.log('AQUI VA LA VUELTA')
         return res.data
       })
       .catch(error => {
@@ -82,6 +81,11 @@ class WishlistService {
   }
   async getUserWishlist (userId) {
     const response = await http.get(`/wishlists/user/${userId}`)
+    return response.data
+  }
+
+  async getWishlistByUserId (userId) {
+    const response = await http.get(`/api/v1/wishlists/by_account/${userId}`)
     return response.data
   }
 }

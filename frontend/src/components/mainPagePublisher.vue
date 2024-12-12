@@ -19,16 +19,47 @@
 
       <!-- Enlace al perfil de usuario con icono de imagen -->
       <router-link to="/forum" class="profile-link">
-        <img src="@/assets/forum_icon.png" alt="Forum" class="user-icon" />
+        <img src="@/assets/forum_icon.png" alt="Forum" class="user-icon" data-testid="forum-icon" />
       </router-link>
       <router-link to="/publisher_profile" class="profile-link">
-        <img src="@/assets/user_icon.png" alt="User Profile" class="user-icon" />
+        <img src="@/assets/user_icon.png" alt="User Profile" class="user-icon" data-testid="user-profile-icon" />
       </router-link>
     </header>
 
     <!-- Título principal -->
     <main class="content">
       <h1 class="main-title">Publications</h1>
+
+      <!-- Contenedor de filtros -->
+      <div class="filters-container">
+        <label>
+          Genre:
+          <select v-model="filters.genre" @change="clearFiltersExcept('genre'); applyFilters">
+            <option value="">All</option>
+            <option value="Fiction">Fiction</option>
+            <option value="Non-Fiction">Non-Fiction</option>
+            <option value="Fantasy">Fantasy</option>
+            <option value="Science Fiction">Science Fiction</option>
+            <option value="Romance">Romance</option>
+          </select>
+        </label>
+        <label>
+          Min Price:
+          <input type="number" v-model.number="filters.minPrice" @input="clearFiltersExcept('minPrice'); applyFilters" placeholder="Min Price" />
+        </label>
+        <label>
+          Max Price:
+          <input type="number" v-model.number="filters.maxPrice" @input="clearFiltersExcept('maxPrice'); applyFilters" placeholder="Max Price" />
+        </label>
+        <label>
+          Min Year:
+          <input type="number" v-model.number="filters.minYear" @input="clearFiltersExcept('minYear'); applyFilters" placeholder="Min Year" />
+        </label>
+        <label>
+          Max Year:
+          <input type="number" v-model.number="filters.maxYear" @input="clearFiltersExcept('maxYear'); applyFilters" placeholder="Max Year" />
+        </label>
+      </div>
 
       <!-- Carrusel de imágenes -->
       <div class="carousel-container">
@@ -67,17 +98,57 @@ export default {
         require('@/assets/19557g.png')
       ],
       currentIndex: 0,
+      filteredBooks: [],
       imagesPerSlide: 5,
       books: [],
       searchQuery: '',
       searchResults: [],
       showDropdown: false,
-      current_user: null
+      current_user: null,
+      filters: {
+        genre: '',
+        minPrice: null,
+        maxPrice: null,
+        minYear: null,
+        maxYear: null
+      }
     }
   },
   computed: {
     maxIndex () {
       return Math.ceil(this.images.length / this.imagesPerSlide) - 1
+    }
+  },
+  watch: {
+    'filters.genre' (newVal) {
+      if (newVal) {
+        this.clearFiltersExcept('genre')
+      }
+      this.applyFilters() // Siempre aplica filtros después de cambiar uno
+    },
+    'filters.minPrice' (newVal) {
+      if (newVal !== null) {
+        this.clearFiltersExcept('minPrice')
+      }
+      this.applyFilters() // Siempre aplica filtros después de cambiar uno
+    },
+    'filters.maxPrice' (newVal) {
+      if (newVal === null || newVal === '') {
+        this.filters.maxPrice = null // Asegúrate de convertir cadenas vacías a null
+      }
+      this.applyFilters()
+    },
+    'filters.minYear' (newVal) {
+      if (newVal !== null) {
+        this.clearFiltersExcept('minYear')
+      }
+      this.applyFilters() // Siempre aplica filtros después de cambiar uno
+    },
+    'filters.maxYear' (newVal) {
+      if (newVal === null || newVal === '') {
+        this.filters.maxYear = null // Asegúrate de convertir cadenas vacías a null
+      }
+      this.applyFilters()
     }
   },
   methods: {
@@ -159,6 +230,105 @@ export default {
       setTimeout(() => {
         this.showDropdown = false
       }, 200) // Retrasa el cierre para permitir la selección
+    },
+    async applyFilters () {
+      const { genre, minPrice, maxPrice, minYear, maxYear } = this.filters
+
+      // Si todos los filtros están vacíos, carga todos los libros
+      // Carga todos los libros si no hay filtros aplicados
+      if (!genre && !minPrice && !maxPrice && !minYear && !maxYear) {
+        await this.fetchAllBooks()
+        return
+      }
+
+      // Aplicar el filtro basado en el campo rellenado
+      if (genre) {
+        await this.applyGenreFilter(genre)
+      } else if (minPrice !== null) {
+        await this.applyMinPriceFilter(minPrice)
+      } else if (maxPrice !== null) {
+        await this.applyMaxPriceFilter(maxPrice)
+      } else if (minYear !== null) {
+        await this.applyMinYearFilter(minYear)
+      } else if (maxYear !== null) {
+        await this.applyMaxYearFilter(maxYear)
+      }
+    },
+    async applyGenreFilter (genre) {
+      try {
+        const filteredBooks = await BookServices.getBooksByGenre(genre)
+        this.updateBooks(filteredBooks)
+      } catch (error) {
+        console.error('Error al filtrar por género:', error)
+      }
+    },
+
+    async applyMinPriceFilter (minPrice) {
+      try {
+        const filteredBooks = await BookServices.getBooksByPriceMin(minPrice)
+        this.updateBooks(filteredBooks)
+      } catch (error) {
+        console.error('Error al filtrar por precio mínimo:', error)
+      }
+    },
+
+    async applyMaxPriceFilter (maxPrice) {
+      try {
+        const filteredBooks = await BookServices.getBooksByPriceMax(maxPrice)
+        this.updateBooks(filteredBooks)
+      } catch (error) {
+        console.error('Error al filtrar por precio máximo:', error)
+      }
+    },
+
+    async applyMinYearFilter (minYear) {
+      try {
+        const filteredBooks = await BookServices.getBooksByDateMin(minYear)
+        this.updateBooks(filteredBooks)
+      } catch (error) {
+        console.error('Error al filtrar por año mínimo:', error)
+      }
+    },
+
+    async applyMaxYearFilter (maxYear) {
+      try {
+        const filteredBooks = await BookServices.getBooksByDateMax(maxYear)
+        this.updateBooks(filteredBooks)
+      } catch (error) {
+        console.error('Error al filtrar por año máximo:', error)
+      }
+    },
+
+    // Restablecer filtros excepto el actualmente modificado
+    resetFilters (activeFilter) {
+      Object.keys(this.filters).forEach(filter => {
+        if (filter !== activeFilter) {
+          this.filters[filter] = null
+        }
+      })
+    },
+
+    // Método genérico para actualizar los libros en el carrusel
+    updateBooks (filteredBooks) {
+      this.books = filteredBooks.data // Actualizar los libros filtrados
+      this.currentIndex = 0 // Reiniciar el índice del carrusel
+    },
+
+    // Método para obtener todos los libros en caso de que no haya filtros activos
+    async fetchAllBooks () {
+      try {
+        const allBooks = await BookServices.getAllBooks()
+        this.updateBooks(allBooks)
+      } catch (error) {
+        console.error('Error al obtener todos los libros:', error)
+      }
+    },
+    clearFiltersExcept (activeFilter) {
+      Object.keys(this.filters).forEach((filter) => {
+        if (filter !== activeFilter) {
+          this.filters[filter] = filter === 'genre' ? '' : null // Vaciar select o inputs
+        }
+      })
     }
   },
   mounted () {
@@ -303,19 +473,163 @@ li {
   margin-bottom: 10px;
 }
 
-/* Contenedor del carrusel */
+/* Filtros */
+.filters-container {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 30px;
+  background: rgba(255, 255, 255, 0.8); /* Fondo translúcido */
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+  border: 2px solid #ccc; /* Borde suave */
+  min-height: 70px; /* Altura mínima fija */
+  align-items: center; /* Centra los elementos verticalmente */
+}
+
+.filters-container label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 1em;
+  font-weight: bold;
+  color: #333;
+}
+
+.filters-container input,
+.filters-container select {
+  margin-top: 5px;
+  padding: 10px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.3s ease;
+  background-color: #f8f8f8; /* Fondo claro */
+}
+
+.filters-container input:focus,
+.filters-container select:focus {
+  border-color: #8a8a8a; /* Color destacado en foco */
+}
+
+.filters-container select {
+  appearance: none; /* Oculta la flecha por defecto */
+  background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="%238a8a8a"%3E%3Cpath fill-rule="evenodd" d="M10 12a.75.75 0 01-.53-.22l-3.75-3.75a.75.75 0 111.06-1.06L10 10.44l3.22-3.22a.75.75 0 111.06 1.06l-3.75 3.75A.75.75 0 0110 12z" clip-rule="evenodd"/%3E%3C/svg%3E');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px 16px;
+}
+
+.filters-container input[type='number'] {
+  -moz-appearance: textfield; /* Oculta las flechas en Firefox */
+}
+
+.filters-container input[type='number']::-webkit-inner-spin-button,
+.filters-container input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none; /* Oculta las flechas en Chrome */
+}
+
+/* Botón de aplicar filtros (opcional) */
+.filters-container button {
+  padding: 10px 20px;
+  font-size: 1em;
+  font-weight: bold;
+  color: white;
+  background-color: #333;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.filters-container button:hover {
+  background-color: #555;
+}
+
+/* Carrusel */
 .carousel-container {
-  margin-top: 100px;
+  margin-top: 50px; /* Reduce el margen superior */
   display: flex;
   align-items: center;
-  gap: 15px;
+  justify-content: space-between;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1110px; /* Reduce el ancho máximo */
+  min-width: 250px;
   overflow: hidden;
-  padding: 20px; /* Espacio interno */
-  border-radius: 15px; /* Bordes redondeados */
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Sombra para darle profundidad */
-  position: relative; /* Para posicionar el botón flotante */
+  padding: 10px;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Reduce la sombra */
+  border: 3px solid; /* Reduce el grosor del borde */
+  height: 280px; /* Reduce la altura */
+  position: relative;
+  gap: 20px; /* Aumenta el espacio entre las flechas y las imágenes */
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+/* Pista del carrusel */
+.carousel {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.5s ease;
+  height: 100%;
+}
+
+/* Imágenes del carrusel */
+.carousel-image {
+  width: 150px; /* Reduce el ancho */
+  height: 100%; /* Ajusta la altura a la del contenedor */
+  flex-shrink: 0;
+  margin-right: 10px; /* Reduce el espacio entre imágenes */
+  border-radius: 10px; /* Bordes redondeados para las imágenes */
+  object-fit: cover; /* Asegura que las imágenes mantengan su proporción */
+  border: 2px solid #ccc; /* Añade un borde fino */
+}
+
+/* Botones del carrusel */
+.carousel-btn {
+  background-color: rgba(0, 0, 0, 0.5); /* Fondo translúcido */
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 35px; /* Reduce el tamaño */
+  height: 35px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin: 0 20px; /* Añadir más margen para aumentar la separación */
+}
+
+.carousel-btn:hover {
+  background-color: rgba(0, 0, 0, 0.7); /* Oscurece al pasar el mouse */
+}
+
+/* Botón izquierdo */
+.left-btn {
+  position: absolute;
+  left: 10px; /* Ajusta la posición */
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+}
+
+/* Botón derecho */
+.right-btn {
+  position: absolute;
+  right: 10px; /* Ajusta la posición */
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
 }
 
 /* Botón de agregar publicación en el carrusel */
@@ -342,36 +656,4 @@ li {
   background-color: #555;
 }
 
-.carousel {
-  overflow: hidden;
-  width: 100%;
-  position: relative;
-}
-
-.carousel-track {
-  display: flex;
-  transition: transform 0.5s ease;
-}
-
-.carousel-image {
-  width: calc(100% / 5); /* Ajuste para mostrar cinco imágenes a la vez */
-  flex-shrink: 0;
-  margin-right: 15px; /* Adds space between images */
-  border-radius: 10px; /* Bordes redondeados */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 1); /* Sombra para efecto 3D */
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.carousel-btn {
-  font-size: 6em;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #000000;
-  transition: color 0.3s ease;
-}
-
-.carousel-btn:hover {
-  color: #555;
-}
 </style>

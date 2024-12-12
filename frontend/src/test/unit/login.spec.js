@@ -3,6 +3,7 @@ import VueRouter from 'vue-router';
 import Login from '../../components/login.vue';
 import userServices from '../../services/UserServices';
 import WishlistServices from '../../services/WishlistServices';
+import LoginServices from '../../services/LoginServices';
 import Swal from 'sweetalert2';
 
 
@@ -40,6 +41,10 @@ jest.mock('../../services/UserServices', () => ({
 
 jest.mock('../../services/WishlistServices', () => ({
   createWishlistOnLogin : jest.fn(),
+}));
+
+jest.mock('../../services/LoginServices.js', () => ({
+  login : jest.fn(),
 }))
   
   describe('login.vue', () => {
@@ -64,7 +69,7 @@ jest.mock('../../services/WishlistServices', () => ({
 
     it('should login successfully and redirect to main page', async () => {
 
-        axios.post.mockResolvedValue({ data: { access_token: 'dummy_token' } });
+        LoginServices.login.mockResolvedValue({ data: { access_token: 'dummy_token' } });
         WishlistServices.createWishlistOnLogin = jest.fn().mockResolvedValue()
 
         userServices.getActualUser = jest.fn().mockResolvedValue({
@@ -82,11 +87,7 @@ jest.mock('../../services/WishlistServices', () => ({
         await wrapper.find('form').trigger('submit.prevent');
         await wrapper.vm.$nextTick();
       
-        expect(axios.post).toHaveBeenCalledWith(
-            `${process.env.API_URL}/api/v1/login/access-token`, 
-            'username=test@example.com&password=correctpassword',
-            { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-          );
+        expect(LoginServices.login).toHaveBeenCalledWith('username=test@example.com&password=correctpassword');
        
         await wrapper.vm.$nextTick();
         
@@ -111,7 +112,7 @@ jest.mock('../../services/WishlistServices', () => ({
 
       it('should login successfully and redirect to editor page', async () => {
 
-        axios.post.mockResolvedValue({ data: { access_token: 'dummy_token' } });
+        LoginServices.login.mockResolvedValue({ data: { access_token: 'dummy_token' } });
         WishlistServices.createWishlistOnLogin = jest.fn().mockResolvedValue()
 
         userServices.getActualUser = jest.fn().mockResolvedValue({
@@ -129,11 +130,7 @@ jest.mock('../../services/WishlistServices', () => ({
         await wrapper.find('form').trigger('submit.prevent');
         await wrapper.vm.$nextTick();
       
-        expect(axios.post).toHaveBeenCalledWith(
-            `${process.env.API_URL}/api/v1/login/access-token`, 
-            'username=test@example.com&password=correctpassword',
-            { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-          );
+        expect(LoginServices.login).toHaveBeenCalledWith('username=test@example.com&password=correctpassword');
        
         await wrapper.vm.$nextTick();
 
@@ -153,8 +150,8 @@ jest.mock('../../services/WishlistServices', () => ({
       });
 
       it('should show error if login fails', async () => {
-        axios.post.mockRejectedValue(new Error('Invalid credentials'));
-
+        LoginServices.login.mockRejectedValue(new Error('Invalid credentials'));
+        
         const SwalMock = jest.spyOn(Swal, 'fire').mockResolvedValue();
 
         await wrapper.setData({
