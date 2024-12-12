@@ -88,7 +88,7 @@ def create_user_editor():
         "email": "editorreview1@example.com",
         "password": "password123",
         "name": "Editor1",
-        "cif" :"g66666666",
+        "cif" :"g11116666",
         "is_editor": True
     }
     response = client.post("/api/v1/users/", json=user_data)
