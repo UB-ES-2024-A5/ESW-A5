@@ -5,7 +5,10 @@ import searchPublisherProfile from '../../components/searchPublisherProfile.vue'
 import Swal from 'sweetalert2';
 import accountServices from '../../services/AccountServices';
 import UserServices from '../../services/UserServices';
-import WishlistServices from '../../services/WishlistServices';
+import wishlistServices from '../../services/WishlistServices';
+
+  const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+
 
   jest.mock('../../services/AccountServices', () => ({
     getAccountById: jest.fn(),
@@ -18,6 +21,7 @@ import WishlistServices from '../../services/WishlistServices';
   }));
   
   jest.mock('../../services/WishlistServices', () => ({
+    getWishlistByUserId : jest.fn(),
     readBooksOfWishlist: jest.fn(),
   }));
 
@@ -109,5 +113,4 @@ import WishlistServices from '../../services/WishlistServices';
       const button = wrapper.find('.follow-button');
       expect(button.text()).toBe('Follow');
     });
-
   });
