@@ -15,6 +15,7 @@ client = TestClient(app)
 # Variable para almacenar datos entre pruebas
 created_account_data_review = {}
 
+
 @pytest.fixture
 def create_user():
     user_data = {
@@ -26,6 +27,7 @@ def create_user():
     }
     response = client.post("/api/v1/users/", json=user_data)
     return response
+
 
 @pytest.fixture
 def create_account(create_user):
@@ -41,6 +43,7 @@ def create_account(create_user):
 
     return response
 
+
 @pytest.fixture
 def authenticate():
     email = "userreview1@example.com"
@@ -48,6 +51,7 @@ def authenticate():
 
     response = client.post("/api/v1/login/access-token/", data={"username": email, "password": password})
     return response.json()['access_token']
+
 
 @pytest.fixture
 def create_user2():
@@ -60,6 +64,7 @@ def create_user2():
     }
     response = client.post("/api/v1/users/", json=user_data)
     return response
+
 
 @pytest.fixture
 def create_account2(create_user2):
@@ -74,6 +79,8 @@ def create_account2(create_user2):
     created_account_data_review["account2"] = response.json()
 
     return response
+
+
 @pytest.fixture
 def authenticate2():
     email = "userreview2@example.com"
@@ -81,6 +88,7 @@ def authenticate2():
 
     response = client.post("/api/v1/login/access-token/", data={"username": email, "password": password})
     return response.json()['access_token']
+
 
 @pytest.fixture
 def create_user_editor():
@@ -93,6 +101,7 @@ def create_user_editor():
     }
     response = client.post("/api/v1/users/", json=user_data)
     return response
+
 
 @pytest.fixture
 def create_account_editor(create_user_editor):
@@ -107,6 +116,8 @@ def create_account_editor(create_user_editor):
     created_account_data_review["account_editor"] = response.json()
 
     return response
+
+
 @pytest.fixture
 def authenticate_editor():
     email = "editorreview1@example.com"
@@ -115,17 +126,19 @@ def authenticate_editor():
     response = client.post("/api/v1/login/access-token/", data={"username":email, "password":password})
     return response.json()['access_token']
 
+
 @pytest.fixture
 def create_user_editor2():
     user_data = {
         "email": "editorreview2@example.com",
         "password": "password123",
-        "name": "Editor2",
-        "cif" :"g77777777",
+        "name": "Editor1",
+        "cif" :"g22226666",
         "is_editor": True
     }
     response = client.post("/api/v1/users/", json=user_data)
     return response
+
 
 @pytest.fixture
 def create_account_editor2(create_user_editor2):
@@ -137,9 +150,11 @@ def create_account_editor2(create_user_editor2):
 
     response = client.post("/api/v1/accounts/", json=account_data)
 
-    created_account_data_review["account_editor2"] = response.json()
+    created_account_data_review["account_editor"] = response.json()
 
     return response
+
+
 @pytest.fixture
 def authenticate_editor2():
     email = "editorreview2@example.com"
@@ -147,6 +162,7 @@ def authenticate_editor2():
 
     response = client.post("/api/v1/login/access-token/", data={"username":email, "password":password})
     return response.json()['access_token']
+
 
 @pytest.fixture
 def create_book1(authenticate_editor):
@@ -174,6 +190,7 @@ def create_book1(authenticate_editor):
 
     return response
 
+
 @pytest.fixture
 def create_book2(authenticate_editor):
     account = client.get("/api/v1/users/by_email/editorreview1@example.com")
@@ -199,6 +216,7 @@ def create_book2(authenticate_editor):
     created_account_data_review["book2"] = response.json()
 
     return response
+
 
 @pytest.fixture
 def create_book3(authenticate_editor):
@@ -226,6 +244,7 @@ def create_book3(authenticate_editor):
 
     return response
 
+
 @pytest.fixture
 def create_book4(authenticate_editor2):
     account = client.get("/api/v1/users/by_email/editorreview2@example.com")
@@ -252,6 +271,7 @@ def create_book4(authenticate_editor2):
 
     return response
 
+
 @pytest.fixture
 def create_book5(authenticate_editor2):
     account = client.get("/api/v1/users/by_email/editorreview2@example.com")
@@ -277,6 +297,7 @@ def create_book5(authenticate_editor2):
     created_account_data_review["book5"] = response.json()
 
     return response
+
 
 @pytest.fixture
 def create_book6(authenticate_editor2):
@@ -328,6 +349,7 @@ def test_create_review_point_book(create_account, create_account2, create_accoun
     assert review_data['point_book'] == results["point_book"]
     assert len(results["list_comments"]) == 0
 
+
 def test_create_review_point_book_duplicate(authenticate):
     """
     Comprobamos el error de una review duplicada
@@ -347,6 +369,7 @@ def test_create_review_point_book_duplicate(authenticate):
     assert response.status_code == 400
     results = response.json()
     assert results['detail'] == "Review already exists."
+
 
 def test_create_review_point_book_being_editor(authenticate_editor):
     """
@@ -369,6 +392,7 @@ def test_create_review_point_book_being_editor(authenticate_editor):
 
     assert results['detail'] == "The user cannot be an editorial user."
 
+
 def test_update_review_point_book_not_found(authenticate):
     """
     Comprobamos el error de una review no encontrada
@@ -389,6 +413,7 @@ def test_update_review_point_book_not_found(authenticate):
     results = response.json()
 
     assert results['detail'] == "Review not found."
+
 
 def test_update_review_point_book(authenticate):
     """
@@ -412,6 +437,7 @@ def test_update_review_point_book(authenticate):
     assert review_data['point_book'] == results["point_book"]
     assert len(results["list_comments"]) == 0
 
+
 def test_create_review_pb_put(authenticate2):
     """
     Comprobamos la creacion de un pb con el metodo put
@@ -432,6 +458,7 @@ def test_create_review_pb_put(authenticate2):
 
     assert review_data['point_book'] == results["point_book"]
     assert len(results["list_comments"]) == 0
+
 
 def test_update_review_pb_put(authenticate2):
     """
@@ -454,9 +481,10 @@ def test_update_review_pb_put(authenticate2):
     assert review_data['point_book'] == results["point_book"]
     assert len(results["list_comments"]) == 0
 
+
 def test_create_comment(authenticate2):
     """
-    Comprobamos la creacion de un comment
+    Comprobamos la creacion de un comment con post
     """
     book_id = created_account_data_review["book2"]["id"]
 
@@ -477,6 +505,7 @@ def test_create_comment(authenticate2):
     comment_texts = {comment for comment in results["list_comments"]}
     assert review_data["text"] in comment_texts
 
+
 def test_create_comment_duplicate(authenticate2):
     """
     Comprobamos el mensaje de error si ya existe el comment
@@ -496,6 +525,7 @@ def test_create_comment_duplicate(authenticate2):
     results = response.json()
 
     assert results["detail"] == "Review already exists."
+
 
 def test_create_review_pb_put_with_comment(authenticate2):
     """
@@ -520,6 +550,7 @@ def test_create_review_pb_put_with_comment(authenticate2):
     comment_texts = {comment for comment in results["list_comments"]}
     assert "creo un comment" in comment_texts
 
+
 def test_update_review_pb_put_with_comment(authenticate2):
     """
     Comprobamos que se actualiza correctamente el pb pese ya haber un pb y un comment
@@ -528,7 +559,7 @@ def test_update_review_pb_put_with_comment(authenticate2):
     book_id = created_account_data_review["book2"]["id"]
 
     review_data = {
-        "point_book": 4
+        "point_book": 3
     }
 
     headers = {
@@ -545,4 +576,283 @@ def test_update_review_pb_put_with_comment(authenticate2):
     assert "creo un comment" in comment_texts
 
 
+def test_add_comment_to_book_not_found(authenticate):
+    """
+    Comprobamos el error de una review no encontrada al crear un comment
+    """
+
+    book_id = created_account_data_review["book5"]["id"]
+
+    review_data = {
+        "text": "prueba_not_found"
+    }
+
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.post(f"/api/v1/reviews/add_comment/{book_id}", json=review_data, headers=headers)
+    assert response.status_code == 400
+    results = response.json()
+
+    assert results['detail'] == "Review not found."
+
+def test_add_comment_to_book(authenticate):
+    """
+    Comprobamos la creacion de un comment a una review ya existente
+    """
+    book_id = created_account_data_review["book5"]["id"]
+
+    review_data = {
+        "point_book": 4
+    }
+
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.post(f"/api/v1/reviews/point_book/{book_id}", json=review_data, headers=headers)
+
+    review_data = {
+        "text": "prueba_comment"
+    }
+
+    response = client.post(f"/api/v1/reviews/add_comment/{book_id}", json=review_data, headers=headers)
+    assert response.status_code == 200
+    results = response.json()
+    created_account_data_review["review1"] = results
+    assert len(results["list_comments"]) == 1
+    comment_texts = {comment for comment in results["list_comments"]}
+    assert review_data["text"] in comment_texts
+    assert results["point_book"] == 4
+
+def test_update_review_not_found(authenticate):
+    """
+    Comprobamos el mensaje de error de una review no encontrada intentando actualizar un comentario
+    """
+    book_id = created_account_data_review["book4"]["id"]
+    comment_id = uuid4()
+
+    review_data = {
+        "text": "prueba_not_found"
+    }
+
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.patch(f"/api/v1/reviews/up_comment/{book_id}/{comment_id}", json=review_data, headers=headers)
+    assert response.status_code == 400
+    results = response.json()
+    assert results["detail"] == "Review not found."
+
+
+def test_update_comment_not_found(authenticate2):
+    """
+    Comprobamos el mensaje de error para la actualizacion de un comentario no encontrado
+    """
+    book_id = created_account_data_review["book5"]["id"]
+    comment_id = uuid4()
+
+    review_data = {
+        "point_book": 4
+    }
+
+    headers = {
+        "Authorization": f"Bearer {authenticate2}"
+    }
+
+    response = client.post(f"/api/v1/reviews/point_book/{book_id}", json=review_data, headers=headers)
+
+    review_data = {
+        "text": "prueba_not_found"
+    }
+
+    response = client.patch(f"/api/v1/reviews/up_comment/{book_id}/{comment_id}", json=review_data, headers=headers)
+    assert response.status_code == 400
+    results = response.json()
+    assert results["detail"] == "Comment not found."
+
+
+def test_get_comments_by_book(authenticate):
+    """
+    Comprobamos que de todos los comments de un libro
+    """
+    book_id = created_account_data_review["book5"]["id"]
+
+    response = client.get(f"/api/v1/reviews/all_comments_book/{book_id}")
+
+    assert response.status_code == 200
+    results = response.json()
+
+    created_account_data_review["comment1"] = results["data"][0]
+
+    assert results["count"] == 1
+    assert results["data"][0]["text"] == "prueba_comment"
+
+
+def test_update_comment(authenticate):
+    """
+    Comprobamos que se actualiza el comentario con patch
+    """
+
+    book_id = created_account_data_review["book5"]["id"]
+    comment_id = created_account_data_review["comment1"]["id"]
+
+    review_data = {
+        "text": "prueba_actualizacion"
+    }
+
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.patch(f"/api/v1/reviews/up_comment/{book_id}/{comment_id}", json=review_data, headers=headers)
+
+    assert response.status_code == 200
+    results = response.json()
+    assert results["text"] == review_data["text"]
+
+
+def test_create_review_put_comment(authenticate):
+    """
+    Comprobamos que se crea el comentario con el metodo put
+    """
+
+    book_id = created_account_data_review["book6"]["id"]
+
+    review_data = {
+        "text": "prueba_put"
+    }
+
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.put(f"/api/v1/reviews/comment/{book_id}/", json=review_data, headers=headers)
+    assert response.status_code == 200
+    results = response.json()
+    assert len(results["list_comments"]) == 1
+    comment_texts = {comment for comment in results["list_comments"]}
+    assert review_data["text"] in comment_texts
+    assert results["point_book"] == None
+
+def test_delete_comment_not_found(authenticate):
+    """
+    Comprobamos el mensaje de error de borrar un comment no encontrado
+    """
+
+    book_id = created_account_data_review["book3"]["id"]
+    comment_id = uuid4()
+
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.delete(f"/api/v1/reviews/del_comment/{book_id}/{comment_id}", headers=headers)
+    assert response.status_code == 400
+    results = response.json()
+    assert results["detail"] == "Review not found."
+
+def test_delete_comment(authenticate):
+    """
+    Comprobamos la elimiacion de un comment
+    """
+
+    book_id = created_account_data_review["book5"]["id"]
+    comment_id = created_account_data_review["comment1"]["id"]
+
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.delete(f"/api/v1/reviews/del_comment/{book_id}/{comment_id}", headers=headers)
+    assert response.status_code == 200
+    results = response.json()
+    assert results["message"] == "Comment deleted successfully"
+
+def test_delete_review_withouts_comments(authenticate):
+    """
+    Comprobamos la eliminacion de un review si no tiene comments y tampoco pb
+    """
+    book_id = created_account_data_review["book6"]["id"]
+    response = client.get(f"/api/v1/reviews/all_comments_book/{book_id}")
+
+    comment_id = response.json()["data"][0]["id"]
+
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.delete(f"/api/v1/reviews/del_comment/{book_id}/{comment_id}", headers=headers)
+
+    assert response.status_code == 200
+    results = response.json()
+    assert results["message"] == "Review deleted successfully"
+
+def test_delete_pb_not_found(authenticate):
+    """
+    Comprobamos el mensaje de error de borrar un pb no encontrado
+    """
+
+    book_id = created_account_data_review["book3"]["id"]
+
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.delete(f"/api/v1/reviews/point_book/{book_id}/", headers=headers)
+    assert response.status_code == 400
+    results = response.json()
+    assert results["detail"] == "Review not found."
+
+def test_delete_pb(authenticate):
+    """
+    Comprobamos el mensaje de error de borrar un pb no encontrado
+    """
+
+    book_id = created_account_data_review["book5"]["id"]
+
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.delete(f"/api/v1/reviews/point_book/{book_id}/", headers=headers)
+    assert response.status_code == 200
+    results = response.json()
+    assert results["message"] == "Review deleted successfully"
+
+
+def test_get_all_reviews():
+    response = client.get("/api/v1/reviews/")
+    assert response.status_code == 200
+    results = response.json()
+    assert results["count"] == 4
+
+def test_get_all_my_reviews(authenticate):
+    headers = {
+        "Authorization": f"Bearer {authenticate}"
+    }
+
+    response = client.get("/api/v1/reviews/my_books", headers=headers)
+    assert response.status_code == 200
+    results = response.json()
+    assert results["count"] == 1
+
+
+def test_get_all_reviews_by_book():
+    book_id = created_account_data_review["book1"]["id"]
+
+    response = client.get(f"/api/v1/reviews/all_review/{book_id}")
+    assert response.status_code == 200
+    results = response.json()
+    created_account_data_review["review2"] = results["data"][1]
+    assert results["count"] == 2
+
+def test_get_all_comments_by_review():
+    review_id = created_account_data_review["review2"]["id"]
+    response = client.get(f"/api/v1/reviews/all_comments/{review_id}")
+    assert response.status_code == 200
+    results = response.json()
+    assert results["count"] == 0
 
