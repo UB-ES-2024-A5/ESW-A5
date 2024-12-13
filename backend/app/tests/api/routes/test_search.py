@@ -225,7 +225,7 @@ def test_search_books_and_users(create_account, create_book1, create_book2, crea
     assert response.status_code == 200
 
     results = response.json()
-    assert len(results) == 4
+    assert len(results) == 10
 
     book_titles = {result["title"] for result in results if result.get("title")}
     assert "El camino de los reyes" in book_titles
@@ -244,7 +244,7 @@ def test_search_books_and_users2():
     assert response.status_code == 200
 
     results = response.json()
-    assert len(results) == 6
+    assert len(results) == 12
 
     book_titles = {result["title"] for result in results if result.get("title")}
     assert "El camino de los reyes" in book_titles
@@ -279,7 +279,7 @@ def test_search_books_by_title():
     assert response.status_code == 200
 
     results = response.json()
-    assert len(results) == 3
+    assert len(results) == 7
 
     book_titles = {result["title"] for result in results if result.get("title")}
     assert "El principe de la niebla" in book_titles
