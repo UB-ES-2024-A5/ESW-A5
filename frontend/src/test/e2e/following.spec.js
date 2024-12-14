@@ -302,6 +302,44 @@ test.describe('Set up db', () => {
       expect(followingText).toContain('1 followed');
     });
 
+    test('Unfollow a user', async ({page}) => {
+      await page.goto('http://localhost:8080/login');
+      await expect(page).toHaveURL('http://localhost:8080/login'); 
+
+      await page.fill('input[placeholder="Email"]', 'testuser2@example.com');
+      await page.fill('input[placeholder="Password"]', 'testpassword');
+      await page.click('button.login-button');
+
+      await expect(page).toHaveURL(new RegExp('/mainPage_user'));
+    
+      await page.goto(`http://localhost:8080/search_user_profile?userID=${userId2}`);
+      await expect(page).toHaveURL(`http://localhost:8080/search_user_profile?userID=${userId2}`);
+
+      const followButton = await page.locator('button.follow-button');
+      await expect(followButton).toBeVisible();
+      await expect(followButton).toHaveText('Unfollow');
+      await followButton.click();
+      await expect(followButton).toHaveText('Follow');
+
+      await page.goBack();
+    
+
+      const userProfileIcon = page.locator('[data-testid="user-profile-icon"]');
+      await expect(userProfileIcon).toBeVisible();
+
+      await userProfileIcon.click();
+
+      await expect(page).toHaveURL(new RegExp('/user_profile'));
+
+      await page.waitForTimeout(100);
+
+      const followersText = await page.locator('.follow-item').nth(0).textContent();
+      expect(followersText).toContain('0 followers');
+
+      const followingText = await page.locator('.follow-item').nth(1).textContent();
+      expect(followingText).toContain('0 followed');
+    });
+
     test('Follow a publisher and see his publications', async ({page}) => {     
 
 
