@@ -178,11 +178,6 @@ async def create_reaction_post(*, session: SessionDep, current_user: CurrentUser
             status_code=404, detail="Post Forum does not exist"
         )
 
-    if db_post.account_id == current_user.id:
-        raise HTTPException(
-            status_code=403, detail="You can't react to your posts"
-        )
-
     statement = select(ForumReaction).where(
         ForumReaction.account_id == current_user.id,
         ForumReaction.forum_id == post_id

@@ -157,11 +157,17 @@ export default {
       }).then(async (result) => {
         if (result.isConfirmed) {
           const {message} = result.value
+          const imgBase64 = this.convertImageToBase64(this.imagePreview)
           const newTopic = {
             text: message,
-            ...(this.imagePreview != null ? {img: this.imagePreview} : {})
+            ...(this.imagePreview != null ? {img: imgBase64} : {})
           }
           await ForumServices.createPost(newTopic)
+          Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Post created successfully!'
+          })
         }
       })
       // Declarar `this.imagePreview` aquí para asegurar que sea accesible
@@ -214,12 +220,18 @@ export default {
       }).then(async (result) => {
         if (result.isConfirmed) {
           const {message} = result.value
+          const imgBase64 = this.convertImageToBase64(this.imagePreview)
           const newTopic = {
             text: message,
-            ...(this.imagePreview != null ? {img: this.imagePreview} : {})
+            ...(this.imagePreview != null ? {img: imgBase64} : {})
           }
           await ForumServices.createResponse(this.current_topic.id, newTopic)
           this.current_topic.num_responses += 1
+          Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Respond created successfully!'
+          })
         }
       })
       // Declarar `this.imagePreview` aquí para asegurar que sea accesible
@@ -378,6 +390,14 @@ export default {
         }
       }
       return null
+    },
+    convertImageToBase64 (image) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onloadend = () => resolve(reader.result)
+        reader.onerror = reject
+        reader.readAsDataURL(image)
+      })
     }
   },
   mounted () {
