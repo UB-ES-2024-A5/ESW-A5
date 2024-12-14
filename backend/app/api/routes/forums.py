@@ -178,6 +178,11 @@ async def create_reaction_post(*, session: SessionDep, current_user: CurrentUser
             status_code=404, detail="Post Forum does not exist"
         )
 
+    if db_post.account_id == current_user.id:
+        raise HTTPException(
+            status_code=403, detail="You can't react to your posts"
+        )
+
     statement = select(ForumReaction).where(
         ForumReaction.account_id == current_user.id,
         ForumReaction.forum_id == post_id
@@ -232,10 +237,6 @@ def delete_reaction(*, session: SessionDep, current_user: CurrentUser, post_id: 
     if not db_post:
         raise HTTPException(
             status_code=404, detail="Post Forum does not exist"
-        )
-    if not db_post.account_id == current_user.id:
-        raise HTTPException(
-            status_code=403, detail="This post does not belong to your account"
         )
 
     statement = select(ForumReaction).where(
@@ -352,3 +353,32 @@ def read_posts_dislike(session: SessionDep, account_id: uuid.UUID, skip: int = 0
     forums_out = session.exec(statement).all()
 
     return ForumsOut(data=forums_out, count=count)
+
+@router.get("/get_reaction_by_post_id/{post_id}", response_model=ForumReactionOut)
+def read_reaction_by_post_id(session: SessionDep, post_id: uuid.UUID, current_user: CurrentUser) -> Any:
+    """
+    Get reaction by post id
+    """
+    statement = select(Forum).where(Forum.id == post_id)
+    post = session.exec(statement).first()
+    if not post:
+        raise HTTPException(
+            status_code=404, detail="Post does not exist"
+        )
+
+    statement = select(Account).where(Account.id == current_user.id)
+    account = session.exec(statement).first()
+    if not account:
+        raise HTTPException(
+            status_code=404, detail="Account does not exist"
+        )
+
+    statement = select(ForumReaction).where(ForumReaction.account_id == account.id, ForumReaction.forum_id == post_id)
+    reaction = session.exec(statement).first()
+
+    if not reaction:
+        raise HTTPException(
+            status_code=404, detail="Reaction does not exist"
+        )
+
+    return reaction
