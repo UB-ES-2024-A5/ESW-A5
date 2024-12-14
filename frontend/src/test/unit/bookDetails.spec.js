@@ -6,6 +6,7 @@ import BookServices from '../../services/BookServices';
 import axios from 'axios';
 import UserServices from '../../services/UserServices';
 import WishlistService from '../../services/WishlistServices';
+import Swal from 'sweetalert2';
 
 function flushPromises() {
     return new Promise(resolve => setImmediate(resolve));
@@ -13,6 +14,7 @@ function flushPromises() {
 
   jest.mock('../../services/UserServices', () => ({
     getActualUser: jest.fn(),
+    getUserById2: jest.fn(),
   }));
   
   jest.mock('../../services/WishlistServices', () => ({
@@ -48,7 +50,9 @@ jest.mock('../../services/BookServices', () => ({
     getAllBooks: jest.fn(),
     getBookById: jest.fn(),
     getBookPublisher: jest.fn(),
-    getReviews: jest.fn().mockResolvedValue({ data: [] })
+    getReviews: jest.fn().mockResolvedValue({ data: [] }),
+    createReviewComments: jest.fn(),
+    createReviewPoints: jest.fn(),
   }));
 
 const localVue = createLocalVue();
@@ -217,4 +221,107 @@ describe('BookDetails', () => {
     expect(WishlistService.deleteBookWishlist).toHaveBeenCalledWith('wishlist-id', 'book-id');
     expect(wrapper.vm.starSelected).toBe(false);
   });
+
+  it('shows an error when trying to comment without rating the book', async () => {
+    
+    const SwalMock = jest.spyOn(Swal, 'fire').mockResolvedValue();
+
+    BookServices.getReviews.mockResolvedValue({
+      data: [],
+    });
+    UserServices.getUserById2.mockResolvedValue({});
+
+    const wrapper = mount(BookDetails, {
+      localVue,
+      router,
+    });
+    await wrapper.vm.fetchComments2('some-id');
+    await wrapper.vm.$nextTick();
+
+    wrapper.setData({ rating: 0, comment: 'This is my comment' });
+  
+    await wrapper.vm.submitReview();
+  
+    expect(SwalMock).toHaveBeenCalledWith({
+      icon: 'warning',
+      title: 'Valoració Incompleta',
+      text: 'No es pot crear la valoració sense indicar el nombre de estrelles.',
+    });
+  });
+  
+  it('successfully rates and comments on a book', async () => {
+
+    const SwalMock = jest.spyOn(Swal, 'fire').mockResolvedValue();
+
+    BookServices.getReviews.mockResolvedValue({
+      data: [],
+    });
+    UserServices.getUserById2.mockResolvedValue({});
+    BookServices.createReviewComments.mockResolvedValue({ message: 'Comentario creado correctamente' });
+    BookServices.createReviewPoints.mockResolvedValue({ message: 'Puntos creados correctamente' });
+
+    
+    const data = {
+      text: 'This is an amazing book!',
+    };
+    const data2 = {
+      point_book: 5,
+    };
+    
+    const wrapper = mount(BookDetails, {
+      localVue,
+      router,
+    });
+  
+    wrapper.setData({
+      rating: 5,
+      comment: 'This is an amazing book!',
+    });
+    wrapper.setData({bookid2 : '1'})
+  
+    BookServices.addReview = jest.fn().mockResolvedValue({
+      data: { success: true },
+    });
+
+    wrapper.setData({valoracioUsuari : false});
+  
+    await wrapper.vm.submitReview();
+
+    expect(BookServices.createReviewComments).toHaveBeenCalledWith(data, wrapper.vm.bookid2);
+    expect(BookServices.createReviewPoints).toHaveBeenCalledWith(data2, wrapper.vm.bookid2);
+  
+    expect(SwalMock).toHaveBeenCalledWith({
+      icon: 'success',
+      title: 'Success!',
+      text: 'Grácies per la teva valoració!'
+    });
+  });
+  
+  it('shows an error when trying to comment on a book that already has a comment by the same user', async () => {
+    const SwalMock = jest.spyOn(Swal, 'fire').mockResolvedValue();
+
+    BookServices.getReviews.mockResolvedValue({
+      data: [],
+    });
+    UserServices.getUserById2.mockResolvedValue({});
+    const wrapper = mount(BookDetails, {
+      localVue,
+      router,
+    });
+  
+    wrapper.setData({
+      rating: 4,
+      comment: 'Another comment',
+      valoracioUsuari: true,
+    });
+  
+    await wrapper.vm.submitReview();
+  
+    expect(SwalMock).toHaveBeenCalledWith({
+      icon: 'warning',
+      title: 'Valoració ja registrada',
+      text: 'Aquest usuari ja te una valoració en aquest llibre.'
+    });;
+  });
+
 });
