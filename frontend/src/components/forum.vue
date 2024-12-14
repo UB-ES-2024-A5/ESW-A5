@@ -10,26 +10,22 @@
       <div>
         <div class="forum-header">
           <h2 class="forum-subtitle">Posts</h2>
-          <button @click="addNewTopic" class="new-topic-button">New Post</button>
+          <button @click="addNewTopic()" class="new-topic-button">New Post</button>
         </div>
 
         <div class="topic-list-container">
           <ul class="topic-list">
-            <li v-for="topic in topics" :key="topic.id" class="topic-item">
-              <h3 class="topic-title">{{ topic.title }}</h3>
-              <p class="topic-message">{{ topic.message }}</p>
-              <p class="topic-info">{{ topic.date }}</p>
-
-              <!-- Like/Dislike Buttons -->
-              <div class="reaction-buttons">
-                <button @click="likePost(topic)" class="reaction-button thumbs-up">
-                  👍 {{ topic.likes }}
-                </button>
-                <button @click="dislikePost(topic)" class="reaction-button thumbs-down">
-                  👎 {{ topic.dislikes }}
-                </button>
-              </div>
-            </li>
+            <topic-item
+              v-for="(topic, index) in topics"
+              :key="index"
+              :topic="topic"
+              :class="{ 'is-active': topics_selected.includes(topic.id) }"
+              @respond="respondToPost"
+              @like="likePost"
+              @dislike="dislikePost"
+              @view-profile="viewProfilePost"
+              @view-responses="viewResponsesPost"
+            />
           </ul>
         </div>
       </div>
@@ -39,26 +35,90 @@
 
 <script>
 import Swal from 'sweetalert2'
-import userServices from '../services/UserServices.js'
+import TopicItem from '../components/postForumItem.vue'
+import ForumServices from '../services/ForumServices.js'
+import UserServices from '../services/UserServices.js'
+import AccountServices from '../services/AccountServices.js'
 
 export default {
+  components: {
+    TopicItem
+  },
   data () {
     return {
-      topics: [
-        { id: 1, title: 'Welcome to Vue Forum', message: 'This is the welcome post where we can discuss the basics of the forum.', date: new Date().toLocaleDateString('es-ES'), likes: 0, dislikes: 0 },
-        { id: 1, title: 'Welcome to Vue Forum', message: 'This is the welcome post where we can discuss the basics of the forum.', date: new Date().toLocaleDateString('es-ES'), likes: 0, dislikes: 0 },
-        { id: 1, title: 'Welcome to Vue Forum', message: 'This is the welcome post where we can discuss the basics of the forum.', date: new Date().toLocaleDateString('es-ES'), likes: 0, dislikes: 0 }
-      ]
+      topics: [],
+      current_topic: null,
+      current_user: null,
+      topics_selected: []
     }
   },
   methods: {
+    handleImageUpload (event) {
+      const file = event.target.files[0]
+      if (file && file.type === 'image/jpeg') {
+        this.image = file
+        this.imagePreview = URL.createObjectURL(file) // Crear vista previa
+        this.imageError = null // Limpiar errores
+      } else {
+        this.image = null
+        this.imagePreview = null
+        this.imageError = 'Por favor, selecciona una imagen en formato JPEG.'
+      }
+    },
+    async getMyReaction (postId) {
+      try {
+        const myReact = await ForumServices.getReactionByPostId(postId)
+        return myReact ? myReact.type : null // Devolver el tipo de reacción o null
+      } catch (e) {
+        console.error('Error al buscar:', e)
+        return null
+      }
+    },
+    async getPostMyFollowing () {
+      try {
+        const posts = await ForumServices.getAllPostsFromFollowings()
+        console.log('Resultados:', posts.data)
+        // Mapear y agregar atributos adicionales
+        this.topics = await Promise.all(
+          posts.data.map(async (post) => {
+            // Obtener datos del usuario y la cuenta
+            // eslint-disable-next-line camelcase
+            const resultMyReaction = await this.getMyReaction(post.id)
+            const account = await AccountServices.getAccountById(post.account_id) // `account_id` debe estar en el post
+            const user = await UserServices.getUserById(account.id) // Asumiendo que `account` tiene `user_id`
+            const responses = await ForumServices.getResponsesForPost(post.id)
+            // Agregar nuevos atributos al post
+            return {
+              // Copiar los atributos originales del post
+              id: post.id,
+              text: post.text,
+              image: post.img,
+              likes: post.likes,
+              dislikes: post.dislikes,
+              date: post.date,
+              responses: [],
+              num_responses: responses.count,
+              profileImg: account.photo || 'default_account_icon.png', // Imagen de perfil
+              name: user.name || 'Unknown User', // Nombre de usuario
+              isEditor: user.is_editor || false, // Si el usuario es editor
+              account_id: post.account_id,
+              my_reaction: resultMyReaction,
+              isActive: false
+            }
+          })
+        )
+        this.topics.sort((a, b) => new Date(b.date) - new Date(a.date))
+      } catch (error) {
+        console.error('Error al buscar:', error)
+      }
+    },
     async goBack () {
       try {
-        const userInfo = await userServices.getActualUser()
+        const userInfo = await UserServices.getActualUser()
         if (userInfo.is_editor) {
-          this.$router.push({ path: '/mainPage_publisher' })
+          this.$router.push({path: '/mainPage_publisher'})
         } else {
-          this.$router.push({ path: '/mainPage_user' })
+          this.$router.push({path: '/mainPage_user'})
         }
       } catch (error) {
         console.error('Error redirecting:', error)
@@ -73,40 +133,263 @@ export default {
       Swal.fire({
         title: 'Add New Post',
         html: `
-          <input id="title" class="swal2-input" placeholder="Post Title">
-          <textarea id="message" class="swal2-textarea" placeholder="Enter your message"></textarea>
+          <textarea id="message" class="swal2-textarea" placeholder="Enter your message" style="width: 80%; height: 150px;"></textarea>
+          <div class="input-group">
+            <input
+              type="file"
+              accept="image/jpeg"
+              id="image-upload"
+              style="margin-bottom: 10px" "margin-top: 10px" "text-align: center"
+            />
+            <div id="image-preview-container" class="image-preview"></div>
+            <span id="image-error-message" class="error-message"></span>
+          </div>
         `,
         showCancelButton: true,
         preConfirm: () => {
-          const title = document.getElementById('title').value
           const message = document.getElementById('message').value
-          if (!title || !message) {
-            Swal.showValidationMessage('Please enter both a title and a message')
+          if (!message) {
+            Swal.showValidationMessage('Please enter a message')
           } else {
-            return { title, message }
+            return {message}
           }
         }
-      }).then((result) => {
+      }).then(async (result) => {
         if (result.isConfirmed) {
-          const { title, message } = result.value
+          const {message} = result.value
           const newTopic = {
-            id: this.topics.length + 1,
-            title,
-            message,
-            date: new Date().toLocaleDateString('es-ES')
+            text: message,
+            ...(this.imagePreview != null ? {img: this.imagePreview} : {})
           }
-          this.topics.push(newTopic)
+          await ForumServices.createPost(newTopic)
         }
       })
+      // Declarar `this.imagePreview` aquí para asegurar que sea accesible
+      this.imagePreview = null // Initializer como null
+      // Vincular el evento de cambio de imagen
+      const imageInput = document.getElementById('image-upload')
+      imageInput.addEventListener('change', (event) => {
+        const file = event.target.files[0]
+        const previewContainer = document.getElementById('image-preview-container')
+        const errorMessageContainer = document.getElementById('image-error-message')
+        if (file && file.type === 'image/jpeg') {
+          this.imagePreview = URL.createObjectURL(file) // Assign la URL de la imagen a `this.imagePreview`
+          // Actualizar el DOM con la vista previa de la imagen
+          previewContainer.innerHTML = `<img src="${this.imagePreview}" alt="Image Preview" style="max-width: 80%; height: auto;" />`
+          // Limpiar mensajes de error
+          errorMessageContainer.textContent = ''
+        } else {
+          // Mostrar mensaje de error si el archivo no es válido
+          previewContainer.innerHTML = ''
+          errorMessageContainer.textContent = 'Por favor, selecciona una imagen en formato JPEG.'
+        }
+      })
+    },
+    respondToPost (topic) {
+      this.current_topic = topic
+      Swal.fire({
+        title: 'Respond New Post',
+        html: `
+          <textarea id="message" class="swal2-textarea" placeholder="Enter your message" style="width: 80%; height: 150px;"></textarea>
+          <div class="input-group">
+            <input
+              type="file"
+              accept="image/jpeg"
+              id="image-upload"
+              style="margin-bottom: 10px" "margin-top: 10px" "text-align: center"
+            />
+            <div id="image-preview-container" class="image-preview"></div>
+            <span id="image-error-message" class="error-message"></span>
+          </div>
+        `,
+        showCancelButton: true,
+        preConfirm: () => {
+          const message = document.getElementById('message').value
+          if (!message) {
+            Swal.showValidationMessage('Please enter a message')
+          } else {
+            return {message}
+          }
+        }
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const {message} = result.value
+          const newTopic = {
+            text: message,
+            ...(this.imagePreview != null ? {img: this.imagePreview} : {})
+          }
+          await ForumServices.createResponse(this.current_topic.id, newTopic)
+          this.current_topic.num_responses += 1
+        }
+      })
+      // Declarar `this.imagePreview` aquí para asegurar que sea accesible
+      this.imagePreview = null // Initializer como null
+      // Vincular el evento de cambio de imagen
+      const imageInput = document.getElementById('image-upload')
+      imageInput.addEventListener('change', (event) => {
+        const file = event.target.files[0]
+        const previewContainer = document.getElementById('image-preview-container')
+        const errorMessageContainer = document.getElementById('image-error-message')
+        if (file && file.type === 'image/jpeg') {
+          this.imagePreview = URL.createObjectURL(file) // Assign la URL de la imagen a `this.imagePreview`
+          // Actualizar el DOM con la vista previa de la imagen
+          previewContainer.innerHTML = `<img src="${this.imagePreview}" alt="Image Preview" style="max-width: 80%; height: auto;" />`
+          // Limpiar mensajes de error
+          errorMessageContainer.textContent = ''
+        } else {
+          // Mostrar mensaje de error si el archivo no es válido
+          previewContainer.innerHTML = ''
+          errorMessageContainer.textContent = 'Por favor, selecciona una imagen en formato JPEG.'
+        }
+      })
+    },
+    checkIfActive (topic) {
+      if (topic.isActive === false) {
+        topic.isActive = true
+      } else if (topic.isActive === true) {
+        topic.isActive = false
+      }
+    },
+    async viewProfilePost (topic) {
+      try {
+        // Verificar que el topic y el id existan
+        if (!topic || !topic.account_id) {
+          console.error('El topic o account_id es inválido')
+          return 0
+        }
+        if (topic.is_editor) {
+          if (topic.account_id !== this.current_user.id) {
+            await this.$router.push({path: '/search_publisher_profile', query: {userID: topic.account_id}}) // Redirigir al perfil de user
+          } else {
+            await this.$router.push({path: '/publisher_profile'}) // Redirigir al perfil del current_user
+          }
+        } else {
+          if (topic.account_id !== this.current_user.id) {
+            await this.$router.push({path: '/search_user_profile', query: {userID: topic.account_id}}) // Redirigir al perfil de user
+          } else {
+            await this.$router.push({path: '/user_profile'}) // Redirigir al perfil del current_user
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching responses:', error)
+      }
+    },
+    async viewResponsesPost (topic) {
+      try {
+        if (topic.responses.length === 0) {
+          const responses = await ForumServices.getResponsesForPost(topic.id)
+          topic.responses = await Promise.all(
+            responses.data.map(async (response) => {
+              // Obtener datos del usuario y la cuenta
+              // eslint-disable-next-line camelcase
+              const resultMyReaction = await this.getMyReaction(response.id)
+              const account = await AccountServices.getAccountById(response.account_id) // `account_id` debe estar en el post
+              const user = await UserServices.getUserById(account.id) // Asumiendo que `account` tiene `user_id`
+              const reResponses = await ForumServices.getResponsesForPost(response.id)
+              // Agregar nuevos atributos al post
+              return {
+                // Copiar los atributos originales del post
+                id: response.id,
+                text: response.text,
+                image: response.img,
+                likes: response.likes,
+                dislikes: response.dislikes,
+                date: response.date,
+                responses: [],
+                num_responses: reResponses.count,
+                profileImg: account.photo || 'default_account_icon.png', // Imagen de perfil
+                name: user.name || 'Unknown User', // Nombre de usuario
+                isEditor: user.is_editor || false, // Si el usuario es editor
+                account_id: response.account_id,
+                my_reaction: resultMyReaction,
+                isActive: false
+              }
+            })
+          )
+          topic.responses.sort((a, b) => new Date(b.date) - new Date(a.date))
+          this.topics_selected.push(topic.id)
+        } else {
+          topic.responses = []
+          this.topics_selected = this.topics_selected.filter(id => id !== topic.id)
+        }
+        this.checkIfActive(topic)
+      } catch (error) {
+        console.error('Error fetching responses:', error)
+      }
+    },
+    async getdata () {
+      await this.getPostMyFollowing()
+      this.current_user = await UserServices.getActualUser()
+    },
+    async toggleReaction (topic, type) {
+      try {
+        let newReaction
+        if (type === true) {
+          newReaction = { type: true } // Like
+        } else if (type === false) {
+          newReaction = { type: false } // Dislike
+        }
+        if (topic.my_reaction === type) {
+          // Eliminar la reacción si ya está activa
+          await ForumServices.deleteReaction(topic.id)
+          topic.my_reaction = null
+          if (type === true) {
+            topic.likes -= 1
+          } else {
+            topic.dislikes -= 1
+          }
+        } else if (topic.my_reaction === null) {
+          // Crear nueva reacción (like o dislike)
+          await ForumServices.createReaction(topic.id, newReaction)
+          topic.my_reaction = type
+          if (type === true) {
+            topic.likes += 1
+          } else {
+            topic.dislikes += 1
+          }
+        } else {
+          // Actualizar la reacción si estaba en el estado contrario
+          await ForumServices.updateReaction(topic.id, newReaction)
+          topic.my_reaction = type
+          if (type === true) {
+            topic.likes += 1
+            topic.dislikes -= 1
+          } else {
+            topic.likes -= 1
+            topic.dislikes += 1
+          }
+        }
+      } catch (error) {
+        console.error('Error al manejar la reacción:', error)
+      }
+    },
+    async likePost (topic) {
+      await this.toggleReaction(topic, true)
+    },
+    async dislikePost (topic) {
+      await this.toggleReaction(topic, false)
+    },
+    findTopicById (id, topics = this.topics) {
+      for (const topic of topics) {
+        if (topic.id === id) return topic
+        if (topic.responses && topic.responses.length) {
+          const found = this.findTopicById(id, topic.responses)
+          if (found) return found
+        }
+      }
+      return null
     }
+  },
+  mounted () {
+    this.getdata()
   }
-
 }
 </script>
 
 <style scoped>
 .forum-background {
   background: url('../assets/fondo_forum.png') no-repeat center fixed;
+  background-size: cover; /* La imagen cubre toda el área */
   width: 100%;
   height: 100%;
   min-height: 100vh;
@@ -119,8 +402,8 @@ export default {
 .forum-container {
   max-width: 1500px;
   width: 80%;
-  height: 60vh; /* Keeps the container height fixed */
-  padding: 4rem;
+  height: 83vh; /* Keeps the container height fixed */
+  padding: 2.5rem;
   background-color: rgba(255, 255, 255, 0.9);
   border-radius: 10px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
@@ -128,14 +411,15 @@ export default {
   display: flex;
   flex-direction: column;
   overflow: hidden; /* Prevent content from overflowing */
+  margin-top: 50px;
 }
 
 .topic-list-container {
   flex-grow: 1;
-  max-height: 400px; /* Set a fixed height for the container */
-  overflow-y: scroll; /* Enable vertical scrolling */
-  padding-right: 0.5rem; /* Prevent scrollbar overlap with content */
-  margin-top: 1rem; /* Add some spacing above */
+  max-height: 65vh; /* Ajusta la altura máxima en función del tamaño de la pantalla */
+  overflow-y: scroll; /* Habilita el desplazamiento vertical si el contenido excede la altura */
+  padding-right: 0.5rem; /* Evita que el scrollbar se solape con el contenido */
+  margin-top: 0.5rem; /* Añade un margen superior para separar de otros elementos */
 }
 
 /* Optional: Customize scrollbar for modern browsers */
@@ -179,7 +463,7 @@ export default {
 .forum-title {
   font-size: 2rem;
   font-weight: bold;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   text-align: center;
   color: #333;
 }
@@ -188,7 +472,6 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
 }
 
 .forum-subtitle {
@@ -214,79 +497,10 @@ export default {
   background-color: #1d4ed8;
 }
 
-.topic-list-container {
-  flex-grow: 1;
-  overflow-y: auto;
-}
-
 .topic-list {
   list-style: none;
-  padding: 0;
+  padding: 10px;
   margin: 0;
 }
 
-.topic-item {
-  background-color: white;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s ease;
-  cursor: pointer;
-  margin-bottom: 1rem;
-  position: relative; /* Add this to position child elements absolutely */
-}
-
-.topic-item:hover {
-  background-color: #f3f4f6;
-}
-
-.topic-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin: 0 0 0.5rem;
-  color: #222;
-  text-align: left;
-}
-
-/* Position the date at the bottom-left of the post */
-.topic-info {
-  font-size: 0.9rem;
-  color: #777;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  margin: 10px; /* Add some margin for spacing */
-}
-
-/* Add styling for the reaction buttons */
-.reaction-buttons {
-  display: flex;
-  justify-content: flex-end;
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  margin: 10px; /* Add some margin for spacing */
-}
-
-.reaction-button {
-  padding: 0.5rem;
-  font-size: 1rem;
-  background-color: transparent;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.reaction-button:hover {
-  background-color: #f0f0f0;
-}
-
-.thumbs-up {
-  color: green;
-}
-
-.thumbs-down {
-  color: red;
-}
 </style>
