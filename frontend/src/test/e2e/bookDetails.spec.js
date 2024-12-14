@@ -238,6 +238,92 @@ test.describe('E2E Book Page', () => {
 
     });
 
+    test('Should post a comment succesfully', async ({ page }) => {
+      await page.goto('http://localhost:8080/login');
+  
+      await page.fill('input[placeholder="Email"]', 'testuser2@example.com');
+      await page.fill('input[placeholder="Password"]', 'testpassword');
+      await page.click('button.login-button');
+  
+      await expect(page).toHaveURL('http://localhost:8080/mainPage_user');
+  
+      const firstImage = await page.locator('.carousel-image').first();
+  
+      const src = await firstImage.getAttribute('src');
+  
+      expect(src).toBe('path/to/book/image.jpg');
+  
+      await firstImage.click();
+  
+      await expect(page).toHaveURL(`http://localhost:8080/book?bookId=${bookId}`);
+
+      const commentBox = await page.locator('.comment-box');
+      await commentBox.fill('Este es un comentario de prueba.');
+
+      const starRating = await page.locator('.star-rating .star');
+      await starRating.first().click();
+
+      const submitButton = await page.locator('.submit-button');
+      await submitButton.click();
+
+      const swalTitle = await page.locator('.swal2-title');
+      await expect(swalTitle).toHaveText('Success!');   
+      });
+
+      test('Should has the correct mean valoration', async ({ page }) => {
+        await page.goto('http://localhost:8080/login');
+    
+        await page.fill('input[placeholder="Email"]', 'testuser2@example.com');
+        await page.fill('input[placeholder="Password"]', 'testpassword');
+        await page.click('button.login-button');
+    
+        await expect(page).toHaveURL('http://localhost:8080/mainPage_user');
+    
+        const firstImage = await page.locator('.carousel-image').first();
+    
+        const src = await firstImage.getAttribute('src');
+    
+        expect(src).toBe('path/to/book/image.jpg');
+    
+        await firstImage.click();
+    
+        await expect(page).toHaveURL(`http://localhost:8080/book?bookId=${bookId}`);
+
+        const ratingAverage = await page.locator('.rating-average');
+        await expect(ratingAverage).toHaveText('(1.0)')
+        });
+
+      test('Should see the pòsted comments', async ({ page }) => {
+        await page.goto('http://localhost:8080/login');
+    
+        await page.fill('input[placeholder="Email"]', 'testuser2@example.com');
+        await page.fill('input[placeholder="Password"]', 'testpassword');
+        await page.click('button.login-button');
+    
+        await expect(page).toHaveURL('http://localhost:8080/mainPage_user');
+    
+        const firstImage = await page.locator('.carousel-image').first();
+    
+        const src = await firstImage.getAttribute('src');
+    
+        expect(src).toBe('path/to/book/image.jpg');
+    
+        await firstImage.click();
+    
+        await expect(page).toHaveURL(`http://localhost:8080/book?bookId=${bookId}`);
+
+        const commentAuthor = await page.locator('.comment-header .comment-author');
+        await expect(commentAuthor).toHaveText('John Doe');
+
+        const commentText = await page.locator('.comment-content p');
+        await expect(commentText).toHaveText('Este es un comentario de prueba.');
+
+        const activeStars = await page.locator('.comment-rating .star.active');
+        await expect(activeStars).toHaveCount(1);
+
+
+
+        });
 
 
 });
