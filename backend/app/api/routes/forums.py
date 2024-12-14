@@ -147,12 +147,12 @@ def delete_post(session: SessionDep, current_user: CurrentUser, post_id: uuid.UU
     """
     Delete a post in the forum along with all its responses and reactions.
     """
+
     statement = select(Forum).where(Forum.id == post_id)
-    post = session.exec(statement).first()
-    if not post:
-        raise HTTPException(
-            status_code=404, detail="Post does not exist"
-        )
+    db_post = session.exec(statement).first()
+
+    if not db_post:
+        raise HTTPException(status_code=404, detail="Post forum not found")
 
     elif not (current_user.account.id == db_post.account.id):
         raise HTTPException(
