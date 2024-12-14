@@ -147,12 +147,6 @@ def delete_post(session: SessionDep, current_user: CurrentUser, post_id: uuid.UU
     """
     Delete a post in the forum along with all its responses and reactions.
     """
-    statement = select(Forum).where(Forum.id == post_id)
-    post = session.exec(statement).first()
-    if not post:
-        raise HTTPException(
-            status_code=404, detail="Post does not exist"
-        )
 
     statement = select(Forum).where(Forum.id == post_id)
     db_post = session.exec(statement).first()
@@ -206,13 +200,6 @@ def update_reaction(*, session: SessionDep, current_user: CurrentUser, new_react
     Update reaction post forum.
     """
     statement = select(Forum).where(Forum.id == post_id)
-    post = session.exec(statement).first()
-    if not post:
-        raise HTTPException(
-            status_code=404, detail="Post does not exist"
-        )
-
-    statement = select(Forum).where(Forum.id == post_id)
     db_post = session.exec(statement).first()
     if not db_post:
         raise HTTPException(
@@ -240,13 +227,6 @@ def delete_reaction(*, session: SessionDep, current_user: CurrentUser, post_id: 
     """
     Delete reaction post forum.
     """
-    statement = select(Forum).where(Forum.id == post_id)
-    post = session.exec(statement).first()
-    if not post:
-        raise HTTPException(
-            status_code=404, detail="Post does not exist"
-        )
-
     statement = select(Forum).where(Forum.id == post_id)
     db_post = session.exec(statement).first()
     if not db_post:
