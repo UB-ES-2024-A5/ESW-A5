@@ -71,6 +71,14 @@
         <span>Wishlist</span>
       </button>
 
+      <button @click="showForum" class="forum-btn">
+        <!-- Ícono de mensaje cuadrado -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
+          <path d="M3 3h18c1.1 0 1.99.89 1.99 1.99v14.02c0 1.1-.89 2-1.99 2H3c-1.1 0-1.99-.89-1.99-1.99V4.99C1.01 3.89 1.89 3 3 3zm0 2v14h18V5H3zm5 3h8v2H8V8z"/>
+        </svg>
+        <span>Forum</span>
+      </button>
+
       <!-- Wishlist Popup -->
       <div v-if="wishlistVisible" class="wishlist-popup">
         <div class="wishlist-content">
@@ -87,6 +95,40 @@
         </div>
       </div>
 
+      <!-- Forum Popup -->
+      <div v-if="forumVisible" class="forum-popup">
+        <div class="forum-content">
+          <div class="forum-header">
+            <h2>{{ user.name }}  forum posts</h2>
+            <select v-model="forumFilter" @change="filterPosts">
+              <option value="participated">Participated</option>
+              <option value="liked">Liked</option>
+              <option value="disliked">Disliked</option>
+            </select>
+          </div>
+          <!-- Contenedor de tarjetas -->
+          <div class="forum-list">
+            <div v-for="post in filteredPosts" :key="post.id" class="forum-card">
+              <!-- Condicional para mostrar imagen o placeholder -->
+              <!-- Verificación para mostrar imagen o placeholder -->
+              <img :src="post.img || placeholderImage"
+                   alt="Post Image"
+                   class="post-image">
+              <div class="post-details">
+                <p class="post-text">{{ post.text }}</p>
+                <div class="post-meta">
+                  <span class="post-date">{{ new Date(post.date).toLocaleString() }}</span>
+                  <div class="post-reactions">
+                    <span>{{ post.likes }} 👍</span>
+                    <span>{{ post.dislikes }} 👎</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button @click="closeForum" class="close-button">Close</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -95,12 +137,14 @@
 import userServices from '../services/UserServices.js'
 import accountServices from '../services/AccountServices.js'
 import wishlistServices from '../services/WishlistServices.js'
+import forumServices from '../services/ForumServices'
 export default {
   data () {
     return {
       profileIcon: require('@/assets/account_icon.png'),
       backgroundImage: require('@/assets/fondo_profile.png'),
       userProfileImage: require('@/assets/placeholder_image.png'), // Default placeholder image
+      placeholderImage: require('@/assets/placeholder_image.png'),
       user: {
         name: '',
         surname: '',
@@ -116,7 +160,11 @@ export default {
       },
       wishlistVisible: false,
       isFollowing: false, // Estado de seguimiento
-      isLoggedIn: false // Estado de inicio de sesión
+      isLoggedIn: false, // Estado de inicio de sesión
+      forumVisible: false,
+      forumFilter: 'participated',
+      posts: [],
+      filteredPosts: []
     }
   },
   methods: {
@@ -193,6 +241,46 @@ export default {
     isUserLoggedIn () {
       // Verifica si hay un token presente
       return !!localStorage.getItem('token')
+    },
+    showForum () {
+      this.fetchForumPosts()
+      this.forumVisible = true
+    },
+    closeForum () {
+      this.forumVisible = false
+    },
+    async fetchForumPosts () {
+      try {
+        const { data } = {}
+        this.posts = data
+        this.filterPosts()
+      } catch (error) {
+        console.error('Error fetching forum posts:', error)
+      }
+    },
+    async filterPosts () {
+      const userID = this.$route.query.userID // Obtén el userID desde la query string
+      try {
+        let data
+        if (this.forumFilter === 'participated') {
+          // Obtener posts participated
+          const response = await forumServices.getAllPostsByAccountId(userID)
+          data = response.data
+        } else if (this.forumFilter === 'liked') {
+          // Obtener posts liked
+          const response = await forumServices.getLikedPostsByAccount(userID)
+          data = response.data
+        } else if (this.forumFilter === 'disliked') {
+          // Obtener posts disliked
+          const response = await forumServices.getDislikedPostsByAccount(userID)
+          data = response.data
+        } else {
+          data = []
+        }
+        this.filteredPosts = data
+      } catch (error) {
+        console.error(`Error fetching ${this.forumFilter} posts:`, error)
+      }
     }
   },
   mounted () {
@@ -465,5 +553,190 @@ input[type="file"] {
 .follow-button:hover {
   background-color: #007bff;
   color: white;
+}
+
+/* Contenedor principal del foro */
+.forum-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.forum-content {
+  background: white;
+  width: 90%;
+  max-width: 800px;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  max-height: 80%;
+}
+
+/* Encabezado del foro */
+.forum-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.forum-header h2 {
+  font-size: 1.5em;
+  color: #333;
+}
+
+.forum-header select {
+  padding: 8px 12px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+}
+
+/* Contenedor de la lista de posts */
+.forum-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Espaciado entre tarjetas */
+  max-height: 400px; /* Altura máxima para permitir desplazamiento */
+  overflow-y: auto; /* Habilitar scroll vertical si hay muchos posts */
+  padding: 1rem;
+}
+
+/* Estilos para las tarjetas */
+.forum-card {
+  display: flex;
+  align-items: flex-start;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  gap: 1rem; /* Espaciado entre imagen y contenido */
+  position: relative; /* Para facilitar el control del contenido */
+}
+
+/* Imagen del post */
+.post-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* Detalles del post */
+.post-details {
+  flex-grow: 1;
+}
+
+/* Texto del post */
+.post-text {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+  word-wrap: break-word; /* Ajustar palabras largas */
+}
+
+/* Meta información (fecha y reacciones) */
+.post-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.post-meta span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.post-meta span svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Botón para cerrar */
+.close-button {
+  display: block;
+  margin: 20px auto 0;
+  padding: 10px 20px;
+  background: #ff5f5f;
+  color: white;
+  font-size: 1em;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.close-button:hover {
+  background: #e04e4e;
+}
+
+.post-date {
+  font-style: italic;
+  margin-top: 0.5rem;
+  align-self: flex-start; /* Alinea la fecha a la izquierda */
+  color: #777;
+  font-size: 0.75rem;
+}
+
+.post-reactions {
+  display: flex;
+  gap: 1rem; /* Espaciado entre likes y dislikes */
+}
+
+/* Scrollbar estilizado (opcional, solo para navegadores compatibles) */
+.forum-list::-webkit-scrollbar {
+  width: 8px;
+}
+.forum-list::-webkit-scrollbar-thumb {
+  background-color: #bbb;
+  border-radius: 4px;
+}
+.forum-list::-webkit-scrollbar-thumb:hover {
+  background-color: #999;
+}
+
+.forum-btn {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  color: #007bff;
+  border: 1px solid #007bff;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.forum-btn:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+.forum-btn .icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .forum-btn {
+    font-size: 0.9rem;
+  }
 }
 </style>
