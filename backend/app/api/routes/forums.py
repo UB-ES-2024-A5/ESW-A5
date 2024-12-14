@@ -154,12 +154,6 @@ def delete_post(session: SessionDep, current_user: CurrentUser, post_id: uuid.UU
             status_code=404, detail="Post does not exist"
         )
 
-    statement = select(Forum).where(Forum.id == post_id)
-    db_post = session.exec(statement).first()
-
-    if not db_post:
-        raise HTTPException(status_code=404, detail="Post forum not found")
-
     elif not (current_user.account.id == db_post.account.id):
         raise HTTPException(
             status_code=403, detail="This post forum does not belong to your user"
