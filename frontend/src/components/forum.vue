@@ -49,13 +49,18 @@ export default {
       topics: [],
       current_topic: null,
       current_user: null,
-      topics_selected: []
+      topics_selected: [],
+      image: null,
+      imagePreview: null,
+      imageError: null
     }
   },
   methods: {
     handleImageUpload (event) {
       const file = event.target.files[0]
+      console.warn('Estamos dentro del handler')
       if (file && file.type === 'image/jpeg') {
+        console.warn('Estamos dentro del handler')
         this.image = file
         this.imagePreview = URL.createObjectURL(file) // Crear vista previa
         this.imageError = null // Limpiar errores
@@ -138,6 +143,7 @@ export default {
             <input
               type="file"
               accept="image/jpeg"
+              @change="handleImageUpload"
               id="image-upload"
               style="margin-bottom: 10px" "margin-top: 10px" "text-align: center"
             />
@@ -157,7 +163,8 @@ export default {
       }).then(async (result) => {
         if (result.isConfirmed) {
           const {message} = result.value
-          const imgBase64 = this.convertImageToBase64(this.imagePreview)
+          console.warn(this.imagePreview)
+          const imgBase64 = this.image ? await this.convertImageToBase64(this.image) : null
           const newTopic = {
             text: message,
             ...(this.imagePreview != null ? {img: imgBase64} : {})
@@ -180,6 +187,8 @@ export default {
         const errorMessageContainer = document.getElementById('image-error-message')
         if (file && file.type === 'image/jpeg') {
           this.imagePreview = URL.createObjectURL(file) // Assign la URL de la imagen a `this.imagePreview`
+          this.image = file
+          console.warn(this.image)
           // Actualizar el DOM con la vista previa de la imagen
           previewContainer.innerHTML = `<img src="${this.imagePreview}" alt="Image Preview" style="max-width: 80%; height: auto;" />`
           // Limpiar mensajes de error
@@ -220,7 +229,7 @@ export default {
       }).then(async (result) => {
         if (result.isConfirmed) {
           const {message} = result.value
-          const imgBase64 = this.convertImageToBase64(this.imagePreview)
+          const imgBase64 = this.image ? await this.convertImageToBase64(this.image) : null
           const newTopic = {
             text: message,
             ...(this.imagePreview != null ? {img: imgBase64} : {})
@@ -244,6 +253,7 @@ export default {
         const errorMessageContainer = document.getElementById('image-error-message')
         if (file && file.type === 'image/jpeg') {
           this.imagePreview = URL.createObjectURL(file) // Assign la URL de la imagen a `this.imagePreview`
+          this.image = file
           // Actualizar el DOM con la vista previa de la imagen
           previewContainer.innerHTML = `<img src="${this.imagePreview}" alt="Image Preview" style="max-width: 80%; height: auto;" />`
           // Limpiar mensajes de error
@@ -395,7 +405,7 @@ export default {
       return new Promise((resolve, reject) => {
         const reader = new FileReader()
         reader.onloadend = () => resolve(reader.result)
-        reader.onerror = reject
+        reader.onerror = (error) => reject(error)
         reader.readAsDataURL(image)
       })
     }
