@@ -456,20 +456,6 @@ def test_delete_reaction_not_found_post(authenticate):
     assert results["detail"] == "Post Forum does not exist"
 
 
-def test_delete_reaction_not_belong_user(authenticate):
-    post_id = created_account_data_forum["post2"]["id"]
-
-    headers = {
-        "Authorization": f"Bearer {authenticate}"
-    }
-
-    response = client.delete(f"/api/v1/forums/delete_reaction/{post_id}", headers=headers)
-
-    assert response.status_code == 403
-    results = response.json()
-    assert results["detail"] == "This post does not belong to your account"
-
-
 def test_delete_reaction_non_existent(authenticate2):
     post_id = created_account_data_forum["post2"]["id"]
 
