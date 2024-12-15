@@ -97,7 +97,6 @@ export default {
             }
           })
         )
-        this.topics.sort((a, b) => new Date(b.date) - new Date(a.date))
       } catch (error) {
         console.error('Error al buscar:', error)
       }
@@ -136,8 +135,8 @@ export default {
               }
             })
         )
-        myTopics.sort((a, b) => new Date(b.date) - new Date(a.date))
         this.topics = [...this.topics, ...myTopics]
+        this.topics.sort((a, b) => new Date(b.date) - new Date(a.date))
       } catch (error) {
         console.error('Error al buscar:', error)
       }
@@ -199,6 +198,7 @@ export default {
             title: 'Success!',
             text: 'Post created successfully!'
           })
+          this.getdata()
         }
       })
       // Declarar `this.imagePreview` aquí para asegurar que sea accesible

@@ -81,7 +81,7 @@ export default {
     timeAgo (dateString) {
       const postDate = new Date(dateString)
       const now = new Date()
-      const diffInSeconds = Math.floor((now - postDate) / 1000)
+      const diffInSeconds = Math.floor((now - postDate) / 1000) - 3600 // Añade 1h de mas y le restmaos el new Date()
       if (diffInSeconds < 60) {
         return `${diffInSeconds} sec ago`
       } else if (diffInSeconds < 3600) {
