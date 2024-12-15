@@ -299,7 +299,7 @@ export default {
     } catch (error) {
       console.error('Error al cargar algun componente: ', error)
     } finally {
-      await new Promise(resolve => setTimeout(resolve, 250))
+      await new Promise(resolve => setTimeout(resolve, 500))
       this.componentKey += 1
       this.loading = false
       console.log(`Number of comments: ${this.comments.length}`)
