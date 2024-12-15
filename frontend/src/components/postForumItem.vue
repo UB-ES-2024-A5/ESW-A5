@@ -30,16 +30,17 @@
     <!-- Respond Button -->
     <div class="topic-reaction">
       <button @click="$emit('respond', topic)" class="response-button">Respond</button>
-      <p class="num-responses" style="margin-left: 10px"> {{ topic.num_responses + ' respnses'}} </p>
+      <p class="num-responses" style="margin-left: 10px"> {{ topic.num_responses + ' responses'}} </p>
       <!-- Like/Dislike Buttons -->
       <div class="reaction-buttons">
-        <button @click="$emit('like', topic)" class="reaction-button thumbs-up">
+        <button id="likeBtn" @click="$emit('like', topic)" :class="['reaction-button', { 'thumbs-up': topic.my_reaction === true }]">
           👍 {{ formatLikes(topic.likes) }}
         </button>
-        <button @click="$emit('dislike', topic)" class="reaction-button thumbs-down">
+        <button id="dislikeBtn" @click="$emit('dislike', topic)" :class="['reaction-button', { 'thumbs-down': topic.my_reaction === false }]">
           👎 {{ formatLikes(topic.dislikes) }}
         </button>
       </div>
+      <button v-if="topic.account_id === currentUserId" @click="$emit('delete', topic)" class="delete-button">🗑️ Delete</button>
     </div>
     <!-- Responses -->
     <ul v-if="topic.responses && topic.responses.length" class="responses-list">
@@ -47,11 +48,13 @@
         v-for="(response, index) in topic.responses"
         :key="index"
         :topic="response"
+        :currentUserId="currentUserId"
         @respond="$emit('respond', $event)"
         @like="$emit('like', $event)"
         @dislike="$emit('dislike', $event)"
         @view-profile="$emit('view-profile', $event)"
         @view-responses="$emit('view-responses', $event)"
+        @delete="$emit('delete', $event)"
       />
     </ul>
   </li>
@@ -68,13 +71,17 @@ export default {
     isActive: {
       type: Boolean,
       default: false
+    },
+    currentUserId: {
+      type: String,
+      required: true
     }
   },
   methods: {
     timeAgo (dateString) {
       const postDate = new Date(dateString)
       const now = new Date()
-      const diffInSeconds = Math.floor((now - postDate) / 1000)
+      const diffInSeconds = Math.floor((now - postDate) / 1000) - 3600 // Añade 1h de mas y le restmaos el new Date()
       if (diffInSeconds < 60) {
         return `${diffInSeconds} sec ago`
       } else if (diffInSeconds < 3600) {
@@ -114,126 +121,6 @@ export default {
 </script>
 
 <style scoped>
-.forum-background {
-  background: url('../assets/fondo_forum.png') no-repeat center fixed;
-  width: 100%;
-  height: 100%;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem;
-}
-
-.forum-container {
-  max-width: 1500px;
-  width: 80%;
-  height: 83vh; /* Keeps the container height fixed */
-  padding: 2.5rem;
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 10px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden; /* Prevent content from overflowing */
-  margin-top: 50px;
-}
-
-.topic-list-container {
-  flex-grow: 1;
-  max-height: 525px; /* Set a fixed height for the container */
-  overflow-y: scroll; /* Enable vertical scrolling */
-  padding-right: 0.5rem; /* Prevent scrollbar overlap with content */
-  margin-top: 0.5rem; /* Add some spacing above */
-}
-
-/* Optional: Customize scrollbar for modern browsers */
-.topic-list-container::-webkit-scrollbar {
-  width: 8px; /* Adjust scrollbar width */
-}
-
-.topic-list-container::-webkit-scrollbar-track {
-  background: #f1f1f1; /* Scrollbar track color */
-  border-radius: 10px; /* Rounded corners */
-}
-
-.topic-list-container::-webkit-scrollbar-thumb {
-  background: #888; /* Scrollbar color */
-  border-radius: 10px;
-}
-
-.topic-list-container::-webkit-scrollbar-thumb:hover {
-  background: #555; /* Hover color for scrollbar */
-}
-
-.back-button-forum {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  font-weight: bold;
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.back-button-forum:hover {
-  background-color: #1d4ed8;
-}
-
-.forum-title {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-  text-align: center;
-  color: #333;
-}
-
-.forum-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.forum-subtitle {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #555;
-}
-
-.new-topic-button {
-  padding: 0.5rem 1rem;
-  margin-right: 10px;
-  font-size: 0.9rem;
-  font-weight: bold;
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.new-topic-button:hover {
-  background-color: #1d4ed8;
-}
-
-.topic-list-container {
-  flex-grow: 1;
-  overflow-y: auto;
-}
-
-.topic-list {
-  list-style: none;
-  padding: 10px;
-  margin: 0;
-}
-
 .topic-item {
   background-color: white;
   padding: 1rem;
@@ -377,6 +264,8 @@ export default {
 }
 
 .reaction-button {
+  margin-left: 10px;
+  min-width: 80px;
   padding: 0.5rem;
   font-size: 1rem;
   background-color: transparent;
@@ -384,7 +273,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  margin-top: 0px;
+  margin-top: 0;
   gap: 5px;
 }
 
@@ -393,11 +282,19 @@ export default {
 }
 
 .thumbs-up {
-  color: green;
+  background-color: #61b800;
+}
+
+.thumbs-up:hover {
+  background-color: #3a7000;
 }
 
 .thumbs-down {
-  color: red;
+  background-color: #dc3545;
+}
+
+.thumbs-down:hover {
+  background-color: #a61a28;
 }
 
 /* Estilo para las respuestas */
@@ -407,16 +304,22 @@ export default {
   padding-left: 0;
 }
 
-.response-item {
-  margin-bottom: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+.delete-button {
+  margin-top: 10px;
+  margin-right: 10px;
+  width: 100px;
+  height: 40px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
   padding: 10px;
-  transition: background-color 0.3s;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-wrap: wrap;
 }
 
-.response-item:hover {
-  background-color: #f9f9f9; /* Cambia de color al pasar el ratón */
+.delete-button:hover {
+  background-color: #a61a28;
 }
 
 </style>

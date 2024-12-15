@@ -19,12 +19,13 @@
               v-for="(topic, index) in topics"
               :key="index"
               :topic="topic"
-              :class="{ 'is-active': topics_selected.includes(topic.id) }"
+              :currentUserId="current_user.id"
               @respond="respondToPost"
               @like="likePost"
               @dislike="dislikePost"
               @view-profile="viewProfilePost"
               @view-responses="viewResponsesPost"
+              @delete="deleteMyPost"
             />
           </ul>
         </div>
@@ -48,29 +49,19 @@ export default {
     return {
       topics: [],
       current_topic: null,
-      current_user: null,
-      topics_selected: []
+      current_user: {id: '1'},
+      topics_selected: [],
+      image: null,
+      imagePreview: null,
+      imageError: null
     }
   },
   methods: {
-    handleImageUpload (event) {
-      const file = event.target.files[0]
-      if (file && file.type === 'image/jpeg') {
-        this.image = file
-        this.imagePreview = URL.createObjectURL(file) // Crear vista previa
-        this.imageError = null // Limpiar errores
-      } else {
-        this.image = null
-        this.imagePreview = null
-        this.imageError = 'Por favor, selecciona una imagen en formato JPEG.'
-      }
-    },
     async getMyReaction (postId) {
       try {
         const myReact = await ForumServices.getReactionByPostId(postId)
         return myReact ? myReact.type : null // Devolver el tipo de reacción o null
       } catch (e) {
-        console.error('Error al buscar:', e)
         return null
       }
     },
@@ -102,11 +93,49 @@ export default {
               name: user.name || 'Unknown User', // Nombre de usuario
               isEditor: user.is_editor || false, // Si el usuario es editor
               account_id: post.account_id,
-              my_reaction: resultMyReaction,
-              isActive: false
+              my_reaction: resultMyReaction
             }
           })
         )
+      } catch (error) {
+        console.error('Error al buscar:', error)
+      }
+    },
+    async getMyPosts () {
+      try {
+        const posts = await ForumServices.getAllMyPosts()
+        console.log('Resultados:', posts.data)
+        // Mapear y agregar atributos adicionales
+        const myTopics = await Promise.all(
+          posts.data
+            .filter(post => post.parent_forum_id === null) // Excluir el usuario logueado
+            .map(async (post) => {
+              // Obtener datos del usuario y la cuenta
+              // eslint-disable-next-line camelcase
+              const resultMyReaction = await this.getMyReaction(post.id)
+              const account = await AccountServices.getAccountById(post.account_id) // `account_id` debe estar en el post
+              const user = await UserServices.getUserById(account.id) // Asumiendo que `account` tiene `user_id`
+              const responses = await ForumServices.getResponsesForPost(post.id)
+              // Agregar nuevos atributos al post
+              return {
+                // Copiar los atributos originales del post
+                id: post.id,
+                text: post.text,
+                image: post.img,
+                likes: post.likes,
+                dislikes: post.dislikes,
+                date: post.date,
+                responses: [],
+                num_responses: responses.count,
+                profileImg: account.photo || 'default_account_icon.png', // Imagen de perfil
+                name: user.name || 'Unknown User', // Nombre de usuario
+                isEditor: user.is_editor || false, // Si el usuario es editor
+                account_id: post.account_id,
+                my_reaction: resultMyReaction
+              }
+            })
+        )
+        this.topics = [...this.topics, ...myTopics]
         this.topics.sort((a, b) => new Date(b.date) - new Date(a.date))
       } catch (error) {
         console.error('Error al buscar:', error)
@@ -157,11 +186,19 @@ export default {
       }).then(async (result) => {
         if (result.isConfirmed) {
           const {message} = result.value
+          console.warn(this.imagePreview)
+          const imgBase64 = this.image ? await this.convertImageToBase64(this.image) : null
           const newTopic = {
             text: message,
-            ...(this.imagePreview != null ? {img: this.imagePreview} : {})
+            ...(this.imagePreview != null ? {img: imgBase64} : {})
           }
           await ForumServices.createPost(newTopic)
+          Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Post created successfully!'
+          })
+          this.getdata()
         }
       })
       // Declarar `this.imagePreview` aquí para asegurar que sea accesible
@@ -174,6 +211,8 @@ export default {
         const errorMessageContainer = document.getElementById('image-error-message')
         if (file && file.type === 'image/jpeg') {
           this.imagePreview = URL.createObjectURL(file) // Assign la URL de la imagen a `this.imagePreview`
+          this.image = file
+          console.warn(this.image)
           // Actualizar el DOM con la vista previa de la imagen
           previewContainer.innerHTML = `<img src="${this.imagePreview}" alt="Image Preview" style="max-width: 80%; height: auto;" />`
           // Limpiar mensajes de error
@@ -214,12 +253,18 @@ export default {
       }).then(async (result) => {
         if (result.isConfirmed) {
           const {message} = result.value
+          const imgBase64 = this.image ? await this.convertImageToBase64(this.image) : null
           const newTopic = {
             text: message,
-            ...(this.imagePreview != null ? {img: this.imagePreview} : {})
+            ...(this.imagePreview != null ? {img: imgBase64} : {})
           }
           await ForumServices.createResponse(this.current_topic.id, newTopic)
           this.current_topic.num_responses += 1
+          Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Respond created successfully!'
+          })
         }
       })
       // Declarar `this.imagePreview` aquí para asegurar que sea accesible
@@ -232,6 +277,7 @@ export default {
         const errorMessageContainer = document.getElementById('image-error-message')
         if (file && file.type === 'image/jpeg') {
           this.imagePreview = URL.createObjectURL(file) // Assign la URL de la imagen a `this.imagePreview`
+          this.image = file
           // Actualizar el DOM con la vista previa de la imagen
           previewContainer.innerHTML = `<img src="${this.imagePreview}" alt="Image Preview" style="max-width: 80%; height: auto;" />`
           // Limpiar mensajes de error
@@ -317,9 +363,14 @@ export default {
         console.error('Error fetching responses:', error)
       }
     },
+    async deleteMyPost (topic) {
+      await ForumServices.deletePost(topic.id)
+      await this.getdata()
+    },
     async getdata () {
-      await this.getPostMyFollowing()
       this.current_user = await UserServices.getActualUser()
+      await this.getPostMyFollowing()
+      await this.getMyPosts()
     },
     async toggleReaction (topic, type) {
       try {
@@ -369,15 +420,13 @@ export default {
     async dislikePost (topic) {
       await this.toggleReaction(topic, false)
     },
-    findTopicById (id, topics = this.topics) {
-      for (const topic of topics) {
-        if (topic.id === id) return topic
-        if (topic.responses && topic.responses.length) {
-          const found = this.findTopicById(id, topic.responses)
-          if (found) return found
-        }
-      }
-      return null
+    convertImageToBase64 (image) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onloadend = () => resolve(reader.result)
+        reader.onerror = (error) => reject(error)
+        reader.readAsDataURL(image)
+      })
     }
   },
   mounted () {
