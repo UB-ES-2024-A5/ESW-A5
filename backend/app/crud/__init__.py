@@ -7,3 +7,4 @@ from . import wishlist
 from . import review
 from . import follower
 from . import search
+from . import forum
