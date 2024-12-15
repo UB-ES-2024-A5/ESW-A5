@@ -30,7 +30,7 @@
     <!-- Respond Button -->
     <div class="topic-reaction">
       <button @click="$emit('respond', topic)" class="response-button">Respond</button>
-      <p class="num-responses" style="margin-left: 10px"> {{ topic.num_responses + ' respnses'}} </p>
+      <p class="num-responses" style="margin-left: 10px"> {{ topic.num_responses + ' responses'}} </p>
       <!-- Like/Dislike Buttons -->
       <div class="reaction-buttons">
         <button id="likeBtn" @click="$emit('like', topic)" :class="['reaction-button', { 'thumbs-up': topic.my_reaction === true }]">
