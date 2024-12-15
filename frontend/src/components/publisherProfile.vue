@@ -1,190 +1,659 @@
-
 <template>
-  <div class="profile-container" :style="{ backgroundImage: 'url(' + backgroundImage + ')' }">
-    <div class="profile-box">
-      <div class="profile-info">
-        <h1>Publisher Profile</h1>
-        <div class="profile-image">
-          <img :src="userProfileImage" alt="Profile Picture" />
+  <div class="user-profile" :style="{ backgroundImage: `url(${backgroundImage})` }">
+    <div class="content-box">
+      <!-- Botón de "Back" -->
+      <button class="back-button" @click="goBack" aria-label="Go back">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
+          <path d="M19 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H19v-2z"/>
+        </svg>
+      </button>
+      <div class="profile-image-container">
+        <img :src="userProfileImage" alt="Profile Icon" class="profile-image">
+      </div>
+      <div class="user-info">
+        <h1>{{ user.name }}</h1>
+        <p>{{ user.email }}</p>
+        <p>cif {{ user.cif }}</p>
+      </div>
+      <div class="follow-info">
+        <div class="follow-item">
+          <!-- Ícono de varias personas para seguidores -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
+            <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm8 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zM8 13c-2.67 0-8 1.34-8 4v2h6v-2c0-.73.38-1.41 1-2-.68-.06-1-.94-1-2z" />
+          </svg>
+          <span>{{ account.num_followers }} followers</span>
         </div>
-        <div class="profile-details">
-          <p><strong>Name:</strong> {{ user.name }}</p>
-          <p><strong>Email:</strong> {{ user.email }}</p>
-          <p><strong>CIF:</strong> {{ user.cif }}</p>
-          <p><strong>Publications:</strong> {{ user.publications }}</p>
+        <div class="follow-item">
+          <!-- Ícono de una persona con un "+" para siguiendo -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
+            <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm8 2c-2.67 0-8 1.34-8 4v2h3v-2h10v2h3v-2c0-2.66-5.33-4-8-4zm2 3v-2h2v2h-2z" />
+          </svg>
+          <span>{{ account.num_following }} followed</span>
+        </div>
+      </div>
+      <div class="biography-section">
+        <h2>Biography</h2>
+        <p>{{ account.bio }}</p>
+      </div>
+
+      <button @click="showForum" class="forum-btn">
+        <!-- Ícono de mensaje cuadrado -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
+          <path d="M3 3h18c1.1 0 1.99.89 1.99 1.99v14.02c0 1.1-.89 2-1.99 2H3c-1.1 0-1.99-.89-1.99-1.99V4.99C1.01 3.89 1.89 3 3 3zm0 2v14h18V5H3zm5 3h8v2H8V8z"/>
+        </svg>
+        <span>Forum</span>
+      </button>
+
+      <!-- Carrusel de publicaciones: Solo visible si estás logueado y sigues la cuenta -->
+      <div class="carousel-container">
+        <button class="carousel-btn left-btn" @click="previousSlide">‹</button>
+        <div class="carousel">
+         <div class="carousel-track" :style="{ transform: `translateX(-${currentIndex * 100}%)` }">
+            <img
+              v-for="(book, index) in books"
+              :key="index"
+              :src="book.img"
+              class="carousel-image"
+              @click="goToBook(book.id)"
+              alt="Book Cover"
+            />
+          </div>
+        </div>
+        <button class="carousel-btn right-btn" @click="nextSlide">›</button>
+      </div>
+
+      <!-- Forum Popup -->
+      <div v-if="forumVisible" class="forum-popup">
+        <div class="forum-content">
+          <div class="forum-header">
+            <h2>{{ user.name }} forum posts</h2>
+            <select v-model="forumFilter" @change="filterPosts">
+              <option value="participated">Participated</option>
+              <option value="liked">Liked</option>
+              <option value="disliked">Disliked</option>
+            </select>
+          </div>
+          <!-- Contenedor de tarjetas -->
+          <div class="forum-list">
+            <div v-for="post in filteredPosts" :key="post.id" class="forum-card">
+              <!-- Condicional para mostrar imagen o placeholder -->
+              <!-- Verificación para mostrar imagen o placeholder -->
+              <img :src="post.img || placeholderImage"
+                   alt="Post Image"
+                   class="post-image">
+              <div class="post-details">
+                <p class="post-text">{{ post.text }}</p>
+                <div class="post-meta">
+                  <span class="post-date">{{ new Date(post.date).toLocaleString() }}</span>
+                  <div class="post-reactions">
+                    <span>{{ post.likes }} 👍</span>
+                    <span>{{ post.dislikes }} 👎</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button @click="closeForum" class="close-button">Close</button>
         </div>
       </div>
 
-      <div v-if="wishlistVisible" class="wishlist-popup">
-        <div class="wishlist-content">
-          <h2>Your Wishlist</h2>
-          <ul>
-            <li v-for="book in user.wishlist" :key="book.id">{{ book.title }}</li>
-          </ul>
-          <button @click="closeWishlist" class="close-button">Close</button>
-        </div>
-      </div>
     </div>
   </div>
 </template>
+
 <script>
 import userServices from '../services/UserServices.js'
-import bookServices from '../services/BookServices.js'
+import accountServices from '../services/AccountServices.js'
+import BookServices from '../services/BookServices.js'
+import forumServices from '../services/ForumServices.js'
 export default {
   data () {
     return {
+      profileIcon: require('@/assets/account_icon.png'),
       backgroundImage: require('@/assets/fondo_profile.png'),
       userProfileImage: require('@/assets/placeholder_image.png'), // Default placeholder image
+      placeholderImage: require('@/assets/placeholder_image.png'),
       user: {
         name: '',
+        surname: '',
         email: '',
-        cif: '',
-        publications: null
+        wishlist: [],
+        wishlistId: '',
+        id: ''
       },
-      wishlistVisible: false
+      account: {
+        num_followers: '',
+        num_following: '',
+        photo: '',
+        bio: ''
+      },
+      currentIndex: 0,
+      imagesPerSlide: 3,
+      books: [],
+      forumVisible: false,
+      forumFilter: 'participated',
+      posts: [],
+      filteredPosts: []
+    }
+  },
+  computed: {
+    maxIndex () {
+      return Math.ceil(this.books.length / 3) - 1 // 3 imágenes por página
     }
   },
   methods: {
-    showWishlist () {
-      this.wishlistVisible = true
-    },
-    closeWishlist () {
-      this.wishlistVisible = false
-    },
     async fetchUserProfile () {
       console.log('Fetching user profile...')
       try {
         const userData = await userServices.getActualUser()
+        const accountData = await accountServices.getActualAccount()
         console.log('User data:', userData)
         this.user.name = userData.name
-        this.user.email = userData.email
         this.user.cif = userData.cif
-        this.user.publications = await bookServices.getBooksByEditorial()
+        this.user.email = userData.email
+        this.user.id = userData.id
+        this.account.num_followers = accountData.num_followers || '0'
+        this.account.num_following = accountData.num_following || '0'
+        this.account.bio = accountData.bio
+        // Mostrar placeholder si no hay foto de perfil
+        this.userProfileImage = accountData.photo || this.profileIcon
+        // Verifica si ya sigues al usuario
       } catch (error) {
         console.error('Error al obtener los datos del usuario:', error)
+      }
+    },
+    goBack () {
+      this.$router.push('/mainPage_user')
+    },
+    nextSlide () {
+      if (this.currentIndex < this.maxIndex) {
+        this.currentIndex++
+      } else {
+        console.log('Estás en el último slide')
+      }
+    },
+    previousSlide () {
+      if (this.currentIndex > 0) {
+        this.currentIndex--
+      } else {
+        console.log('Estás en el primer slide')
+      }
+    },
+    goToBook (index) {
+      this.$router.push({ path: '/book', query: { bookId: index } })
+    },
+    async getAllBooks () {
+      try {
+        const userID = this.user.id // Obtén el userID desde la query string
+        const response = await BookServices.getBooksByEditorialId(userID)
+        this.books = response.data
+        this.maxIndex = Math.ceil(this.books.length / 3) - 1 // Ajustar según el número de libros visibles
+      } catch (error) {
+        console.error('Error al obtener libros:', error)
+      }
+    },
+    showForum () {
+      this.fetchForumPosts()
+      this.forumVisible = true
+    },
+    closeForum () {
+      this.forumVisible = false
+    },
+    async fetchForumPosts () {
+      try {
+        const { data } = {}
+        this.posts = data
+        this.filterPosts()
+      } catch (error) {
+        console.error('Error fetching forum posts:', error)
+      }
+    },
+    async filterPosts () {
+      try {
+        let data
+        if (this.forumFilter === 'participated') {
+          // Obtener posts participated
+          const response = await forumServices.getAllMyPosts()
+          data = response.data
+        } else if (this.forumFilter === 'liked') {
+          // Obtener posts liked
+          const response = await forumServices.getMyLikedPosts()
+          data = response.data
+        } else if (this.forumFilter === 'disliked') {
+          // Obtener posts disliked
+          const response = await forumServices.getMyDislikedPosts()
+          data = response.data
+        } else {
+          data = []
+        }
+        this.filteredPosts = data
+      } catch (error) {
+        console.error(`Error fetching ${this.forumFilter} posts:`, error)
       }
     }
   },
   mounted () {
-    console.log('Componente montado')
     this.fetchUserProfile()
+    this.getAllBooks()
   }
 }
 </script>
 
 <style scoped>
-.profile-container {
+.user-profile {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-color: #f5ece0;
-  padding: 0;
-  margin: 0;
+  padding: 2rem;
+  font-family: 'Arial', sans-serif;
 }
 
-/* Profile box style */
-.profile-box {
+.content-box {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   display: flex;
-  width: 600px; /* Ajustar el ancho si es necesario */
-  height: 400px;
-  padding: 40px;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-  position: relative;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-}
-
-.profile-info {
+  max-width: 400px;
   width: 100%;
+  position: relative; /* Esto es clave para posicionar el botón relativo a este contenedor */
 }
 
-.profile-info h1 {
-  font-size: 28px;
-  margin-bottom: 20px;
-  color: #333;
+.profile-image-container {
+  position: relative;
+  margin-bottom: 1.5rem;
 }
 
-.profile-image img {
-  width: 150px;
-  height: 150px;
+.profile-image {
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
-  margin-bottom: 20px;
+  object-fit: cover;
+  border: 3px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.profile-details {
-  font-size: 18px;
+.user-info {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.user-info h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 500;
   color: #333;
-  margin-bottom: 20px;
 }
 
-.profile-details p {
-  margin: 10px 0;
+.user-info p {
+  margin: 0.5rem 0 0;
+  color: #666;
 }
 
-/* Wishlist button */
-.wishlist-button {
-  padding: 12px;
+.follow-info {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.follow-item {
+  display: flex;
+  align-items: center;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.follow-item .icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 0.3rem;
+}
+
+.biography-section {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  max-height: 300px; /* Opcional: limitar la altura máxima */
+  overflow-y: auto; /* Permite desplazarse si el texto supera la altura */
+}
+
+.biography-section h2 {
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.biography-section p {
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin: 0; /* Evita márgenes inesperados */
+  word-wrap: break-word; /* Asegura que las palabras largas no rompan el diseño */
+  white-space: pre-wrap; /* Mantiene los saltos de línea escritos por el usuario */
+}
+
+@media (max-width: 480px) {
+  .content-box {
+    padding: 1.5rem;
+  }
+
+  .user-info h1 {
+    font-size: 1.2rem;
+  }
+
+  .follow-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+}
+
+.follow-button.disabled {
+  background-color: #ccc;
+  border: 1px solid #ccc;
+  cursor: not-allowed;
+  color: #666;
+}
+
+.follow-button.disabled:hover {
+  background-color: #ccc;
+  color: #666;
+}
+
+input[type="file"] {
+  display: none; /* Oculta el input */
+}
+
+.back-button {
+  position: absolute; /* Para colocarlo en una esquina del contenedor */
+  top: 10px;
+  right: 10px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+}
+
+.back-button .icon {
+  width: 24px;
+  height: 24px;
+  fill: #333;
+}
+
+.back-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.back-button:active {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.follow-button {
+  margin-left: 10px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 20px;
+  border: 1px solid #007bff;
+  background-color: white;
+  color: #007bff;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.follow-button.following {
+  background-color: #f1f1f1;
+  color: #666;
+  border-color: #ccc;
+}
+
+.follow-button:hover {
   background-color: #007bff;
+  color: white;
+}
+
+.carousel-container {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  margin: 20px 0;
+}
+
+.carousel {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+
+.carousel-image {
+  width: calc((100% - 40px) / 4); /* Tres imágenes con espacio entre ellas */
+  height: 150px;
+  margin: 0 5px;
+  cursor: pointer;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
   border: none;
   color: white;
-  border-radius: 5px;
+  font-size: 20px;
   cursor: pointer;
+  z-index: 10;
 }
 
-/* Wishlist popup */
-.wishlist-popup {
+.left-btn {
+  left: 10px;
+}
+
+.right-btn {
+  right: 10px;
+}
+
+/* Contenedor principal del foro */
+.forum-popup {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
-.wishlist-content {
+.forum-content {
   background: white;
+  width: 90%;
+  max-width: 800px;
+  border-radius: 8px;
   padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  width: 400px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  max-height: 80%;
 }
 
-.wishlist-content h2 {
-  font-size: 24px;
+/* Encabezado del foro */
+.forum-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
 }
 
-.wishlist-content ul {
-  list-style-type: none;
-  padding: 0;
-  font-size: 18px;
-  margin-bottom: 20px;
+.forum-header h2 {
+  font-size: 1.5em;
+  color: #333;
 }
 
-.wishlist-content li {
-  margin: 10px 0;
+.forum-header select {
+  padding: 8px 12px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
 }
 
+/* Contenedor de la lista de posts */
+.forum-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Espaciado entre tarjetas */
+  max-height: 400px; /* Altura máxima para permitir desplazamiento */
+  overflow-y: auto; /* Habilitar scroll vertical si hay muchos posts */
+  padding: 1rem;
+}
+
+/* Estilos para las tarjetas */
+.forum-card {
+  display: flex;
+  align-items: flex-start;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  gap: 1rem; /* Espaciado entre imagen y contenido */
+  position: relative; /* Para facilitar el control del contenido */
+}
+
+/* Imagen del post */
+.post-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* Detalles del post */
+.post-details {
+  flex-grow: 1;
+}
+
+/* Texto del post */
+.post-text {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+  word-wrap: break-word; /* Ajustar palabras largas */
+}
+
+/* Meta información (fecha y reacciones) */
+.post-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.post-meta span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.post-meta span svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Botón para cerrar */
 .close-button {
+  display: block;
+  margin: 20px auto 0;
   padding: 10px 20px;
-  background-color: #f44336;
+  background: #ff5f5f;
   color: white;
+  font-size: 1em;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
+  transition: background 0.3s;
 }
 
 .close-button:hover {
-  background-color: #d32f2f;
+  background: #e04e4e;
+}
+
+.post-date {
+  font-style: italic;
+  margin-top: 0.5rem;
+  align-self: flex-start; /* Alinea la fecha a la izquierda */
+  color: #777;
+  font-size: 0.75rem;
+}
+
+.post-reactions {
+  display: flex;
+  gap: 1rem; /* Espaciado entre likes y dislikes */
+}
+
+/* Scrollbar estilizado (opcional, solo para navegadores compatibles) */
+.forum-list::-webkit-scrollbar {
+  width: 8px;
+}
+.forum-list::-webkit-scrollbar-thumb {
+  background-color: #bbb;
+  border-radius: 4px;
+}
+.forum-list::-webkit-scrollbar-thumb:hover {
+  background-color: #999;
+}
+
+.forum-btn {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  color: #007bff;
+  border: 1px solid #007bff;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.forum-btn:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+.forum-btn .icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .forum-btn {
+    font-size: 0.9rem;
+  }
 }
 </style>

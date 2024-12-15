@@ -6,12 +6,18 @@ import Swal from 'sweetalert2';
 import BookServices from '../../services/BookServices';
 import WelcomePage from '../../components/welcomePage.vue';
 import UserServices from '../../services/UserServices';
+import SearchServices from '../../services/SearchServices';
 
 jest.mock('../../services/BookServices', () => ({
   getAllBooks: jest.fn(),
+  getBooksByGenre: jest.fn(),
 }));
 jest.mock('../../services/UserServices', () => ({
   getActualUser: jest.fn(),
+}));
+
+jest.mock('../../services/SearchServices', () => ({
+  search: jest.fn(),
 }));
 describe('Navigation from Welcome Page to MainPageGuest', () => {
   let router;
@@ -45,8 +51,8 @@ describe('Navigation from Welcome Page to MainPageGuest', () => {
 
     wrapper.setData({
       books: [
-        { id: 1, img: 'book1.png' },
-        { id: 2, img: 'book2.png' },
+        { id: 1, img: 'book1.png', genre: 'Fiction', price: 10, year: 2020 },
+        { id: 2, img: 'book2.png', genre: 'Non-Fiction', price: 20, year: 2021 },
       ],
     });
 
@@ -71,6 +77,121 @@ describe('Navigation from Welcome Page to MainPageGuest', () => {
     expect(userIcon.exists()).toBe(true)
 
   });
+  it('updates searchQuery on input and calls search method', async () => {
+    const wrapper = mount(MainPageUser, {
+      localVue,
+      router,
+    });
 
+    const searchInput = wrapper.find('.search-bar');
+    await searchInput.setValue('Test query');
+
+    expect(wrapper.vm.searchQuery).toBe('Test query');
+    expect(SearchServices.search).toHaveBeenCalledWith('Test query', 20);
+  });
+
+  it('shows dropdown with search results when populated', async () => {
+    const wrapper = mount(MainPageUser, {
+      localVue,
+      router,
+    });
+
+    await wrapper.setData({
+      searchResults: [
+        { id: 3, name: 'User 1' },
+        { id: 4, title: 'Book 1' },
+      ],
+      showDropdown: true,
+    });
+
+    await wrapper.vm.$nextTick();
+
+    const dropdownItems = wrapper.findAll('.dropdown-item');
+    expect(dropdownItems.length).toBe(2);
+    expect(dropdownItems.at(0).text()).toContain('User 1');
+    expect(dropdownItems.at(1).text()).toContain('Book 1');
+  });
+  it('should filter books by genre', async () => {
+    const wrapper = mount(MainPageUser, {
+      localVue,
+      router,
+    });
+    BookServices.getBooksByGenre.mockResolvedValue({
+      data: [
+        { id: 1, img: 'book1.png', genre: 'Fiction', price: 10, year: 2020 },
+      ],
+    });
+    wrapper.setData({ filters: { genre: 'Fiction' } });
+    await wrapper.vm.$nextTick();
+
+    wrapper.vm.applyFilters();
+    await wrapper.vm.$nextTick();
+
+    expect(BookServices.getBooksByGenre).toHaveBeenCalledWith('Fiction');
+    await wrapper.vm.$nextTick();
+    const images = wrapper.findAll('.carousel-image');
+    expect(images.length).toBe(1);
+    expect(images.at(0).attributes('src')).toBe('book1.png');
+  });
+
+  it('should not display any books when no results are found by genre filter', async () => {
+    const wrapper = mount(MainPageUser, {
+      localVue,
+      router,
+    });
   
+    BookServices.getBooksByGenre.mockResolvedValue({
+      data: [],
+    });
+  
+    wrapper.setData({ filters: { genre: 'Fiction' } });
+    await wrapper.vm.$nextTick();
+  
+    wrapper.vm.applyFilters();
+    await wrapper.vm.$nextTick();
+  
+    expect(BookServices.getBooksByGenre).toHaveBeenCalledWith('Fiction');
+    
+    const images = wrapper.findAll('.carousel-image');
+    expect(images.length).toBe(0);
+  });
+  it('should reset filters except the active one', async () => {
+    const wrapper = mount(MainPageUser, {
+      localVue,
+      router,
+    });
+    wrapper.setData({
+      filters: {
+        genre: 'Fantasy',
+        minPrice: 10,
+        maxPrice: 50,
+        minYear: 2000,
+        maxYear: 2020,
+      },
+    });
+
+    wrapper.vm.clearFiltersExcept('genre');
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.vm.filters).toEqual({
+      genre: 'Fantasy',
+      minPrice: null,
+      maxPrice: null,
+      minYear: null,
+      maxYear: null,
+    });
+  });
+  it('does not update minYear if letters are entered', async () => {
+    const wrapper = mount(MainPageUser, {
+      localVue,
+      router,
+    });
+    const minYearInput = wrapper.find('input[placeholder="Min Year"]');
+    await minYearInput.setValue('abcd');
+
+
+    await wrapper.vm.$nextTick();
+    expect(wrapper.vm.filters.minYear).toBe("");
+  });
+
 });
