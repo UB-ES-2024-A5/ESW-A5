@@ -129,7 +129,7 @@ describe('BookDetails', () => {
 
     await wrapper.vm.$nextTick();
 
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 600));
 
     await wrapper.vm.$nextTick();
 
